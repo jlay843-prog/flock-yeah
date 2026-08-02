@@ -22,7 +22,134 @@
     sponsor: null,
     deskNotes: [],
     giftLog: [],
+    snapshotTimer: null,
+    hls: null,
   };
+
+  function camStream(henId) {
+    const cfg = global.CamConfig || {};
+    const streams = cfg.streams || {};
+    return streams[henId] || null;
+  }
+
+  function stopLive() {
+    if (state.snapshotTimer) {
+      clearInterval(state.snapshotTimer);
+      state.snapshotTimer = null;
+    }
+    if (state.hls) {
+      try {
+        state.hls.destroy();
+      } catch (_) {}
+      state.hls = null;
+    }
+    const vid = el("stage-live-video");
+    const img = el("stage-live-img");
+    if (vid) {
+      vid.pause();
+      vid.removeAttribute("src");
+      vid.load();
+      vid.hidden = true;
+    }
+    if (img) {
+      img.removeAttribute("src");
+      img.hidden = true;
+    }
+    const stage = el("cam-stage");
+    if (stage) stage.classList.remove("has-live");
+  }
+
+  function setStreamStatus(text) {
+    const s = el("cam-stream-status");
+    if (s) s.textContent = text || "";
+  }
+
+  function mountLive(henId) {
+    stopLive();
+    const stream = camStream(henId);
+    const statusEl = el("cam-stream-status");
+    const stage = el("cam-stage");
+    const vid = el("stage-live-video");
+    const img = el("stage-live-img");
+    const disc = (global.CamConfig && global.CamConfig.discovery) || {};
+
+    if (!stream || !stream.mode || stream.mode === "none") {
+      if (disc.host) {
+        setStreamStatus(
+          "LAN cam " +
+            disc.host +
+            " detected (" +
+            (disc.vendor || "camera") +
+            ", :" +
+            ((disc.openPorts || []).join(",") || "?") +
+            ") — enable RTSP/HTTP, then set js/cam-config.local.js"
+        );
+      } else {
+        setStreamStatus("");
+      }
+      return;
+    }
+
+    const label = stream.label || "Live feed";
+    if (stream.mode === "snapshot" && stream.snapshotUrl) {
+      if (img && stage) {
+        img.hidden = false;
+        stage.classList.add("has-live");
+        const tick = () => {
+          img.src =
+            stream.snapshotUrl +
+            (stream.snapshotUrl.indexOf("?") >= 0 ? "&" : "?") +
+            "_ts=" +
+            Date.now();
+        };
+        tick();
+        state.snapshotTimer = setInterval(tick, stream.refreshMs || 2000);
+        setStreamStatus("LIVE snapshot · " + label);
+      }
+      return;
+    }
+
+    if (stream.mode === "mjpeg" && stream.mjpegUrl && img && stage) {
+      img.hidden = false;
+      stage.classList.add("has-live");
+      img.src = stream.mjpegUrl;
+      setStreamStatus("LIVE MJPEG · " + label);
+      return;
+    }
+
+    if (stream.mode === "hls" && stream.hlsUrl && vid && stage) {
+      vid.hidden = false;
+      stage.classList.add("has-live");
+      if (global.Hls && global.Hls.isSupported()) {
+        state.hls = new global.Hls({ enableWorker: true });
+        state.hls.loadSource(stream.hlsUrl);
+        state.hls.attachMedia(vid);
+        state.hls.on(global.Hls.Events.MANIFEST_PARSED, () => {
+          vid.play().catch(() => {});
+        });
+        setStreamStatus("LIVE HLS · " + label);
+      } else if (vid.canPlayType("application/vnd.apple.mpegurl")) {
+        vid.src = stream.hlsUrl;
+        vid.play().catch(() => {});
+        setStreamStatus("LIVE HLS · " + label);
+      } else {
+        setStreamStatus("HLS not supported in this browser");
+      }
+      return;
+    }
+
+    if (stream.mode === "iframe" && stream.iframeUrl) {
+      setStreamStatus("iframe mode — open " + stream.iframeUrl);
+      return;
+    }
+
+    setStreamStatus(
+      "Stream mode “" +
+        stream.mode +
+        "” needs URLs in cam-config.local.js · hint: " +
+        (stream.rtspHint || "see CAM-SETUP.md")
+    );
+  }
 
   function load() {
     try {
@@ -157,6 +284,7 @@
       photo.src = hen.photo;
       photo.alt = hen.name;
     }
+    mountLive(hen.id);
   }
 
   function renderCommentary(text) {
@@ -474,6 +602,28 @@
     pushSystemChat(CLUCKY.greetings[0]);
     const brand = el("brand-tagline");
     if (brand) brand.textContent = FARM.tagline + " " + FARM.attribution;
+
+    const disc = (global.CamConfig && global.CamConfig.discovery) || {};
+    const banner = el("cam-lan-banner");
+    if (banner && disc.host) {
+      banner.innerHTML =
+        "<strong>LAN test cam:</strong> " +
+        escapeHtml(disc.host) +
+        " · " +
+        escapeHtml(disc.vendor || "camera") +
+        " · open ports " +
+        escapeHtml((disc.openPorts || []).join(", ") || "none") +
+        " · <a href=\"CAM-SETUP.md\">CAM-SETUP.md</a> · " +
+        escapeHtml(disc.notes || "");
+    }
+    const stream = camStream(state.activeCam);
+    if (!stream || stream.mode === "none") {
+      pushSystemChat(
+        "Test Reolink is on the LAN at " +
+          (disc.host || "?") +
+          " (client port 9000). Enable RTSP/HTTP in the Reolink app, copy js/cam-config.local.example.js → cam-config.local.js, then Nest Cam A goes live."
+      );
+    }
   }
 
   global.HenCam = {

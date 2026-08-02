@@ -38,16 +38,20 @@
       <div class="panel">
         <div class="stage" id="cam-stage">
           <img class="stage-photo" id="stage-photo" src="assets/hens/henrietta.svg" alt="">
+          <img class="stage-live-img" id="stage-live-img" alt="Live camera" hidden>
+          <video class="stage-live-video" id="stage-live-video" playsinline muted autoplay controls hidden></video>
           <div class="stage-mark" id="stage-mark" aria-hidden="true">FY</div>
           <div class="stage-inner">
             <h2 id="stage-hen-name">Henrietta</h2>
             <p id="stage-cam-label">Nest Cam A</p>
             <p id="stage-hen-bio">Flock matriarch.</p>
+            <p class="cam-stream-status" id="cam-stream-status"></p>
           </div>
         </div>
         <div class="commentary" id="cam-commentary" aria-live="polite">
           <strong>Cam commentary</strong> Loading flock/zone events…
         </div>
+        <p class="muted" id="cam-lan-banner" style="margin-top:0.65rem"></p>
         <div class="cam-grid" id="cam-grid" aria-label="Hen camera grid"></div>
         <div class="btn-row" style="margin-top:1rem">
           <button type="button" class="btn" id="btn-solforge">Cut this hen in steel (SolForge)</button>
@@ -115,7 +119,10 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="js/flock-data.js"></script>
+  <script src="js/cam-config.js"></script>
+  <script src="js/cam-config.local.js"></script>
   <script src="js/stripe-config.js"></script>
   <script src="js/solforge-bridge.js"></script>
   <script src="js/hen-voice.js"></script>

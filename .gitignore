@@ -8,3 +8,4 @@ node_modules/
 .vscode/
 .idea/
 *.local.html
+js/cam-config.local.js

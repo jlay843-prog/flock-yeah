@@ -32,8 +32,12 @@
     <section class="ops-grid">
       <article class="ops-card">
         <h3>Cameras</h3>
-        <p>v1 uses photos + zone commentary (no face ID). Recommended: <strong>Reolink PoE</strong> (coop/nests), <strong>Reolink Argus</strong> solar (run). Drop HLS embeds into the stage later.</p>
-        <a class="btn" href="hens.html">Open cams</a>
+        <p id="ops-cam-status">Loading CamConfig…</p>
+        <p>Recommended: <strong>Reolink PoE</strong> / <strong>Argus</strong>. Wire via <code>js/cam-config.local.js</code> — see <a href="CAM-SETUP.md">CAM-SETUP.md</a>.</p>
+        <div class="btn-row">
+          <a class="btn" href="hens.html">Open cams</a>
+          <button type="button" class="btn btn-primary" id="btn-probe-hint">Probe steps</button>
+        </div>
       </article>
       <article class="ops-card">
         <h3>Egg counter</h3>
@@ -66,6 +70,8 @@
   </footer>
 
   <script src="js/flock-data.js"></script>
+  <script src="js/cam-config.js"></script>
+  <script src="js/cam-config.local.js"></script>
   <script src="js/solforge-bridge.js"></script>
   <script>
     (function () {
@@ -77,6 +83,20 @@
       });
       document.getElementById("open-solforge").addEventListener("click", function () {
         SolForgeBridge.openShop();
+      });
+      var d = (window.CamConfig && CamConfig.discovery) || {};
+      var s = (CamConfig.streams && CamConfig.streams.henrietta) || {};
+      var el = document.getElementById("ops-cam-status");
+      if (el) {
+        el.innerHTML =
+          "<strong>" + (d.host || "no host") + "</strong> · " +
+          (d.vendor || "?") + " · ports " + ((d.openPorts || []).join(", ") || "n/a") +
+          "<br>Nest Cam A mode: <code>" + (s.mode || "none") + "</code>" +
+          (s.label ? " · " + s.label : "") +
+          "<br><span class='muted'>" + (d.notes || "") + "</span>";
+      }
+      document.getElementById("btn-probe-hint").addEventListener("click", function () {
+        alert("From repo root run:\npowershell -File scripts/probe-cam.ps1\n\nEnable RTSP 554 + HTTP 80 in Reolink app, then copy cam-config.local.example.js → cam-config.local.js");
       });
     })();
   </script>

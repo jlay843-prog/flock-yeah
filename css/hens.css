@@ -292,6 +292,29 @@ code {
   z-index: 1;
 }
 
+.stage.has-live .stage-photo,
+.stage.has-live .stage-mark {
+  opacity: 0.12;
+  animation: none;
+}
+
+.stage-live-img,
+.stage-live-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  background: #0a100d;
+}
+
+.cam-stream-status {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(247, 244, 239, 0.85);
+}
+
 .stage-mark {
   position: absolute;
   top: 18%;
