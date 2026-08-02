@@ -8,15 +8,16 @@ Static multi-cam chicken site for **Lone Tree Acres LLC** (Longmont, CO).
 
 **Thesis:** Birds, not plates. Zero ALPR. Maximum dirt baths.
 
-## Quick start
+## Quick start (local development)
 
-```bash
-cd Chicken-Coop-Commentary
-python -m http.server 8080
-# open http://localhost:8080/hens.html
+```powershell
+powershell -File scripts/dev.ps1
+# opens http://localhost:8080/hens.html
 ```
 
-Or open `index.html` / `hens.html` directly in a browser (no build step).
+Or `npm run dev`. Edit files → refresh browser. Full workflow: [DEV.md](DEV.md).
+
+Production = merge/push to `main` after `npm run qc` (or `scripts/qc-check.ps1`).
 
 ## Pages
 

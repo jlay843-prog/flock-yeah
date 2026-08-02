@@ -1,0 +1,10 @@
+{
+  "name": "flock-yeah",
+  "private": true,
+  "description": "Flock Yeah static chicken-cam site — local preview only",
+  "scripts": {
+    "dev": "npx --yes serve -l 8080",
+    "dev:python": "python -m http.server 8080",
+    "qc": "powershell -NoProfile -File scripts/qc-check.ps1"
+  }
+}
