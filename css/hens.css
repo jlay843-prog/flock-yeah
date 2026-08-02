@@ -43,6 +43,22 @@ body {
   line-height: 1.5;
 }
 
+body.has-merch-bg {
+  background-image:
+    url("../assets/patterns/spy-chicken-tile.svg"),
+    url("../assets/patterns/sayings-tile.svg"),
+    radial-gradient(1000px 500px at 8% -8%, rgba(4, 120, 87, 0.12), transparent 55%),
+    radial-gradient(800px 420px at 92% 0%, rgba(217, 119, 6, 0.1), transparent 50%),
+    linear-gradient(180deg, var(--cream) 0%, #efe9df 45%, #e7e0d4 100%);
+  background-size: 180px 180px, 240px 120px, auto, auto, auto;
+  background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
+}
+
+body.page-shop .panel,
+body.page-shop .shop-card {
+  backdrop-filter: blur(2px);
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -905,6 +921,70 @@ textarea:focus {
   background: #fff;
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+}
+
+.shop-art {
+  margin: -0.25rem -0.25rem 0.75rem;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background:
+    linear-gradient(145deg, rgba(4, 120, 87, 0.08), rgba(217, 119, 6, 0.08)),
+    var(--cream);
+  border: 1px solid var(--line);
+}
+
+.shop-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.shop-saying {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--emerald);
+  letter-spacing: -0.02em;
+}
+
+.design-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  padding: 0 0 2.5rem;
+}
+
+.design-tile {
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.design-tile img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: var(--cream);
+}
+
+.design-tile figcaption {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.65rem 0.7rem;
+}
+
+.design-tile strong {
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.design-tile span {
+  font-size: 0.72rem;
+  color: var(--mist-dim);
 }
 
 .herd-card img {

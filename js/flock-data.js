@@ -220,39 +220,175 @@
     { id: "hawk-watch", name: "Hawk Watch Hour", priceCents: 1500, costCents: 1125, emoji: "🦅", blurb: "Sponsor an hour of sky watch." },
   ];
 
+  /**
+   * Merch art catalog — punny counter to law-enforcement “Flock” cameras.
+   * Print SVGs in designs/merch/; mockups in assets/merch/.
+   */
+  const MERCH_DESIGNS = [
+    {
+      id: "flock-yeah-classic",
+      saying: "Flock Yeah",
+      sub: "birds > plates",
+      art: "designs/merch/flock-yeah-classic.svg",
+    },
+    {
+      id: "keep-flocks-mom",
+      saying: "Keep flocks for the birds.",
+      sub: "— Mom",
+      art: "designs/merch/keep-flocks-mom.svg",
+    },
+    {
+      id: "birds-not-plates",
+      saying: "Birds, not plates.",
+      sub: "Zero ALPR energy",
+      art: "designs/merch/birds-not-plates.svg",
+    },
+    {
+      id: "spy-chicken",
+      saying: "SPY CHICKEN",
+      sub: "Eyes on your driveway. Mostly snacks.",
+      art: "designs/merch/spy-chicken.svg",
+    },
+    {
+      id: "cop-chicken",
+      saying: "COP CHICKEN",
+      sub: "On duty. Plates optional.",
+      art: "designs/merch/cop-chicken.svg",
+    },
+    {
+      id: "flock-safety-nah",
+      saying: "Flock Safety? Nah. Flock Yeah.",
+      sub: "Different flock. Better feathers.",
+      art: "designs/merch/flock-safety-nah.svg",
+      mockup: "assets/merch/art-flock-safety-nah.png",
+    },
+    {
+      id: "zero-alpr",
+      saying: "Zero ALPR. Maximum dirt baths.",
+      sub: "Thesis on a shirt",
+      art: "designs/merch/zero-alpr.svg",
+    },
+    {
+      id: "feeder-surveillance",
+      saying: "Surveilling the feeder, not the freeway.",
+      sub: "Priorities.",
+      art: "designs/merch/feeder-surveillance.svg",
+    },
+    {
+      id: "clucky-saw-car",
+      saying: "Clucky saw your car. She doesn't care.",
+      sub: "Host approved",
+      art: "designs/merch/clucky-saw-car.svg",
+    },
+    {
+      id: "neighborhood-watch",
+      saying: "Neighborhood Watch (feathers edition)",
+      sub: "Snacks > speeding",
+      art: "designs/merch/neighborhood-watch.svg",
+    },
+  ];
+
   /** Target margin ~25% → price ≈ cost / 0.75 */
   const SHOP_ITEMS = [
     {
-      id: "flock-sticker",
-      name: "Flock Yeah Sticker Pack",
-      priceCents: 800,
-      costCents: 600,
+      id: "sticker-pack",
+      name: "Spy Chicken Sticker Pack",
+      priceCents: 900,
+      costCents: 675,
       kind: "merch",
-      blurb: "Six hens, one attitude. ~25% margin target.",
+      designId: "flock-yeah-classic",
+      image: "assets/merch/stickers-flock-pack.png",
+      blurb: "Flock Yeah, Mom’s line, Zero ALPR, Cop Chicken & friends — peel responsibly.",
     },
     {
-      id: "coop-mug",
-      name: "Clucky Coffee Mug",
+      id: "mug-spy",
+      name: "Spy Chicken Mug",
+      priceCents: 2400,
+      costCents: 1800,
+      kind: "merch",
+      designId: "spy-chicken",
+      image: "assets/merch/mug-spy-chicken.png",
+      blurb: "Eyes on your driveway. Mostly snacks. Ceramic surveillance.",
+    },
+    {
+      id: "mug-mom",
+      name: "Mom Quote Mug",
       priceCents: 2200,
       costCents: 1650,
       kind: "merch",
-      blurb: "Keep flocks for the birds — printed inside the rim.",
+      designId: "keep-flocks-mom",
+      image: "designs/merch/keep-flocks-mom.svg",
+      blurb: "Keep flocks for the birds. — Mom. Morning coffee, evening doctrine.",
     },
     {
-      id: "flock-hat",
+      id: "tee-cop",
+      name: "Cop Chicken Tee",
+      priceCents: 3400,
+      costCents: 2550,
+      kind: "apparel",
+      designId: "cop-chicken",
+      image: "assets/merch/tee-cop-chicken.png",
+      blurb: "On duty. Plates optional. Soft tee, hard stare.",
+    },
+    {
+      id: "tee-nah",
+      name: "Flock Safety? Nah. Tee",
+      priceCents: 3400,
+      costCents: 2550,
+      kind: "apparel",
+      designId: "flock-safety-nah",
+      image: "assets/merch/art-flock-safety-nah.png",
+      blurb: "Different flock. Better feathers. Birds, not plates.",
+    },
+    {
+      id: "tee-mom",
+      name: "Keep Flocks Tee",
+      priceCents: 3200,
+      costCents: 2400,
+      kind: "apparel",
+      designId: "keep-flocks-mom",
+      image: "designs/merch/keep-flocks-mom.svg",
+      blurb: "Mom said it. Wear it. Thesis fabric.",
+    },
+    {
+      id: "tee-zero",
+      name: "Zero ALPR Tee",
+      priceCents: 3200,
+      costCents: 2400,
+      kind: "apparel",
+      designId: "zero-alpr",
+      image: "designs/merch/zero-alpr.svg",
+      blurb: "Zero ALPR. Maximum dirt baths.",
+    },
+    {
+      id: "hat-flock",
       name: "Flock Yeah Cap",
       priceCents: 2800,
       costCents: 2100,
       kind: "apparel",
-      blurb: "Hat edition of Mom's line.",
+      designId: "flock-yeah-classic",
+      image: "assets/merch/hat-flock-yeah.png",
+      blurb: "Shade for the run. Brand for the birds.",
     },
     {
-      id: "flock-tee",
-      name: "Flock Yeah Tee",
-      priceCents: 3200,
-      costCents: 2400,
-      kind: "apparel",
-      blurb: "Soft tee. Hard stance against ALPR vibes.",
+      id: "sticker-spy",
+      name: "Spy Chicken Sticker (single)",
+      priceCents: 400,
+      costCents: 300,
+      kind: "merch",
+      designId: "spy-chicken",
+      image: "designs/merch/spy-chicken.svg",
+      blurb: "Laptop-sized surveillance. Waterproof attitude.",
+    },
+    {
+      id: "sticker-cop",
+      name: "Cop Chicken Sticker (single)",
+      priceCents: 400,
+      costCents: 300,
+      kind: "merch",
+      designId: "cop-chicken",
+      image: "designs/merch/cop-chicken.svg",
+      blurb: "Badge optional. Snacks mandatory.",
     },
     {
       id: "egg-carton",
@@ -260,6 +396,7 @@
       priceCents: 700,
       costCents: 400,
       kind: "farm",
+      image: "designs/merch/birds-not-plates.svg",
       blurb: "Longmont pickup · while the ladies cooperate.",
     },
     {
@@ -268,6 +405,7 @@
       priceCents: 4500,
       costCents: 3375,
       kind: "solforge",
+      image: "designs/plasma/flock-yeah-mark.svg",
       blurb: "Cut at SolForge from designs/plasma SVGs.",
     },
     {
@@ -276,6 +414,7 @@
       priceCents: 2500,
       costCents: 0,
       kind: "sponsor",
+      image: "designs/merch/neighborhood-watch.svg",
       blurb: "Your name on the Farm desk ticker.",
     },
   ];
@@ -329,17 +468,23 @@
     return ZONE_EVENTS[Math.floor(Math.random() * ZONE_EVENTS.length)];
   }
 
+  function getDesign(id) {
+    return MERCH_DESIGNS.find((d) => d.id === id) || null;
+  }
+
   global.FlockData = {
     HENS,
     CLUCKY,
     ZONE_EVENTS,
     HORSES,
     GIFTS,
+    MERCH_DESIGNS,
     SHOP_ITEMS,
     CAMERAS,
     FARM,
     STORAGE_KEYS,
     getHen,
+    getDesign,
     formatMoney,
     priceFromCost,
     randomZoneEvent,
