@@ -229,11 +229,27 @@
     const cfg = global.StripeConfig;
     const link = cfg && cfg.paymentLinks ? cfg.paymentLinks[itemId] : "";
 
-    if (item.kind === "solforge" && global.SolForgeBridge) {
-      global.SolForgeBridge.openCustomMetal(
-        "Flock Yeah shop: " + item.name + " / svg under designs/plasma/"
-      );
-      if (status) status.textContent = "Opening SolForge for " + item.name + "…";
+    if (
+      global.SolForgeBridge &&
+      (item.kind === "solforge" ||
+        item.kind === "print3d" ||
+        item.fabricate === "plasma" ||
+        item.fabricate === "print")
+    ) {
+      const design =
+        item.designId && data().getDesign
+          ? data().getDesign(item.designId)
+          : null;
+      const order = global.SolForgeBridge.orderFromShopItem(item, design);
+      global.SolForgeBridge.openOrder(order);
+      if (status) {
+        status.textContent =
+          "Opening SolForge intake for " +
+          item.name +
+          " (" +
+          (order.process === "print_future" ? "3D print" : "plasma") +
+          ")…";
+      }
       return;
     }
 

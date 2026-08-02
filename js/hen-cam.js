@@ -437,9 +437,17 @@
     const solforgeBtn = el("btn-solforge");
     if (solforgeBtn && global.SolForgeBridge) {
       solforgeBtn.addEventListener("click", () => {
-        global.SolForgeBridge.openCustomMetal(
-          global.SolForgeBridge.plasmaOrderNote(state.activeCam)
-        );
+        const hen = getHen(state.activeCam);
+        global.SolForgeBridge.openOrder({
+          process: "plasma",
+          title: (hen ? hen.name : "Flock") + " silhouette — plasma",
+          sku: "cam-" + state.activeCam,
+          saying: hen ? hen.name : "Flock Yeah",
+          designUrl: "designs/plasma/" + state.activeCam + "-plasma.svg",
+          materialHint: '1/8" mild steel',
+          dimensions: "12in x 10in x 0.125in",
+          note: global.SolForgeBridge.plasmaOrderNote(state.activeCam),
+        });
       });
     }
   }
