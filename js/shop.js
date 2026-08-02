@@ -53,7 +53,7 @@
 
     if (item.kind === "solforge" && global.SolForgeBridge) {
       global.SolForgeBridge.openCustomMetal(
-        "Flock Yeah shop: " + item.name + " / svg under print/"
+        "Flock Yeah shop: " + item.name + " / svg under designs/plasma/"
       );
       if (status) status.textContent = "Opening SolForge for " + item.name + "…";
       return;

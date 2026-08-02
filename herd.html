@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Herd · Flock Yeah · Lone Tree Acres Horses</title>
-  <meta name="description" content="Meet the Lone Tree Acres herd — Lincoln, Grace, Winchester, Tia, Buster, and Thunder — neighbors to the Flock Yeah hens.">
+  <meta name="description" content="Meet the Lone Tree Acres herd — Lincoln, Grace, Winchester, and Tia — neighbors to the Flock Yeah hens.">
   <link rel="stylesheet" href="css/hens.css">
 </head>
-<body>
+<body data-lineup="horses">
   <header class="site-header">
     <div class="brand">
       <div class="brand-mark">Flock <span>Yeah</span></div>
@@ -22,35 +22,56 @@
     </nav>
   </header>
 
-  <main class="wrap">
+  <main class="wrap lineup-page">
     <section class="hero-strip">
       <div class="live-pill">Pasture neighbors</div>
-      <h1>The herd next door</h1>
+      <h1>The herd — lineup + lens</h1>
       <p>
-        Same Rabbit Mountain sky, bigger shoes. Boutique boarding herd at Lone Tree Acres —
-        the hens provide editorial commentary.
+        Same Rabbit Mountain sky, bigger shoes. Lincoln, Grace, Winchester, and Tia —
+        boutique boarding neighbors to the Flock Yeah hens.
       </p>
     </section>
 
-    <section class="card-grid" id="herd-grid" aria-label="Horse herd"></section>
+    <section class="lineup-board" aria-label="Horse jail lineup">
+      <div class="lineup-row" id="lineup-row"></div>
+    </section>
+
+    <section class="lens-layout">
+      <div class="panel">
+        <h2>Lens</h2>
+        <div class="lens-view" id="lens-view" title="Move pointer to pan">
+          <img class="lens-subject" src="assets/horses/lincoln.svg" alt="">
+        </div>
+        <div class="lens-controls">
+          <label for="lens-zoom">Zoom</label>
+          <input id="lens-zoom" type="range" min="100" max="250" value="135">
+        </div>
+      </div>
+      <div class="panel" id="lens-meta">
+        <h2>Select a horse</h2>
+      </div>
+    </section>
+
+    <section class="card-grid" id="herd-grid" aria-label="Horse cards" style="padding-top:0"></section>
   </main>
 
   <footer class="site-footer">
     <div class="wrap">
-      Boarding &amp; rehab · <a href="https://lonetreeacres.com" target="_blank" rel="noopener noreferrer">lonetreeacres.com</a> ·
+      Boarding &amp; rehab · <a href="https://www.lonetreeacres.com" target="_blank" rel="noopener noreferrer">lonetreeacres.com</a> ·
       Jeff Lay · Longmont, CO
     </div>
   </footer>
 
   <script src="js/flock-data.js"></script>
+  <script src="js/lineup.js"></script>
   <script>
     (function () {
       var grid = document.getElementById("herd-grid");
-      var tag = document.getElementById("brand-tagline");
-      if (tag) tag.textContent = FlockData.FARM.tagline + " " + FlockData.FARM.attribution;
+      if (!grid) return;
       grid.innerHTML = FlockData.HORSES.map(function (h) {
         return (
           '<article class="herd-card">' +
+          '<img src="' + h.photo + '" alt="' + h.name + '">' +
           "<h3>" + h.name + "</h3>" +
           "<p><strong>" + h.role + "</strong></p>" +
           "<p>" + h.note + "</p>" +

@@ -13,6 +13,8 @@
     paymentLinks: {
       "flock-sticker": "",
       "coop-mug": "",
+      "flock-hat": "",
+      "flock-tee": "",
       "egg-carton": "",
       "hen-plasma": "",
       "sponsor-day": "",

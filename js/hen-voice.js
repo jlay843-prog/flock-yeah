@@ -47,7 +47,7 @@
         : "Send a gift from the tray — we notice generosity.";
     }
     if (/\b(hawk|fox|danger|safe)\b/.test(t)) {
-      return hen.id === "cluck-norris"
+      return hen.id === "cluck"
         ? "Sky threats get the roundhouse stare. We're covered."
         : "Sky watch is serious. Clucky calls it if something circles.";
     }

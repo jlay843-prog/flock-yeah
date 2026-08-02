@@ -31,7 +31,7 @@
 
     /** Build a deep-link note for plasma hen cuts */
     plasmaOrderNote(henId) {
-      return "Flock Yeah plasma cut request: hen=" + (henId || "flock") + " svg=print/";
+      return "Flock Yeah plasma cut request: hen=" + (henId || "flock") + " svg=designs/plasma/";
     },
 
     /**

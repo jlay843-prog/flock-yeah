@@ -1,14 +1,13 @@
-# Security — Flock Yeah static site
+# Security — Flock Yeah / Chicken-Coop-Commentary
 
 ## Model
 
-This repo is a **static front end**. It must never contain:
+Static front end only. It must never contain:
 
-- Stripe **secret** keys (`sk_…`)
-- Webhook signing secrets
-- LLM API keys
+- Stripe **secret** keys (`sk_…`) or webhook secrets
+- LLM / API keys
 - SMTP / mailbox passwords
-- Camera DVR admin credentials
+- Camera DVR / RTSP credentials
 - Private SolForge / Farm Brain tokens
 
 ## Allowed client config
@@ -19,25 +18,20 @@ This repo is a **static front end**. It must never contain:
 | Payment Link URLs | `js/stripe-config.js` | Public Stripe-hosted links |
 | SolForge public URLs | `js/solforge-bridge.js` | `https://solforge.lonetreeacres.com` |
 
-## Chat
+## Product constraints
 
-`hen-voice.js` runs **on-device** personality replies. If you later wire `SolForgeBridge.chat` to an edge LLM:
-
-- Authenticate on the server
-- Rate-limit by IP / session
-- Do not embed provider API keys in the browser bundle
+- **No ALPR / license plates.** Cam commentary is flock/zone events only.
+- Chat is on-device personality (`hen-voice.js`) until a server-keyed bridge exists.
+- Farm desk entries are local UX queues — not remote device control.
 
 ## Cameras
 
-Do not hardcode RTSP passwords or DVR admin URLs in HTML/JS. Prefer:
-
-- Vendor embed tokens with short TTL, or
-- A reverse proxy that strips credentials
+Do not hardcode RTSP passwords or DVR admin URLs. Prefer vendor embeds with short TTL or a credential-stripping reverse proxy.
 
 ## localStorage
 
-Egg count, sponsor, desk notes, and gift log are browser-local (`fy_*` keys). Treat as UX state, not authoritative farm records.
+Keys `fy_*` store egg count, sponsor, desk notes, gifts. Browser-local only — not authoritative farm records.
 
 ## Reporting
 
-Owner: Jeff Lay · `jeffrey@lonetreeacres.com` · [lonetreeacres.com](https://lonetreeacres.com)
+Owner: Jeff Lay · Lone Tree Acres LLC · `jeffrey@lonetreeacres.com` · https://www.lonetreeacres.com

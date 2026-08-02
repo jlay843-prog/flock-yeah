@@ -1,5 +1,5 @@
 /**
- * Flock Yeah — multi-cam UI, egg counter, farm desk, gifts, sponsor, chat
+ * Flock Yeah — multi-cam UI, zone commentary, egg counter, farm desk, gifts, sponsor, chat
  */
 (function (global) {
   "use strict";
@@ -11,6 +11,8 @@
     FARM,
     STORAGE_KEYS,
     formatMoney,
+    randomZoneEvent,
+    getHen,
   } = global.FlockData;
 
   const state = {
@@ -54,21 +56,32 @@
   function saveEggs() {
     localStorage.setItem(STORAGE_KEYS.eggs, String(state.eggs));
   }
-
   function saveSponsor() {
     localStorage.setItem(STORAGE_KEYS.sponsor, JSON.stringify(state.sponsor));
   }
-
   function saveDesk() {
     localStorage.setItem(STORAGE_KEYS.desk, JSON.stringify(state.deskNotes.slice(0, 40)));
   }
-
   function saveGifts() {
     localStorage.setItem(STORAGE_KEYS.gifts, JSON.stringify(state.giftLog.slice(0, 40)));
   }
 
   function el(id) {
     return document.getElementById(id);
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function photoFor(speakerId) {
+    if (speakerId === "clucky") return CLUCKY.photo;
+    const hen = getHen(speakerId);
+    return hen ? hen.photo : CLUCKY.photo;
   }
 
   function renderCams() {
@@ -88,6 +101,11 @@
         '">' +
         '<div class="cam-screen">' +
         '<span class="cam-live">LIVE</span>' +
+        '<img src="' +
+        h.photo +
+        '" alt="' +
+        escapeHtml(h.name) +
+        '" onerror="this.style.display=\'none\'">' +
         '<span class="cam-hen-mark" aria-hidden="true">' +
         h.mugshot +
         "</span>" +
@@ -99,6 +117,8 @@
         "</strong>" +
         "<span>" +
         h.camLabel +
+        " · " +
+        h.mood +
         "</span>" +
         "</div>" +
         "</button>"
@@ -112,13 +132,14 @@
         renderCams();
         renderStage();
         renderChatTabs();
-        pushSystemChat("Switched to " + (global.FlockData.getHen(state.activeCam) || {}).name + " cam.");
+        const hen = getHen(state.activeCam);
+        pushSystemChat("Switched to " + (hen ? hen.name : "cam") + ".");
       });
     });
   }
 
   function renderStage() {
-    const hen = global.FlockData.getHen(state.activeCam) || HENS[0];
+    const hen = getHen(state.activeCam) || HENS[0];
     const stage = el("cam-stage");
     if (!stage) return;
     stage.style.setProperty("--hen", hen.color);
@@ -126,11 +147,25 @@
     const name = el("stage-hen-name");
     const label = el("stage-cam-label");
     const bio = el("stage-hen-bio");
-    if (name) name.textContent = hen.name;
-    if (label) label.textContent = hen.camLabel + " · " + hen.title;
-    if (bio) bio.textContent = hen.bio;
     const mark = el("stage-mark");
+    const photo = el("stage-photo");
+    if (name) name.textContent = hen.name;
+    if (label) label.textContent = hen.camLabel + " · " + hen.role + " · " + hen.mood;
+    if (bio) bio.textContent = hen.bio;
     if (mark) mark.textContent = hen.mugshot;
+    if (photo) {
+      photo.src = hen.photo;
+      photo.alt = hen.name;
+    }
+  }
+
+  function renderCommentary(text) {
+    const box = el("cam-commentary");
+    if (!box) return;
+    const line = text || (randomZoneEvent() || {}).text || "Coop ambient: waiting…";
+    box.innerHTML = "<strong>Cam commentary</strong>" + escapeHtml(line);
+    const ticker = el("live-ticker");
+    if (ticker) ticker.textContent = line;
   }
 
   function renderEggs() {
@@ -209,7 +244,7 @@
   function sendGift(giftId) {
     const gift = GIFTS.find((g) => g.id === giftId);
     if (!gift) return;
-    const hen = global.FlockData.getHen(state.activeCam);
+    const hen = getHen(state.activeCam);
     const line =
       gift.emoji +
       " " +
@@ -222,10 +257,14 @@
     state.giftLog.unshift(line);
     saveGifts();
     state.deskNotes.unshift({ t: "Gift", m: line });
+    state.deskNotes.unshift({
+      t: "Farm desk",
+      m: "Queue for Jeff: deliver " + gift.name + " to " + (hen ? hen.zone : "coop"),
+    });
     saveDesk();
     renderGifts();
     renderDesk();
-    pushSystemChat(line + " — Clucky will pretend to invoice Stripe.");
+    pushSystemChat(line + " — queued on the Farm desk for Jeff.");
 
     const cfg = global.StripeConfig;
     if (cfg && cfg.isConfigured() && cfg.paymentLinks[giftId]) {
@@ -257,41 +296,54 @@
       btn.addEventListener("click", () => {
         state.chatTarget = btn.getAttribute("data-chat");
         renderChatTabs();
-        const label = el("chat-target-label");
-        if (label) {
-          label.textContent =
-            state.chatTarget === "clucky"
-              ? CLUCKY.name + " · " + CLUCKY.title
-              : (global.FlockData.getHen(state.chatTarget) || {}).name;
-        }
+        updateChatLabel();
       });
     });
+    updateChatLabel();
+  }
+
+  function updateChatLabel() {
     const label = el("chat-target-label");
-    if (label) {
-      label.textContent =
-        state.chatTarget === "clucky"
-          ? CLUCKY.name + " · " + CLUCKY.title
-          : (global.FlockData.getHen(state.chatTarget) || {}).name;
+    if (!label) return;
+    if (state.chatTarget === "clucky") {
+      label.textContent = CLUCKY.name + " · " + CLUCKY.title;
+    } else {
+      const hen = getHen(state.chatTarget);
+      label.textContent = hen
+        ? hen.name + " · " + hen.role + " · " + hen.mood
+        : "";
     }
   }
 
-  function pushChat(role, text) {
+  function pushChat(role, text, speakerId) {
     const log = el("chat-log");
     if (!log) return;
     const row = document.createElement("div");
-    row.className = "chat-row chat-" + role;
-    row.innerHTML =
-      "<strong>" +
-      escapeHtml(role === "you" ? "You" : role) +
-      "</strong><p>" +
-      escapeHtml(text) +
-      "</p>";
+    const isYou = role === "you";
+    row.className = "chat-row chat-" + (isYou ? "you" : "bot");
+    if (isYou) {
+      row.innerHTML =
+        '<div class="chat-bubble"><strong>You</strong><p>' +
+        escapeHtml(text) +
+        "</p></div>";
+    } else {
+      const src = photoFor(speakerId || "clucky");
+      row.innerHTML =
+        '<img class="chat-avatar" src="' +
+        src +
+        '" alt="" onerror="this.style.visibility=\'hidden\'">' +
+        '<div class="chat-bubble"><strong>' +
+        escapeHtml(role) +
+        "</strong><p>" +
+        escapeHtml(text) +
+        "</p></div>";
+    }
     log.appendChild(row);
     log.scrollTop = log.scrollHeight;
   }
 
   function pushSystemChat(text) {
-    pushChat("Clucky", text);
+    pushChat("Clucky", text, "clucky");
   }
 
   async function sendChat(text) {
@@ -300,15 +352,17 @@
     pushChat("you", msg);
     const bridge = global.SolForgeBridge;
     const answer = await global.HenVoice.replyAsync(state.chatTarget, msg, bridge);
-    pushChat(answer.speaker, answer.text);
-  }
+    pushChat(answer.speaker, answer.text, state.chatTarget);
 
-  function escapeHtml(s) {
-    return String(s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    // Self-moderating farm-desk hint: physical action verbs → queue for Jeff
+    if (/\b(feed|treat|open|close|clean|refill|check)\b/i.test(msg)) {
+      state.deskNotes.unshift({
+        t: "Farm desk",
+        m: "Chat asked: “" + msg.slice(0, 80) + "” — review before acting.",
+      });
+      saveDesk();
+      renderDesk();
+    }
   }
 
   function bindForms() {
@@ -333,6 +387,7 @@
         state.deskNotes.unshift({ t: "Eggs", m: "Counter +1 → " + state.eggs });
         saveDesk();
         renderDesk();
+        renderCommentary("Nest zone: egg tally moved to " + state.eggs + ".");
       });
     }
     if (eggMinus) {
@@ -373,7 +428,9 @@
         });
         saveDesk();
         renderDesk();
-        pushSystemChat("Sponsor locked: " + name.trim() + ". Thank you for keeping flocks for the birds.");
+        pushSystemChat(
+          "Sponsor locked: " + name.trim() + ". Thank you for keeping flocks for the birds."
+        );
       });
     }
 
@@ -388,15 +445,11 @@
   }
 
   function simulateCamLife() {
-    // Subtle egg tick once in a while for demo flavor
+    renderCommentary();
     setInterval(() => {
-      if (Math.random() < 0.08) {
-        const hen = HENS[Math.floor(Math.random() * HENS.length)];
-        const line = hen.name + " looks nest-suspicious…";
-        const ticker = el("live-ticker");
-        if (ticker) ticker.textContent = line;
-      }
-    }, 12000);
+      const ev = randomZoneEvent();
+      renderCommentary(ev.text);
+    }, 14000);
   }
 
   function init() {

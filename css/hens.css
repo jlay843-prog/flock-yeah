@@ -1,23 +1,24 @@
-/* Flock Yeah — Lone Tree Acres chicken cam */
+/* Flock Yeah — Lone Tree Acres chicken cam
+   Brand: Emerald / Cream / Gold / Charcoal */
 @import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap");
 
 :root {
-  --coop-ink: #0c1410;
-  --coop-panel: #15231c;
-  --coop-panel-2: #1c2e24;
-  --mist: #dce8df;
-  --mist-dim: #a8bdb0;
-  --straw: #e6c14a;
-  --barn: #d6452e;
-  --sage: #6f9b78;
-  --live: #3dffa0;
-  --line: rgba(220, 232, 223, 0.12);
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --emerald: #047857;
+  --cream: #f7f4ef;
+  --gold: #d97706;
+  --charcoal: #1a1816;
+  --emerald-deep: #065f46;
+  --mist-dim: #6b7280;
+  --live: #10b981;
+  --line: rgba(26, 24, 22, 0.12);
+  --shadow: 0 18px 50px rgba(26, 24, 22, 0.12);
   --radius: 18px;
   --font-display: "Bricolage Grotesque", Georgia, serif;
   --font-body: "Figtree", system-ui, sans-serif;
-  --hen: #b33a2b;
-  --hen-accent: #f0a090;
+  --hen: var(--emerald);
+  --hen-accent: var(--gold);
+  --panel: #ffffff;
+  --ink: var(--charcoal);
 }
 
 *,
@@ -34,11 +35,11 @@ body {
   margin: 0;
   min-height: 100%;
   font-family: var(--font-body);
-  color: var(--mist);
+  color: var(--ink);
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(230, 193, 74, 0.12), transparent 55%),
-    radial-gradient(900px 500px at 90% 0%, rgba(214, 69, 46, 0.1), transparent 50%),
-    linear-gradient(180deg, #101a14 0%, var(--coop-ink) 40%, #0a100d 100%);
+    radial-gradient(1000px 500px at 8% -8%, rgba(4, 120, 87, 0.12), transparent 55%),
+    radial-gradient(800px 420px at 92% 0%, rgba(217, 119, 6, 0.1), transparent 50%),
+    linear-gradient(180deg, var(--cream) 0%, #efe9df 45%, #e7e0d4 100%);
   line-height: 1.5;
 }
 
@@ -48,13 +49,20 @@ img {
 }
 
 a {
-  color: var(--straw);
+  color: var(--emerald);
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
 a:hover {
-  color: #ffe28a;
+  color: var(--emerald-deep);
+}
+
+code {
+  font-size: 0.9em;
+  background: rgba(26, 24, 22, 0.06);
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
 }
 
 .site-header {
@@ -66,7 +74,7 @@ a:hover {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem 1.25rem;
-  background: rgba(12, 20, 16, 0.88);
+  background: rgba(247, 244, 239, 0.92);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(12px);
 }
@@ -83,12 +91,12 @@ a:hover {
   font-weight: 800;
   font-size: clamp(1.35rem, 2.5vw, 1.8rem);
   letter-spacing: -0.03em;
-  color: #fff;
+  color: var(--charcoal);
   line-height: 1.1;
 }
 
 .brand-mark span {
-  color: var(--straw);
+  color: var(--emerald);
 }
 
 .brand-tag {
@@ -110,14 +118,14 @@ a:hover {
 }
 
 .nav a {
-  color: var(--mist);
+  color: var(--charcoal);
   text-decoration: none;
   padding: 0.35rem 0.2rem;
 }
 
 .nav a:hover,
 .nav a[aria-current="page"] {
-  color: var(--straw);
+  color: var(--emerald);
 }
 
 .wrap {
@@ -137,11 +145,12 @@ a:hover {
   font-size: clamp(2rem, 5vw, 3.4rem);
   letter-spacing: -0.04em;
   line-height: 1.05;
+  color: var(--charcoal);
 }
 
 .hero-strip p {
   margin: 0;
-  max-width: 40rem;
+  max-width: 42rem;
   color: var(--mist-dim);
   font-size: 1.05rem;
 }
@@ -153,9 +162,9 @@ a:hover {
   width: fit-content;
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
-  border: 1px solid rgba(61, 255, 160, 0.35);
-  background: rgba(61, 255, 160, 0.08);
-  color: var(--live);
+  border: 1px solid rgba(4, 120, 87, 0.3);
+  background: rgba(4, 120, 87, 0.08);
+  color: var(--emerald);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -168,16 +177,16 @@ a:hover {
   height: 0.55rem;
   border-radius: 50%;
   background: var(--live);
-  box-shadow: 0 0 0 0 rgba(61, 255, 160, 0.7);
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
   animation: pulse 1.6s infinite;
 }
 
 @keyframes pulse {
   70% {
-    box-shadow: 0 0 0 10px rgba(61, 255, 160, 0);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(61, 255, 160, 0);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
   }
 }
 
@@ -195,7 +204,7 @@ a:hover {
 }
 
 .panel {
-  background: linear-gradient(180deg, var(--coop-panel) 0%, var(--coop-panel-2) 100%);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -207,6 +216,7 @@ a:hover {
   margin: 0 0 0.65rem;
   font-family: var(--font-display);
   letter-spacing: -0.02em;
+  color: var(--charcoal);
 }
 
 .stage {
@@ -215,9 +225,9 @@ a:hover {
   border-radius: 14px;
   min-height: 320px;
   background:
-    radial-gradient(circle at var(--pan-x, 50%) var(--pan-y, 40%), var(--hen-accent), transparent 35%),
-    linear-gradient(160deg, #24362c, var(--hen) 120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.2), transparent 35%),
+    linear-gradient(160deg, var(--emerald-deep), var(--hen) 70%, var(--charcoal));
+  border: 1px solid rgba(26, 24, 22, 0.15);
 }
 
 .stage::after {
@@ -228,9 +238,8 @@ a:hover {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 0, 0, 0.08) 3px
+    rgba(0, 0, 0, 0.06) 3px
   );
-  mix-blend-mode: multiply;
   pointer-events: none;
   animation: scan 8s linear infinite;
 }
@@ -251,7 +260,20 @@ a:hover {
   align-content: end;
   min-height: 320px;
   padding: 1.25rem;
-  background: linear-gradient(180deg, transparent 35%, rgba(0, 0, 0, 0.72));
+  background: linear-gradient(180deg, transparent 35%, rgba(26, 24, 22, 0.78));
+  color: var(--cream);
+}
+
+.stage-photo {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(180px, 40%);
+  opacity: 0.95;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+  animation: floaty 5s ease-in-out infinite;
+  z-index: 1;
 }
 
 .stage-mark {
@@ -262,7 +284,7 @@ a:hover {
   font-family: var(--font-display);
   font-size: clamp(5rem, 14vw, 8rem);
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.16);
+  color: rgba(247, 244, 239, 0.16);
   letter-spacing: -0.06em;
   animation: floaty 5s ease-in-out infinite;
 }
@@ -280,11 +302,32 @@ a:hover {
 .stage-inner h2 {
   margin: 0;
   font-size: 2rem;
+  color: var(--cream);
 }
 
 .stage-inner p {
   margin: 0.25rem 0 0;
-  color: var(--mist-dim);
+  color: rgba(247, 244, 239, 0.78);
+}
+
+.commentary {
+  margin-top: 0.85rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: rgba(4, 120, 87, 0.08);
+  border: 1px solid rgba(4, 120, 87, 0.18);
+  font-size: 0.92rem;
+  color: var(--charcoal);
+  min-height: 3.2em;
+}
+
+.commentary strong {
+  color: var(--emerald);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.2rem;
 }
 
 .cam-grid {
@@ -303,7 +346,7 @@ a:hover {
 .cam-tile {
   appearance: none;
   border: 1px solid var(--line);
-  background: #101a14;
+  background: #fff;
   color: inherit;
   border-radius: 12px;
   padding: 0;
@@ -316,22 +359,28 @@ a:hover {
 .cam-tile:hover,
 .cam-tile.is-active {
   transform: translateY(-2px);
-  border-color: var(--hen-accent);
+  border-color: var(--gold);
 }
 
 .cam-screen {
   position: relative;
   aspect-ratio: 4/3;
-  background: linear-gradient(145deg, #1a2a20, var(--hen));
+  background: linear-gradient(145deg, var(--emerald-deep), var(--hen));
   display: grid;
   place-items: center;
+}
+
+.cam-screen img {
+  width: 55%;
+  height: auto;
+  opacity: 0.9;
 }
 
 .cam-hen-mark {
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(247, 244, 239, 0.45);
 }
 
 .cam-live {
@@ -341,8 +390,8 @@ a:hover {
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  color: #04140c;
-  background: var(--live);
+  color: #fff;
+  background: var(--emerald);
   padding: 0.15rem 0.35rem;
   border-radius: 4px;
 }
@@ -353,9 +402,10 @@ a:hover {
   background: repeating-linear-gradient(
     180deg,
     transparent 0 3px,
-    rgba(0, 0, 0, 0.12) 3px 4px
+    rgba(0, 0, 0, 0.08) 3px 4px
   );
-  opacity: 0.5;
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 .cam-meta {
@@ -392,7 +442,7 @@ a:hover {
   font-size: 3rem;
   font-weight: 800;
   letter-spacing: -0.04em;
-  color: #fff;
+  color: var(--charcoal);
   line-height: 1;
 }
 
@@ -406,8 +456,8 @@ a:hover {
 button.btn {
   appearance: none;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--mist);
+  background: rgba(26, 24, 22, 0.03);
+  color: var(--charcoal);
   font: inherit;
   font-weight: 600;
   padding: 0.55rem 0.9rem;
@@ -417,24 +467,25 @@ button.btn {
 }
 
 .btn:hover {
-  border-color: rgba(230, 193, 74, 0.5);
+  border-color: rgba(4, 120, 87, 0.45);
   transform: translateY(-1px);
 }
 
 .btn-primary {
-  background: var(--straw);
-  color: #1a1405;
+  background: var(--emerald);
+  color: #fff;
   border-color: transparent;
 }
 
 .btn-primary:hover {
-  background: #f0d06a;
-  color: #1a1405;
+  background: var(--emerald-deep);
+  color: #fff;
 }
 
 .btn-danger {
-  background: rgba(214, 69, 46, 0.18);
-  border-color: rgba(214, 69, 46, 0.45);
+  background: rgba(185, 28, 28, 0.08);
+  border-color: rgba(185, 28, 28, 0.35);
+  color: #991b1b;
 }
 
 .chat-tabs {
@@ -458,35 +509,55 @@ button.btn {
 }
 
 .chat-tab.is-active {
-  color: #1a1405;
-  background: var(--straw);
+  color: #fff;
+  background: var(--emerald);
   border-color: transparent;
 }
 
 .chat-log {
-  height: 220px;
+  height: 240px;
   overflow: auto;
   display: grid;
   gap: 0.55rem;
   padding: 0.65rem;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(26, 24, 22, 0.03);
   border: 1px solid var(--line);
   margin-bottom: 0.65rem;
 }
 
-.chat-row strong {
+.chat-row {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0.55rem;
+  align-items: start;
+}
+
+.chat-row.chat-you {
+  grid-template-columns: 1fr;
+}
+
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  object-fit: cover;
+}
+
+.chat-bubble strong {
   display: block;
   font-size: 0.75rem;
-  color: var(--straw);
+  color: var(--emerald);
   margin-bottom: 0.15rem;
 }
 
-.chat-row.chat-you strong {
-  color: var(--sage);
+.chat-row.chat-you .chat-bubble strong {
+  color: var(--gold);
 }
 
-.chat-row p {
+.chat-bubble p {
   margin: 0;
   font-size: 0.92rem;
 }
@@ -504,8 +575,8 @@ textarea {
   flex: 1;
   min-width: 0;
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.25);
-  color: var(--mist);
+  background: #fff;
+  color: var(--charcoal);
   border-radius: 999px;
   padding: 0.55rem 0.9rem;
   font: inherit;
@@ -519,7 +590,7 @@ textarea {
 
 input:focus,
 textarea:focus {
-  outline: 2px solid rgba(230, 193, 74, 0.45);
+  outline: 2px solid rgba(4, 120, 87, 0.35);
   outline-offset: 1px;
 }
 
@@ -540,7 +611,7 @@ textarea:focus {
   gap: 0.15rem;
   padding: 0.45rem 0.55rem;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(26, 24, 22, 0.03);
   font-size: 0.88rem;
 }
 
@@ -549,7 +620,7 @@ textarea:focus {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--straw);
+  color: var(--gold);
 }
 
 .muted {
@@ -566,7 +637,7 @@ textarea:focus {
 .gift-btn {
   appearance: none;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
+  background: #fff;
   color: inherit;
   border-radius: 12px;
   padding: 0.55rem;
@@ -578,7 +649,7 @@ textarea:focus {
 }
 
 .gift-btn:hover {
-  border-color: var(--straw);
+  border-color: var(--gold);
 }
 
 .gift-emoji {
@@ -594,10 +665,8 @@ textarea:focus {
   gap: 0.2rem;
   padding: 0.85rem;
   border-radius: 12px;
-  background:
-    linear-gradient(135deg, rgba(230, 193, 74, 0.12), rgba(214, 69, 46, 0.08)),
-    rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(230, 193, 74, 0.25);
+  background: linear-gradient(135deg, rgba(4, 120, 87, 0.08), rgba(217, 119, 6, 0.08));
+  border: 1px solid rgba(217, 119, 6, 0.28);
   margin-bottom: 0.75rem;
 }
 
@@ -606,7 +675,7 @@ textarea:focus {
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--straw);
+  color: var(--gold);
   font-weight: 700;
 }
 
@@ -636,11 +705,11 @@ textarea:focus {
   position: relative;
   border-radius: var(--radius);
   padding: 1.25rem 1rem 0.5rem;
-  background:
-    linear-gradient(180deg, #1a1a1a 0%, #0e0e0e 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #2a2622 0%, var(--charcoal) 100%);
+  border: 1px solid rgba(26, 24, 22, 0.4);
   box-shadow: var(--shadow);
   overflow: hidden;
+  color: var(--cream);
 }
 
 .lineup-board::before {
@@ -687,7 +756,7 @@ textarea:focus {
 
 .mug-height {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(247, 244, 239, 0.4);
   text-align: center;
 }
 
@@ -696,17 +765,23 @@ textarea:focus {
   border-radius: 12px 12px 4px 4px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%),
-    linear-gradient(180deg, #2a2a2a, var(--hen));
+    linear-gradient(180deg, #3f3a34, var(--hen));
   display: grid;
   place-items: center;
   border: 2px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 -30px 40px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.mug-body img {
+  width: 70%;
+  height: auto;
 }
 
 .mug.is-selected .mug-body {
-  border-color: var(--hen-accent);
+  border-color: var(--gold);
   box-shadow:
-    0 0 0 2px rgba(230, 193, 74, 0.25),
+    0 0 0 2px rgba(217, 119, 6, 0.35),
     inset 0 -30px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -714,12 +789,12 @@ textarea:focus {
   font-family: var(--font-display);
   font-size: 2.4rem;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(247, 244, 239, 0.45);
 }
 
 .mug-plate {
-  background: #f3e7c7;
-  color: #1a1405;
+  background: var(--cream);
+  color: var(--charcoal);
   border-radius: 4px;
   padding: 0.35rem 0.4rem;
   display: grid;
@@ -754,12 +829,12 @@ textarea:focus {
   aspect-ratio: 1;
   margin: 0 auto;
   overflow: hidden;
-  border: 10px solid #222;
+  border: 10px solid #2a2622;
   box-shadow:
-    inset 0 0 60px rgba(0, 0, 0, 0.65),
+    inset 0 0 60px rgba(0, 0, 0, 0.45),
     0 0 0 2px #444,
     var(--shadow);
-  background: #050805;
+  background: #0c0b0a;
   cursor: crosshair;
 }
 
@@ -769,7 +844,7 @@ textarea:focus {
   inset: 0;
   background:
     radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%),
-    repeating-radial-gradient(circle at center, transparent 0 8px, rgba(61, 255, 160, 0.05) 8px 9px);
+    repeating-radial-gradient(circle at center, transparent 0 8px, rgba(4, 120, 87, 0.06) 8px 9px);
   z-index: 2;
   pointer-events: none;
 }
@@ -779,18 +854,24 @@ textarea:focus {
   left: var(--pan-x, 50%);
   top: var(--pan-y, 45%);
   transform: translate(-50%, -50%) scale(var(--zoom, 1.15));
+  width: 45%;
+  transition: transform 0.08s linear, left 0.08s linear, top 0.08s linear;
+  z-index: 1;
+}
+
+.lens-subject-fallback {
   font-family: var(--font-display);
   font-size: 7rem;
   font-weight: 800;
   color: var(--hen-accent);
+  width: auto;
   text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  transition: transform 0.08s linear, left 0.08s linear, top 0.08s linear;
 }
 
 .lens-meta blockquote {
   margin: 0.75rem 0;
   padding-left: 0.85rem;
-  border-left: 3px solid var(--straw);
+  border-left: 3px solid var(--gold);
   color: var(--mist-dim);
   font-style: italic;
 }
@@ -806,7 +887,6 @@ textarea:focus {
   flex: 1;
 }
 
-/* Herd / shop / ops */
 .card-grid,
 .shop-grid,
 .ops-grid {
@@ -822,9 +902,15 @@ textarea:focus {
   position: relative;
   padding: 1rem;
   border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--coop-panel), var(--coop-panel-2));
+  background: #fff;
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
+}
+
+.herd-card img {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 0.65rem;
 }
 
 .shop-card h3,
@@ -867,7 +953,7 @@ textarea:focus {
 }
 
 .site-footer strong {
-  color: var(--mist);
+  color: var(--charcoal);
 }
 
 .success-box {
@@ -881,7 +967,6 @@ textarea:focus {
   letter-spacing: -0.03em;
 }
 
-/* Landing redirect helper */
 .landing {
   min-height: 100dvh;
   display: grid;
@@ -898,5 +983,5 @@ textarea:focus {
 }
 
 .landing h1 span {
-  color: var(--straw);
+  color: var(--emerald);
 }

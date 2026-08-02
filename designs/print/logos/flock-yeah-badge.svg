@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="92" fill="#047857"/>
+  <circle cx="100" cy="100" r="70" fill="#f7f4ef"/>
+  <path d="M70 110c10 20 50 20 60 0-8 8-20 14-30 14s-22-6-30-14z" fill="#1a1816"/>
+  <circle cx="85" cy="85" r="6" fill="#1a1816"/><circle cx="115" cy="85" r="6" fill="#1a1816"/>
+  <text x="100" y="175" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#d97706">FY</text>
+</svg>

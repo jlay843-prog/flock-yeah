@@ -1,10 +1,12 @@
 /**
- * Flock Yeah — Who's Who jail lineup + lens zoom
+ * Flock Yeah — Who's Who jail lineup + lens zoom (hens or horses)
  */
 (function (global) {
   "use strict";
 
-  const { HENS, FARM } = global.FlockData;
+  const { HENS, HORSES, FARM } = global.FlockData;
+  const mode = (document.body && document.body.dataset.lineup) || "hens";
+  const roster = mode === "horses" ? HORSES : HENS;
 
   const state = {
     selected: null,
@@ -17,52 +19,65 @@
     return document.getElementById(id);
   }
 
+  function getSubject(id) {
+    if (mode === "horses") return HORSES.find((h) => h.id === id) || HORSES[0];
+    return global.FlockData.getHen(id) || HENS[0];
+  }
+
   function renderLineup() {
     const row = el("lineup-row");
     if (!row) return;
-    row.innerHTML = HENS.map((h, i) => {
-      const height = 160 + (i % 3) * 18;
-      return (
-        '<button type="button" class="mug' +
-        (state.selected === h.id ? " is-selected" : "") +
-        '" data-hen="' +
-        h.id +
-        '" style="--hen:' +
-        h.color +
-        ";--hen-accent:" +
-        h.accent +
-        ";--mug-h:" +
-        height +
-        'px">' +
-        '<div class="mug-height">' +
-        (14 + i) +
-        '"</div>' +
-        '<div class="mug-body">' +
-        '<span class="mug-mark">' +
-        h.mugshot +
-        "</span>" +
-        "</div>" +
-        '<div class="mug-plate">' +
-        "<strong>" +
-        h.name.toUpperCase() +
-        "</strong>" +
-        "<span>" +
-        h.breed +
-        "</span>" +
-        "<span>#" +
-        String(i + 1).padStart(2, "0") +
-        "</span>" +
-        "</div>" +
-        "</button>"
-      );
-    }).join("");
+    row.innerHTML = roster
+      .map((h, i) => {
+        const height = 160 + (i % 3) * 18;
+        const color = h.color || "#047857";
+        const accent = h.accent || "#d97706";
+        const plateSub = h.breed || h.role || "";
+        const mark = h.mugshot || h.name.slice(0, 1);
+        const photo = h.photo
+          ? '<img src="' + h.photo + '" alt="" onerror="this.remove()">'
+          : '<span class="mug-mark">' + mark + "</span>";
+        return (
+          '<button type="button" class="mug' +
+          (state.selected === h.id ? " is-selected" : "") +
+          '" data-id="' +
+          h.id +
+          '" style="--hen:' +
+          color +
+          ";--hen-accent:" +
+          accent +
+          ";--mug-h:" +
+          height +
+          'px">' +
+          '<div class="mug-height">' +
+          (14 + i) +
+          (mode === "horses" ? " hh" : '"') +
+          "</div>" +
+          '<div class="mug-body">' +
+          photo +
+          "</div>" +
+          '<div class="mug-plate">' +
+          "<strong>" +
+          h.name.toUpperCase() +
+          "</strong>" +
+          "<span>" +
+          plateSub +
+          "</span>" +
+          "<span>#" +
+          String(i + 1).padStart(2, "0") +
+          "</span>" +
+          "</div>" +
+          "</button>"
+        );
+      })
+      .join("");
 
-    row.querySelectorAll("[data-hen]").forEach((btn) => {
-      btn.addEventListener("click", () => selectHen(btn.getAttribute("data-hen")));
+    row.querySelectorAll("[data-id]").forEach((btn) => {
+      btn.addEventListener("click", () => selectSubject(btn.getAttribute("data-id")));
     });
   }
 
-  function selectHen(id) {
+  function selectSubject(id) {
     state.selected = id;
     state.zoom = 1.35;
     state.panX = 48 + Math.random() * 8;
@@ -72,41 +87,57 @@
   }
 
   function renderLens() {
-    const hen = global.FlockData.getHen(state.selected) || HENS[0];
+    const sub = getSubject(state.selected || roster[0].id);
     const lens = el("lens-view");
     const meta = el("lens-meta");
     const slider = el("lens-zoom");
     if (lens) {
-      lens.style.setProperty("--hen", hen.color);
-      lens.style.setProperty("--hen-accent", hen.accent);
+      lens.style.setProperty("--hen", sub.color || "#047857");
+      lens.style.setProperty("--hen-accent", sub.accent || "#d97706");
       lens.style.setProperty("--zoom", String(state.zoom));
       lens.style.setProperty("--pan-x", state.panX + "%");
       lens.style.setProperty("--pan-y", state.panY + "%");
-      lens.classList.toggle("has-subject", !!state.selected);
       const mark = lens.querySelector(".lens-subject");
-      if (mark) mark.textContent = hen.mugshot;
+      if (mark) {
+        if (sub.photo) {
+          mark.outerHTML =
+            '<img class="lens-subject" src="' +
+            sub.photo +
+            '" alt="' +
+            sub.name +
+            '">';
+        } else {
+          mark.textContent = sub.mugshot || sub.name.slice(0, 1);
+          mark.classList.add("lens-subject-fallback");
+        }
+      }
     }
     if (meta) {
+      const title = sub.title || sub.role || "";
+      const bio = sub.bio || sub.note || "";
+      const quote = sub.catchphrases ? sub.catchphrases[0] : "";
+      const link =
+        mode === "horses"
+          ? ""
+          : '<p class="lens-cam"><a href="hens.html#' +
+            sub.id +
+            '">Open ' +
+            (sub.camLabel || "cam") +
+            "</a></p>";
       meta.innerHTML =
         "<h2>" +
-        hen.name +
+        sub.name +
         "</h2>" +
-        "<p class=\"lens-title\">" +
-        hen.title +
-        " · " +
-        hen.breed +
+        '<p class="lens-title">' +
+        title +
+        (sub.breed ? " · " + sub.breed : "") +
+        (sub.mood ? " · " + sub.mood : "") +
         "</p>" +
         "<p>" +
-        hen.bio +
+        bio +
         "</p>" +
-        "<blockquote>“" +
-        hen.catchphrases[0] +
-        "”</blockquote>" +
-        '<p class="lens-cam"><a href="hens.html#' +
-        hen.id +
-        '">Open ' +
-        hen.camLabel +
-        "</a></p>";
+        (quote ? "<blockquote>“" + quote + "”</blockquote>" : "") +
+        link;
     }
     if (slider && document.activeElement !== slider) {
       slider.value = String(Math.round(state.zoom * 100));
@@ -121,7 +152,6 @@
         renderLens();
       });
     }
-
     const lens = el("lens-view");
     if (lens) {
       lens.addEventListener("pointermove", (e) => {
@@ -132,19 +162,18 @@
         renderLens();
       });
     }
-
     const tag = el("brand-tagline");
     if (tag) tag.textContent = FARM.tagline + " " + FARM.attribution;
   }
 
   function init() {
-    state.selected = HENS[0].id;
+    state.selected = roster[0].id;
     renderLineup();
     renderLens();
     bindControls();
   }
 
-  global.Lineup = { init, selectHen };
+  global.Lineup = { init, selectSubject };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

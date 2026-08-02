@@ -28,8 +28,8 @@
       <div class="live-pill">Multi-cam live</div>
       <h1>The ladies are on air.</h1>
       <p>
-        Clucky hosts. Henrietta runs the order. You bring the snacks.
-        Egg counter, Farm desk, gifts, and coop sponsor — all from Lone Tree Acres.
+        Clucky hosts flock/zone commentary — birds, not plates. Chat with the hens,
+        queue Farm desk actions for Jeff, send gifts, sponsor the coop.
       </p>
       <p class="ticker" id="live-ticker">Waiting for coop gossip…</p>
     </section>
@@ -37,12 +37,16 @@
     <section class="layout-cams">
       <div class="panel">
         <div class="stage" id="cam-stage">
+          <img class="stage-photo" id="stage-photo" src="assets/hens/henrietta.svg" alt="">
           <div class="stage-mark" id="stage-mark" aria-hidden="true">FY</div>
           <div class="stage-inner">
             <h2 id="stage-hen-name">Henrietta</h2>
             <p id="stage-cam-label">Nest Cam A</p>
             <p id="stage-hen-bio">Flock matriarch.</p>
           </div>
+        </div>
+        <div class="commentary" id="cam-commentary" aria-live="polite">
+          <strong>Cam commentary</strong> Loading flock/zone events…
         </div>
         <div class="cam-grid" id="cam-grid" aria-label="Hen camera grid"></div>
         <div class="btn-row" style="margin-top:1rem">
