@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thanks · Flock Yeah Checkout</title>
+  <meta name="description" content="Flock Yeah checkout success — thanks for supporting Lone Tree Acres.">
+  <link rel="stylesheet" href="css/hens.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="brand-mark">Flock <span>Yeah</span></div>
+      <div class="brand-tag">Keep flocks for the birds. — Mom</div>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="hens.html">Cams</a>
+      <a href="shop.html">Shop</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="panel success-box">
+      <div class="live-pill" style="margin:0 auto 1rem">Order noted</div>
+      <h1>Yeah. The flock thanks you.</h1>
+      <p id="success-detail">
+        Your support keeps cameras warm, nests soft, and Clucky employed (sort of).
+      </p>
+      <div class="btn-row" style="justify-content:center;margin-top:1.25rem">
+        <a class="btn btn-primary" href="hens.html">Back to cams</a>
+        <a class="btn" href="shop.html">More shop</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/flock-data.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var item = params.get("item");
+      var demo = params.get("demo");
+      var el = document.getElementById("success-detail");
+      var found = item && FlockData.SHOP_ITEMS.find(function (i) { return i.id === item; });
+      var last = null;
+      try { last = JSON.parse(sessionStorage.getItem("fy_last_order") || "null"); } catch (e) {}
+      if (found) {
+        el.textContent =
+          (demo ? "Demo checkout for " : "Paid / queued: ") +
+          found.name +
+          ". Clucky will announce it on the Farm desk.";
+      } else if (last) {
+        el.textContent = "Last local order: " + last.name + ".";
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shop · Flock Yeah · Merch, Eggs &amp; Plasma</title>
+  <meta name="description" content="Flock Yeah shop — stickers, mugs, farm eggs, SolForge plasma hen cuts, and coop sponsorship.">
+  <link rel="stylesheet" href="css/hens.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="brand-mark">Flock <span>Yeah</span></div>
+      <div class="brand-tag" id="brand-tagline">Keep flocks for the birds. — Mom</div>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="hens.html">Cams</a>
+      <a href="whos-who.html">Who's Who</a>
+      <a href="herd.html">Herd</a>
+      <a href="shop.html" aria-current="page">Shop</a>
+      <a href="ops.html">Ops</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero-strip">
+      <div class="live-pill">Merch &amp; metal</div>
+      <h1>Shop the flock</h1>
+      <p>
+        Stickers, mugs, local eggs, and plasma-cut hen silhouettes via
+        <a href="https://solforge.lonetreeacres.com" target="_blank" rel="noopener noreferrer">SolForge</a>.
+        Stripe Payment Links plug into <code>js/stripe-config.js</code> when you're ready.
+      </p>
+      <p class="muted" id="shop-status">Checking payment config…</p>
+    </section>
+
+    <section class="shop-grid" id="shop-grid" aria-label="Shop catalog"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      Payments: Stripe (client publishable key only) · Fabrication:
+      <a href="https://solforge.lonetreeacres.com" target="_blank" rel="noopener noreferrer">solforge.lonetreeacres.com</a>
+    </div>
+  </footer>
+
+  <script src="js/flock-data.js"></script>
+  <script src="js/stripe-config.js"></script>
+  <script src="js/solforge-bridge.js"></script>
+  <script src="js/shop.js"></script>
+</body>
+</html>

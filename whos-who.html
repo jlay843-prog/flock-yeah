@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Who's Who · Flock Yeah Jail Lineup</title>
+  <meta name="description" content="Flock Yeah hen jail lineup with lens zoom — meet Henrietta, Scratch, Cluck Norris, Daisy, Pepper, and Maple.">
+  <link rel="stylesheet" href="css/hens.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="brand-mark">Flock <span>Yeah</span></div>
+      <div class="brand-tag" id="brand-tagline">Keep flocks for the birds. — Mom</div>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="hens.html">Cams</a>
+      <a href="whos-who.html" aria-current="page">Who's Who</a>
+      <a href="herd.html">Herd</a>
+      <a href="shop.html">Shop</a>
+      <a href="ops.html">Ops</a>
+    </nav>
+  </header>
+
+  <main class="wrap lineup-page">
+    <section class="hero-strip">
+      <div class="live-pill">Mugshot unit</div>
+      <h1>Who's Who — jail lineup</h1>
+      <p>Pick a hen. Twist the lens. Learn the charges (usually: theft of snacks, unauthorized dust baths).</p>
+    </section>
+
+    <section class="lineup-board" aria-label="Hen jail lineup">
+      <div class="lineup-row" id="lineup-row"></div>
+    </section>
+
+    <section class="lens-layout">
+      <div class="panel">
+        <h2>Lens</h2>
+        <div class="lens-view" id="lens-view" title="Move pointer to pan">
+          <span class="lens-subject" aria-hidden="true">H</span>
+        </div>
+        <div class="lens-controls">
+          <label for="lens-zoom">Zoom</label>
+          <input id="lens-zoom" type="range" min="100" max="250" value="135">
+        </div>
+      </div>
+      <div class="panel" id="lens-meta">
+        <h2>Select a hen</h2>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <strong>Flock Yeah</strong> · Lone Tree Acres · Jeff Lay ·
+      <a href="hens.html">Back to cams</a>
+    </div>
+  </footer>
+
+  <script src="js/flock-data.js"></script>
+  <script src="js/lineup.js"></script>
+</body>
+</html>

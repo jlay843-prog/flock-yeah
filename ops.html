@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ops · Flock Yeah Farm Desk</title>
+  <meta name="description" content="Flock Yeah ops board — cam status, egg tally notes, SolForge handoff, and security pointers.">
+  <link rel="stylesheet" href="css/hens.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="brand-mark">Flock <span>Yeah</span></div>
+      <div class="brand-tag" id="brand-tagline">Keep flocks for the birds. — Mom</div>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="hens.html">Cams</a>
+      <a href="whos-who.html">Who's Who</a>
+      <a href="herd.html">Herd</a>
+      <a href="shop.html">Shop</a>
+      <a href="ops.html" aria-current="page">Ops</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero-strip">
+      <div class="live-pill">Farm desk</div>
+      <h1>Ops board</h1>
+      <p>Static-site checklist for running Flock Yeah without leaking secrets. Owner: Jeff Lay.</p>
+    </section>
+
+    <section class="ops-grid">
+      <article class="ops-card">
+        <h3>Cameras</h3>
+        <p>Drop real HLS/WebRTC embeds into the stage when streams are ready. Grid tiles stay as selectors.</p>
+        <a class="btn" href="hens.html">Open cams</a>
+      </article>
+      <article class="ops-card">
+        <h3>Egg counter</h3>
+        <p>Stored in <code>localStorage</code> key <code>fy_egg_count_v1</code>. Reset from browser storage if needed.</p>
+        <button type="button" class="btn btn-danger" id="reset-eggs">Reset eggs</button>
+      </article>
+      <article class="ops-card">
+        <h3>Stripe</h3>
+        <p>Publishable key + Payment Links only in <code>js/stripe-config.js</code>. Secrets stay on SolForge / server.</p>
+        <a class="btn" href="shop.html">Shop config</a>
+      </article>
+      <article class="ops-card">
+        <h3>SolForge</h3>
+        <p>Plasma SVGs live in <code>print/</code>. Bridge opens <code>solforge.lonetreeacres.com/start</code>.</p>
+        <button type="button" class="btn btn-primary" id="open-solforge">Open SolForge</button>
+      </article>
+      <article class="ops-card">
+        <h3>Security</h3>
+        <p>Read <a href="SECURITY.md">SECURITY.md</a>. No API secrets in this repo. Chat is local personality until a bridge is wired.</p>
+      </article>
+      <article class="ops-card">
+        <h3>Handoff</h3>
+        <p>Next agent: start at <a href="CHAT-HANDOFF.md">CHAT-HANDOFF.md</a> for architecture and TODOs.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">Lone Tree Acres · 6693 Rabbit Mountain Rd · jeffrey@lonetreeacres.com</div>
+  </footer>
+
+  <script src="js/flock-data.js"></script>
+  <script src="js/solforge-bridge.js"></script>
+  <script>
+    (function () {
+      var tag = document.getElementById("brand-tagline");
+      if (tag) tag.textContent = FlockData.FARM.tagline + " " + FlockData.FARM.attribution;
+      document.getElementById("reset-eggs").addEventListener("click", function () {
+        localStorage.removeItem(FlockData.STORAGE_KEYS.eggs);
+        alert("Egg counter cleared for this browser.");
+      });
+      document.getElementById("open-solforge").addEventListener("click", function () {
+        SolForgeBridge.openShop();
+      });
+    })();
+  </script>
+</body>
+</html>

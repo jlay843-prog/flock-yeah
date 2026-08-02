@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Herd · Flock Yeah · Lone Tree Acres Horses</title>
+  <meta name="description" content="Meet the Lone Tree Acres herd — Lincoln, Grace, Winchester, Tia, Buster, and Thunder — neighbors to the Flock Yeah hens.">
+  <link rel="stylesheet" href="css/hens.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="brand-mark">Flock <span>Yeah</span></div>
+      <div class="brand-tag" id="brand-tagline">Keep flocks for the birds. — Mom</div>
+    </div>
+    <nav class="nav" aria-label="Primary">
+      <a href="hens.html">Cams</a>
+      <a href="whos-who.html">Who's Who</a>
+      <a href="herd.html" aria-current="page">Herd</a>
+      <a href="shop.html">Shop</a>
+      <a href="ops.html">Ops</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero-strip">
+      <div class="live-pill">Pasture neighbors</div>
+      <h1>The herd next door</h1>
+      <p>
+        Same Rabbit Mountain sky, bigger shoes. Boutique boarding herd at Lone Tree Acres —
+        the hens provide editorial commentary.
+      </p>
+    </section>
+
+    <section class="card-grid" id="herd-grid" aria-label="Horse herd"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      Boarding &amp; rehab · <a href="https://lonetreeacres.com" target="_blank" rel="noopener noreferrer">lonetreeacres.com</a> ·
+      Jeff Lay · Longmont, CO
+    </div>
+  </footer>
+
+  <script src="js/flock-data.js"></script>
+  <script>
+    (function () {
+      var grid = document.getElementById("herd-grid");
+      var tag = document.getElementById("brand-tagline");
+      if (tag) tag.textContent = FlockData.FARM.tagline + " " + FlockData.FARM.attribution;
+      grid.innerHTML = FlockData.HORSES.map(function (h) {
+        return (
+          '<article class="herd-card">' +
+          "<h3>" + h.name + "</h3>" +
+          "<p><strong>" + h.role + "</strong></p>" +
+          "<p>" + h.note + "</p>" +
+          "</article>"
+        );
+      }).join("");
+    })();
+  </script>
+</body>
+</html>
