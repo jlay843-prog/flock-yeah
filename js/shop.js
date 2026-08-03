@@ -78,7 +78,7 @@
       );
     }
 
-    // picture: webp thumb preferred; original PNG only as last resort
+    // WebP thumb for modern browsers; SVG art fallback (never multi-MB PNG in grid)
     if (v.hasWebp) {
       return (
         '<picture class="shop-picture">' +
@@ -86,12 +86,12 @@
         v.thumb +
         '" type="image/webp">' +
         '<img src="' +
-        v.original +
+        art +
         '" alt="' +
         alt +
         '" loading="' +
         loading +
-        '" decoding="async" width="480" height="480" class="shop-img"' +
+        '" decoding="async" width="480" height="480" class="shop-img is-ready"' +
         prio +
         " onerror=\"" +
         fallbackOnErr +
@@ -167,11 +167,19 @@
       imgEl.classList.add("is-ready");
     };
     imgEl.onerror = function () {
+      // Prefer original only if full webp missing; else SVG art (no multi-MB crawl)
+      if (imgEl.dataset.tried !== "1" && raw && raw !== v.full) {
+        imgEl.dataset.tried = "1";
+        imgEl.src = raw;
+        return;
+      }
       imgEl.onerror = null;
-      imgEl.src = raw || itemArtFallback(item);
+      imgEl.src = itemArtFallback(item);
+      imgEl.classList.add("is-ready");
     };
     imgEl.classList.remove("is-ready");
-    imgEl.src = v.full || raw;
+    delete imgEl.dataset.tried;
+    imgEl.src = v.full || raw || itemArtFallback(item);
 
     el("lb-title").textContent = item.name;
     el("lb-saying").textContent = design ? "“" + design.saying + "”" : "";
@@ -295,12 +303,12 @@
           ? '<picture><source srcset="' +
             v.thumb +
             '" type="image/webp"><img src="' +
-            v.original +
+            (d.art || "designs/merch/flock-yeah-classic.svg") +
             '" alt="' +
             escapeHtml(d.saying) +
             '" loading="' +
             loading +
-            '" decoding="async" width="480" height="480" class="shop-img" onload="this.classList.add(\'is-ready\')"></picture>'
+            '" decoding="async" width="480" height="480" class="shop-img is-ready" onload="this.classList.add(\'is-ready\')"></picture>'
           : '<img src="' +
             src +
             '" alt="' +
