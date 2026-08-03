@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ops · Flock Yeah</title>
-  <meta name="description" content="Flock Yeah farm desk — eggs, shop, and SolForge.">
+  <title>Ops ritual · Flock Yeah</title>
+  <meta name="description" content="Weekly 15-minute Flock Yeah ops checklist.">
   <meta name="robots" content="noindex">
-  <link rel="stylesheet" href="css/hens.css">
+  <link rel="stylesheet" href="css/hens.css?v=ops-ritual1">
 </head>
 <body class="has-merch-bg">
   <header class="site-header">
@@ -25,66 +25,87 @@
 
   <main class="wrap">
     <section class="hero-strip">
-      <div class="live-pill">Farm desk</div>
-      <h1>Ops</h1>
+      <div class="live-pill">~15 min / week</div>
+      <h1>Ops ritual</h1>
+      <p class="hero-lead">
+        Cam OK? PayPal skim? Restock draft? Sponsor note? Done.
+        No daily content treadmill — Clucky + Nest Cam <em>are</em> the show.
+      </p>
+      <p class="muted" id="ritual-week-label"></p>
     </section>
 
     <section class="ops-grid">
+      <article class="ops-card" style="grid-column:1/-1">
+        <h3>This week’s checklist</h3>
+        <ul class="ops-ritual-list" id="ritual-list"></ul>
+        <div class="btn-row" style="margin-top:0.75rem">
+          <button type="button" class="btn btn-primary" id="ritual-mark-all">Mark all done</button>
+          <button type="button" class="btn" id="ritual-reset">Reset week</button>
+        </div>
+        <p class="muted" id="ritual-status" style="margin-top:0.65rem"></p>
+      </article>
+
       <article class="ops-card">
-        <h3>Cams</h3>
-        <p id="ops-cam-status">Live cam status</p>
+        <h3>1 · Cams</h3>
+        <p id="ops-cam-status">Checking…</p>
         <div class="btn-row">
-          <a class="btn btn-primary" href="hens.html">Open cams</a>
+          <a class="btn btn-primary" href="hens.html" target="_blank" rel="noopener">Open cams</a>
+          <a class="btn" href="/cam/snap" target="_blank" rel="noopener">Snap test</a>
         </div>
       </article>
+
       <article class="ops-card">
-        <h3>Egg counter</h3>
-        <p>Reset the on-page egg tally for this browser.</p>
-        <button type="button" class="btn btn-danger" id="reset-eggs">Reset eggs</button>
+        <h3>2 · PayPal skim</h3>
+        <p>Skim PayPal/Venmo for gift tips &amp; <code>sponsor:Name</code> notes.</p>
+        <div class="btn-row">
+          <a class="btn" href="https://www.paypal.com/myaccount/transactions" target="_blank" rel="noopener">PayPal</a>
+        </div>
       </article>
+
       <article class="ops-card">
-        <h3>Shop &amp; gifts</h3>
-        <p>PayPal and Venmo for treats and sponsors. Plasma and 3D print open on SolForge.</p>
-        <a class="btn" href="shop.html">Shop</a>
-        <a class="btn" href="hens.html#gifts">Gifts</a>
+        <h3>3 · Restock package</h3>
+        <p>Build EA draft if stock low. When goods arrive, receive package → bumps shop stock.</p>
+        <label class="muted">Package id</label>
+        <input id="pkg-id" type="text" placeholder="rp_2026…" style="width:100%;margin:0.35rem 0">
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="pkg-receive">Receive package (stock +)</button>
+        </div>
+        <p class="muted" id="pkg-status"></p>
+        <p class="muted">Needs Bearer in local ops token (see below). Or run fleet script.</p>
       </article>
+
+      <article class="ops-card">
+        <h3>4 · Sponsor board</h3>
+        <p>After a payment with note <code>sponsor:Jane</code>, activate the board.</p>
+        <input id="sponsor-name-ops" type="text" placeholder="Name" style="width:100%;margin:0.25rem 0">
+        <input id="sponsor-note-ops" type="text" placeholder="Optional note" style="width:100%;margin:0.25rem 0">
+        <button type="button" class="btn btn-primary" id="sponsor-activate">Put on board 24h</button>
+        <p class="muted" id="sponsor-ops-status"></p>
+      </article>
+
       <article class="ops-card">
         <h3>SolForge</h3>
-        <p>Custom metal and fab orders for the farm.</p>
+        <p>Plasma / 3D jobs.</p>
         <button type="button" class="btn btn-primary" id="open-solforge">Open SolForge</button>
+        <a class="btn" href="shop.html">Shop</a>
+      </article>
+
+      <article class="ops-card">
+        <h3>Friday reminder</h3>
+        <p>Optional: fleet runs <code>OPS-FRIDAY-REMINDER.sh</code> → Gmail draft “ops ritual due”.</p>
+        <p class="muted">Farm token (Bearer, stays in this browser only):</p>
+        <input id="ops-token" type="password" placeholder="CRON / FLOCK_FARM secret" autocomplete="off" style="width:100%">
       </article>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="wrap">Lone Tree Acres · Longmont, CO</div>
+    <div class="wrap">Lone Tree Acres · ops · noindex</div>
   </footer>
 
-  <script src="js/flock-data.js"></script>
-  <script src="js/cam-config.js"></script>
+  <script src="js/flock-data.js?v=area-cams1"></script>
+  <script src="js/cam-config.js?v=area-cams1"></script>
   <script src="js/solforge-bridge.js"></script>
-  <script>
-    (function () {
-      var tag = document.getElementById("brand-tagline");
-      if (tag && window.FlockData) {
-        tag.textContent = FlockData.FARM.tagline + " " + FlockData.FARM.attribution;
-      }
-      document.getElementById("reset-eggs").addEventListener("click", function () {
-        if (window.FlockData) localStorage.removeItem(FlockData.STORAGE_KEYS.eggs);
-        alert("Egg counter cleared for this browser.");
-      });
-      document.getElementById("open-solforge").addEventListener("click", function () {
-        if (window.SolForgeBridge) SolForgeBridge.openShop();
-      });
-      var el = document.getElementById("ops-cam-status");
-      if (el && window.CamConfig) {
-        var s = (CamConfig.streams && CamConfig.streams.henrietta) || {};
-        var live = s.mode && s.mode !== "none";
-        el.textContent = live
-          ? "Nest Cam A · live"
-          : "Nest Cam A · offline or local preview";
-      }
-    })();
-  </script>
+  <script src="js/ops-ritual.js?v=ops-ritual1"></script>
 </body>
 </html>

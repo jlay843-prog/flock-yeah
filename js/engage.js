@@ -15,7 +15,7 @@
 
   const CHIPS = [
     { label: "Who's nesting?", text: "Who's nesting right now?" },
-    { label: "Send mealworms", text: "I'd like to send mealworms", action: "gift:mealworms" },
+    { label: "Support the flock", text: "I'd like to support the flock", action: "gift:flock-tip" },
     { label: "What's Nest Cam A seeing?", text: "What's Nest Cam A seeing?" },
     { label: "Sponsor the coop", text: "How do I sponsor the coop today?", action: "scroll:sponsor" },
   ];
@@ -265,7 +265,7 @@
       escapeHtml(hen.name) +
       "?</p>" +
       '<div class="btn-row">' +
-      '<a class="btn btn-primary" href="#gifts">Send a treat</a>' +
+      '<a class="btn btn-primary" href="#gifts">Support the flock</a>' +
       '<button type="button" class="btn" id="gift-bridge-dismiss">Not now</button>' +
       "</div>";
     const dismiss = el("gift-bridge-dismiss");

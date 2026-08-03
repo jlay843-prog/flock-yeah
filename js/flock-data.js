@@ -252,50 +252,18 @@
     },
   ];
 
+  /**
+   * Single support tip — low owner labor (no multi-SKU gift tray).
+   * PayPal note can still say sponsor:Name for board (see /api/flock/sponsor).
+   */
   const GIFTS = [
     {
-      id: "mealworms",
-      name: "Support · Mealworm Fund",
-      priceCents: 300,
-      costCents: 225,
-      emoji: "🐛",
-      blurb: "Tips the snack jar — supports real treats when stocked (not instant dispense).",
-      dispense: "mealworms",
-    },
-    {
-      id: "scratch-grain",
-      name: "Support · Scratch Fund",
+      id: "flock-tip",
+      name: "Support the flock",
       priceCents: 500,
-      costCents: 375,
-      emoji: "🌾",
-      blurb: "Funds the run scatter budget. Thanks from the dig crew.",
-      dispense: "scratch",
-    },
-    {
-      id: "nest-box",
-      name: "Support · Nest Comfort",
-      priceCents: 800,
-      costCents: 600,
-      emoji: "🪺",
-      blurb: "Helps keep boxes soft — coop care fund.",
-      dispense: null,
-    },
-    {
-      id: "dust-bath",
-      name: "Support · Spa Day Fund",
-      priceCents: 1000,
-      costCents: 750,
-      emoji: "✨",
-      blurb: "Dust-bath maintenance fund. Daisy approves.",
-      dispense: null,
-    },
-    {
-      id: "hawk-watch",
-      name: "Support · Sky Watch",
-      priceCents: 1500,
-      costCents: 1125,
-      emoji: "🦅",
-      blurb: "Sponsors an hour of peace-of-mind for the flock.",
+      costCents: 0,
+      emoji: "💛",
+      blurb: "One-tap tip for coop care, cam upkeep, and snacks. Not an instant dispenser.",
       dispense: null,
     },
   ];

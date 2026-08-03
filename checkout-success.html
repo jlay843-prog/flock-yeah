@@ -99,6 +99,27 @@
         sessionStorage.setItem("fy_pending_announce_v1", JSON.stringify(pending));
       } catch (e) {}
 
+      // Sponsor board: public claim after checkout (shared across visitors via SolForge)
+      if (kind === "sponsor" || (last && last.kind === "sponsor") || item === "sponsor-day") {
+        var sName = nameParam || (last && last.name) || "";
+        sName = String(sName).replace(/^Sponsor:\s*/i, "").trim();
+        if (sName) {
+          var base =
+            (FlockData.FARM && FlockData.FARM.solforge) ||
+            "https://solforge.lonetreeacres.com";
+          fetch(String(base).replace(/\/$/, "") + "/api/flock/sponsor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: sName,
+              note: "",
+              source: "checkout-success",
+              publicClaim: true,
+            }),
+          }).catch(function () {});
+        }
+      }
+
       var back = document.getElementById("back-cams");
       if (back) {
         var u = new URL("hens.html", location.href);

@@ -530,7 +530,49 @@
           : "");
     } else {
       box.innerHTML =
-        '<p class="sponsor-live">Sponsor open</p><strong>Your name here</strong><span>24 hours on Nest Cam A’s board — use the form below.</span>';
+        '<p class="sponsor-live">Sponsor open</p><strong>Your name here</strong>' +
+        "<span>24h board · form below or PayPal note <code>sponsor:YourName</code></span>";
+    }
+  }
+
+  async function loadSponsorFromServer() {
+    try {
+      const base = (FARM && FARM.solforge) || "https://solforge.lonetreeacres.com";
+      const res = await fetch(String(base).replace(/\/$/, "") + "/api/flock/sponsor", {
+        cache: "no-store",
+      });
+      if (!res.ok) return;
+      const j = await res.json();
+      if (j && j.ok && j.sponsor && j.sponsor.name) {
+        state.sponsor = {
+          name: j.sponsor.name,
+          note: j.sponsor.note || "",
+          until: j.sponsor.until,
+          at: Date.now(),
+        };
+        saveSponsor();
+        renderSponsor();
+      }
+    } catch (_) {
+      /* local fallback */
+    }
+  }
+
+  async function pushSponsorToServer(name, note) {
+    try {
+      const base = (FARM && FARM.solforge) || "https://solforge.lonetreeacres.com";
+      await fetch(String(base).replace(/\/$/, "") + "/api/flock/sponsor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name,
+          note: note || "",
+          source: "public-form",
+          publicClaim: true,
+        }),
+      });
+    } catch (_) {
+      /* ignore */
     }
   }
 
@@ -844,6 +886,7 @@
         };
         saveSponsor();
         renderSponsor();
+        pushSponsorToServer(name.trim(), note.trim());
         state.deskNotes.unshift({
           t: "Sponsor",
           m: name.trim() + " is on the board for 24h.",
@@ -851,7 +894,11 @@
         saveDesk();
         renderDesk();
         pushSystemChat(
-          "Sponsor board hold: " + name.trim() + ". Opening PayPal/Venmo checkout…"
+          "Sponsor board: " +
+            name.trim() +
+            ". Opening PayPal/Venmo — put sponsor:" +
+            name.trim() +
+            " in the note if paying separately."
         );
         const pay = global.PayConfig || global.StripeConfig;
         if (pay && typeof pay.beginCheckout === "function") {
@@ -951,6 +998,7 @@
     renderStage();
     renderEggs();
     renderSponsor();
+    loadSponsorFromServer();
     renderDesk();
     renderGifts();
     renderChatTabs();
