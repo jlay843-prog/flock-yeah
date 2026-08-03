@@ -216,7 +216,12 @@
     });
 
     const buyBtn = el("lb-buy");
+    buyBtn.dataset.itemId = itemId;
+    const ok = isOrderable(itemId);
+    buyBtn.disabled = !ok;
+    buyBtn.textContent = ok ? "Get it" : "Out of stock";
     buyBtn.onclick = () => {
+      if (!isOrderable(itemId)) return;
       closeLightbox();
       buy(itemId);
     };
@@ -332,11 +337,119 @@
     }).join("");
   }
 
+  /** @type {Record<string, { inStock?: boolean, madeToOrder?: boolean, label?: string, available?: number }>} */
+  let stockMap = {};
+
+  function stockUrl() {
+    const base =
+      (global.FlockData && global.FlockData.FARM && global.FlockData.FARM.solforge) ||
+      "https://solforge.lonetreeacres.com";
+    return String(base).replace(/\/$/, "") + "/api/shop/stock";
+  }
+
+  function isOrderable(itemId) {
+    const row = stockMap[itemId];
+    if (!row) {
+      // Unknown / stock API down — allow made-to-order kinds only offline-safe
+      const item = (data().SHOP_ITEMS || []).find((i) => i.id === itemId);
+      if (
+        item &&
+        (item.kind === "solforge" ||
+          item.kind === "print3d" ||
+          item.fabricate === "plasma" ||
+          item.fabricate === "print")
+      ) {
+        return true;
+      }
+      // Physical merch: fail closed when we have loaded stock and SKU missing → treat as OOS
+      if (stockMap && Object.keys(stockMap).length && item) return false;
+      return true;
+    }
+    return Boolean(row.inStock || row.madeToOrder);
+  }
+
+  function stockLabel(itemId) {
+    const row = stockMap[itemId];
+    if (!row) return "";
+    return row.label || (row.inStock ? "In stock" : "Out of stock");
+  }
+
+  function applyStockToDom() {
+    const cards = document.querySelectorAll(".shop-card[data-sku]");
+    cards.forEach((card) => {
+      const sku = card.getAttribute("data-sku");
+      const orderable = isOrderable(sku);
+      const label = stockLabel(sku) || (orderable ? "" : "Out of stock");
+      card.classList.toggle("is-oos", !orderable);
+      card.setAttribute("data-stock", orderable ? "in" : "out");
+      let badge = card.querySelector(".shop-stock-badge");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "shop-stock-badge";
+        card.appendChild(badge);
+      }
+      badge.textContent = label;
+      badge.hidden = !label;
+      const buyBtn = card.querySelector("[data-buy]");
+      if (buyBtn) {
+        buyBtn.disabled = !orderable;
+        buyBtn.setAttribute("aria-disabled", orderable ? "false" : "true");
+        buyBtn.textContent = orderable ? "Get it" : "Out of stock";
+        buyBtn.classList.toggle("btn-primary", orderable);
+        buyBtn.classList.toggle("btn-disabled", !orderable);
+      }
+      const title = card.querySelector("h3");
+      if (title) title.classList.toggle("is-struck", !orderable);
+    });
+    // Lightbox buy
+    const lbBuy = el("lb-buy");
+    if (lbBuy && lbBuy.dataset.itemId) {
+      const ok = isOrderable(lbBuy.dataset.itemId);
+      lbBuy.disabled = !ok;
+      lbBuy.textContent = ok ? "Get it" : "Out of stock";
+    }
+  }
+
+  async function loadStock() {
+    try {
+      const res = await fetch(stockUrl(), { cache: "no-store" });
+      if (!res.ok) return;
+      const json = await res.json();
+      if (!json || !json.ok || !json.items) return;
+      stockMap = json.items;
+      if (global.PayConfig) global.PayConfig.stockMap = stockMap;
+      global.FlockShop = global.FlockShop || {};
+      global.FlockShop._stockMap = stockMap;
+      applyStockToDom();
+      const status = el("shop-status");
+      if (status) {
+        const oos = Object.values(stockMap).filter(
+          (r) => r && !r.inStock && !r.madeToOrder
+        ).length;
+        status.textContent =
+          oos > 0
+            ? "Greyed items are out of stock — restock package is with farm ops. Made-to-order metal/3D still open."
+            : "Click a product to preview designs.";
+      }
+    } catch (_) {
+      /* offline: leave cards orderable */
+    }
+  }
+
   function buy(itemId) {
     const { SHOP_ITEMS } = data();
     const item = (SHOP_ITEMS || []).find((i) => i.id === itemId);
     if (!item) return;
     const status = el("shop-status");
+
+    if (!isOrderable(itemId)) {
+      if (status) {
+        status.textContent =
+          item.name + " is out of stock. We cannot take orders until restocked.";
+      }
+      return;
+    }
+
     const cfg = global.StripeConfig;
     const link = cfg && cfg.paymentLinks ? cfg.paymentLinks[itemId] : "";
 
@@ -408,12 +521,17 @@
     const { FARM } = data();
     if (tag && FARM) tag.textContent = FARM.tagline + " " + FARM.attribution;
     const status = el("shop-status");
-    if (status) {
-      status.textContent = "Click a product to preview designs.";
-    }
+    if (status) status.textContent = "Loading stock…";
+    loadStock();
   }
 
-  global.FlockShop = { init, buy, openLightbox };
+  global.FlockShop = {
+    init: init,
+    buy: buy,
+    openLightbox: openLightbox,
+    loadStock: loadStock,
+    isOrderable: isOrderable,
+  };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

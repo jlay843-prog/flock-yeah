@@ -226,6 +226,29 @@
    */
   PayConfig.beginCheckout = function (id, meta) {
     const m = meta || {};
+    // Out-of-stock guard (shop + gifts) — stockMap filled by shop.js / hen-cam
+    const stock = PayConfig.stockMap || (global.FlockShop && global.FlockShop._stockMap);
+    if (stock && stock[id]) {
+      const row = stock[id];
+      if (!row.inStock && !row.madeToOrder) {
+        const status =
+          document.getElementById("shop-status") ||
+          document.getElementById("chat-status");
+        if (status) {
+          status.textContent =
+            (m.name || id) + " is out of stock — orders are closed for this item.";
+        } else {
+          global.alert((m.name || id) + " is out of stock.");
+        }
+        return { mode: "blocked", reason: "out_of_stock" };
+      }
+    }
+    if (global.FlockShop && typeof global.FlockShop.isOrderable === "function") {
+      if (!global.FlockShop.isOrderable(id)) {
+        return { mode: "blocked", reason: "out_of_stock" };
+      }
+    }
+
     const method = (m.method || "chooser").toLowerCase();
     const priceCents = resolvePriceCents(id, m);
     const note = PayConfig.buildNote(id, m);

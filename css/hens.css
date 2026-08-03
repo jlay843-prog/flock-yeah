@@ -1135,9 +1135,68 @@ textarea:focus {
   box-shadow: var(--shadow);
 }
 
+.shop-card {
+  /* badge anchors to card */
+}
+
 .shop-card.is-spotlight {
   border-color: rgba(4, 120, 87, 0.55);
   box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.18), var(--shadow);
+}
+
+/* Out of stock — grey + strike title, block buy */
+.shop-card.is-oos {
+  opacity: 0.72;
+  filter: grayscale(0.55);
+  background: #f3f1ec;
+}
+
+.shop-card.is-oos .shop-art {
+  cursor: default;
+}
+
+.shop-card.is-oos h3.is-struck,
+.shop-card.is-oos h3 {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  color: #78716c;
+}
+
+.shop-card.is-oos .shop-row strong {
+  text-decoration: line-through;
+  color: #a8a29e;
+}
+
+.shop-stock-badge {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 2;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(4, 120, 87, 0.12);
+  color: var(--emerald-deep, #065f46);
+  border: 1px solid rgba(4, 120, 87, 0.25);
+}
+
+.shop-card.is-oos .shop-stock-badge {
+  background: rgba(120, 113, 108, 0.18);
+  color: #57534e;
+  border-color: rgba(120, 113, 108, 0.35);
+}
+
+.shop-card .btn-disabled,
+.shop-card button[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+  background: #d6d3d1 !important;
+  color: #57534e !important;
+  border-color: #a8a29e !important;
 }
 
 .shop-art {
