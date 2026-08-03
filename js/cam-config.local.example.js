@@ -1,47 +1,29 @@
 /**
- * Copy to cam-config.local.js and fill credentials.
- * cam-config.local.js is gitignored — never commit passwords.
+ * Copy to cam-config.local.js for farm-LAN day tests only.
+ * Loaded only when hostname is localhost / private LAN (see hens.html).
  *
- * After enabling RTSP + HTTP in the Reolink app:
- *  1. Prefer snapshotUrl for a quick win (no proxy).
- *  2. Or run go2rtc (see CAM-SETUP.md) and set hlsUrl.
+ * Prefer same-origin proxies from `npm run dev`:
+ *   mp4Url: "/cam/live.mp4"
+ *   snapshotUrl: "/cam/snap"
+ * Never put camera passwords in files that ship to the public CDN.
  */
 (function (global) {
   "use strict";
 
-  const USER = "admin";
-  const PASS = "REPLACE_ME";
-  const HOST = "192.168.68.118";
-
   const local = {
-    discovery: {
-      host: HOST,
-      vendor: "Reolink",
-      mac: "EC-71-DB-19-18-56",
-      openPorts: [9000],
-      notes: "Local override active.",
-    },
+    discovery: { host: "", vendor: "", openPorts: [], notes: "" },
     streams: {
       henrietta: {
-        mode: "snapshot", // snapshot | hls | mjpeg | none
-        label: "Test Reolink (local)",
-        snapshotUrl:
-          "http://" +
-          HOST +
-          "/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=flockyeah&user=" +
-          encodeURIComponent(USER) +
-          "&password=" +
-          encodeURIComponent(PASS),
-        // After go2rtc: mode:"hls", hlsUrl:"http://127.0.0.1:1984/api/stream.m3u8?src=reolink-test"
-        rtspHint:
-          "rtsp://" + USER + ":" + PASS + "@" + HOST + ":554/h264Preview_01_sub",
-        refreshMs: 1500,
+        mode: "mp4", // or "snapshot"
+        label: "Nest Cam A",
+        mp4Url: "/cam/live.mp4",
+        snapshotUrl: "/cam/snap",
+        refreshMs: 2000,
       },
     },
-    proxyBase: "http://127.0.0.1:1984",
+    proxyBase: "",
   };
 
-  // Merge over defaults
   const base = global.CamConfig || {};
   global.CamConfig = Object.assign({}, base, local, {
     discovery: Object.assign({}, base.discovery || {}, local.discovery),

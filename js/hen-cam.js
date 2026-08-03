@@ -672,12 +672,25 @@
     if (!global.FlockEngage) return;
     const rows = global.FlockEngage.loadChat();
     if (!rows.length) return;
+    const junk =
+      global.FlockEngage.isJunkChatLine ||
+      function () {
+        return false;
+      };
     rows.slice(-24).forEach((r) => {
+      if (!r || junk(r.text)) return;
       pushChat(r.role, r.text, r.speakerId, { skipPersist: true });
     });
   }
 
   function pushSystemChat(text) {
+    if (
+      global.FlockEngage &&
+      typeof global.FlockEngage.isJunkChatLine === "function" &&
+      global.FlockEngage.isJunkChatLine(text)
+    ) {
+      return;
+    }
     pushChat("Clucky", text, "clucky");
   }
 
@@ -880,6 +893,11 @@
     if (banner) {
       banner.hidden = true;
       banner.textContent = "";
+    }
+    // Public CDN has no cam proxy — quiet offline (no LAN/dev chatter)
+    const stream = camStream(state.activeCam);
+    if (!stream || !stream.mode || stream.mode === "none") {
+      setStreamStatus("Nest Cam A · offline");
     }
   }
 

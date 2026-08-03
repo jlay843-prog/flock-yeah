@@ -53,16 +53,44 @@
     return JOKE_SHOP[JOKE_SHOP.length - 1];
   }
 
+  /** Drop old LAN/dev chatter that leaked into visitor chat history. */
+  function isJunkChatLine(text) {
+    const t = String(text || "");
+    return (
+      /192\.168\./.test(t) ||
+      /Test Reolink/i.test(t) ||
+      /cam-config\.local/i.test(t) ||
+      /npm run dev/i.test(t) ||
+      /open ports/i.test(t) ||
+      /client port 9000/i.test(t) ||
+      /RTSP\/HTTP/i.test(t) ||
+      /go2rtc/i.test(t) ||
+      /solforge-secrets/i.test(t) ||
+      /Pi Zero/i.test(t) ||
+      /LAN test/i.test(t)
+    );
+  }
+
   function loadChat() {
     try {
-      return JSON.parse(localStorage.getItem(KEYS.chat) || "[]");
+      const rows = JSON.parse(localStorage.getItem(KEYS.chat) || "[]");
+      const clean = (rows || []).filter(function (r) {
+        return r && !isJunkChatLine(r.text);
+      });
+      if (clean.length !== (rows || []).length) {
+        localStorage.setItem(KEYS.chat, JSON.stringify(clean.slice(-40)));
+      }
+      return clean;
     } catch (_) {
       return [];
     }
   }
 
   function saveChat(rows) {
-    localStorage.setItem(KEYS.chat, JSON.stringify((rows || []).slice(-40)));
+    const clean = (rows || []).filter(function (r) {
+      return r && !isJunkChatLine(r.text);
+    });
+    localStorage.setItem(KEYS.chat, JSON.stringify(clean.slice(-40)));
   }
 
   function loadPin() {
@@ -336,6 +364,7 @@
       offerGiftBridge: offerGiftBridge,
       loadChat: loadChat,
       saveChat: saveChat,
+      isJunkChatLine: isJunkChatLine,
       henOfWeek: henOfWeek,
       shopForLine: shopForLine,
       KEYS: KEYS,
@@ -350,6 +379,7 @@
     shopForLine: shopForLine,
     loadChat: loadChat,
     saveChat: saveChat,
+    isJunkChatLine: isJunkChatLine,
     KEYS: KEYS,
   };
 })(typeof window !== "undefined" ? window : globalThis);

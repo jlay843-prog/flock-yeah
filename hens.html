@@ -159,25 +159,50 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="js/flock-data.js"></script>
   <script src="js/cam-config.js"></script>
-  <script src="js/cam-config.local.js"></script>
   <script src="js/stripe-config.js"></script>
-  <script src="js/stripe-config.local.js"></script>
   <script src="js/pay-config.js"></script>
-  <script src="js/pay-config.local.js"></script>
   <script src="js/engage-config.js"></script>
   <script src="js/treat-hook.js"></script>
   <script src="js/solforge-bridge.js"></script>
   <script src="js/hen-voice.js"></script>
   <script src="js/clucky-watch.js"></script>
   <script src="js/engage.js"></script>
-  <script src="js/hen-cam.js"></script>
+  <script>
+    // Load cam-config.local.js only on localhost / farm LAN (never on public CDN).
+    // Then boot hen-cam after optional local override.
+    (function () {
+      var h = location.hostname;
+      var isLocal =
+        h === "localhost" ||
+        h === "127.0.0.1" ||
+        h === "[::1]" ||
+        /^192\.168\./.test(h) ||
+        /^10\./.test(h);
+      function bootHenCam() {
+        var s = document.createElement("script");
+        s.src = "js/hen-cam.js";
+        document.body.appendChild(s);
+      }
+      if (!isLocal) {
+        bootHenCam();
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = "js/cam-config.local.js";
+      s.onload = bootHenCam;
+      s.onerror = bootHenCam;
+      document.head.appendChild(s);
+    })();
+  </script>
   <script>
     (function () {
       var hash = (location.hash || "").replace(/^#/, "");
       if (!hash || !window.FlockData || !window.FlockData.getHen(hash)) return;
       document.addEventListener("DOMContentLoaded", function () {
-        var tile = document.querySelector('[data-hen="' + hash + '"]');
-        if (tile) tile.click();
+        setTimeout(function () {
+          var tile = document.querySelector('[data-hen="' + hash + '"]');
+          if (tile) tile.click();
+        }, 200);
       });
     })();
   </script>
