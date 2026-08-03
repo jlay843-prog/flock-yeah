@@ -58,6 +58,10 @@
       clearInterval(state.snapshotTimer);
       state.snapshotTimer = null;
     }
+    if (state._leadTimer) {
+      clearInterval(state._leadTimer);
+      state._leadTimer = null;
+    }
     if (state.hls) {
       try {
         state.hls.destroy();
@@ -179,7 +183,7 @@
       setStreamStatus("Live · " + label);
     };
 
-    // Continuous MP4 / video — prefer smooth recovery over ultra-low-latency
+    // Continuous MP4 — buffer-ahead (~4–5s behind live edge) absorbs camera keyframe hitches
     if (
       (stream.mode === "mp4" || stream.mode === "hls" || stream.mode === "video") &&
       stream.mp4Url &&
@@ -194,85 +198,143 @@
       try {
         vid.setAttribute("playsinline", "");
         vid.setAttribute("webkit-playsinline", "");
-        // Let browser buffer a bit — reduces hitch vs zero-buffer live
         vid.preload = "auto";
       } catch (_) {}
 
+      // Play ~4.5s behind the buffered tip so brief stalls don't freeze the picture
+      const TARGET_LEAD = 4.5;
+      const MAX_LEAD = 9;
+      const MIN_START = 3.5;
       let stallTimer = null;
       let recoveries = 0;
+      let leadTimer = null;
+      let started = false;
+
       const clearStall = () => {
         if (stallTimer) {
           clearTimeout(stallTimer);
           stallTimer = null;
         }
       };
+      const bufferedEnd = () => {
+        try {
+          if (vid.buffered && vid.buffered.length) {
+            return vid.buffered.end(vid.buffered.length - 1);
+          }
+        } catch (_) {}
+        return 0;
+      };
+      const leadSecs = () => {
+        const end = bufferedEnd();
+        if (!end) return 0;
+        return end - (vid.currentTime || 0);
+      };
+      const maintainLead = () => {
+        const end = bufferedEnd();
+        if (end < MIN_START) return;
+        const L = leadSecs();
+        try {
+          if (L < 2.2) {
+            // Too close to live edge — step back into buffer (absorbs next hitch)
+            const t = Math.max(0, end - TARGET_LEAD);
+            if (t + 0.25 < end) vid.currentTime = t;
+          } else if (L > MAX_LEAD) {
+            // Too far behind — catch up to target lag
+            vid.currentTime = Math.max(0, end - TARGET_LEAD);
+          }
+        } catch (_) {}
+      };
       const softRecover = () => {
-        if (recoveries >= 4) {
+        if (recoveries >= 5) {
           setStreamStatus("Live · recovering… stills");
+          if (leadTimer) clearInterval(leadTimer);
           fallBackToStills("");
           return;
         }
         recoveries += 1;
         setStreamStatus("Live · smoothing…");
-        try {
-          // Nudge playback head slightly behind live edge if buffered
-          if (vid.buffered && vid.buffered.length) {
-            const end = vid.buffered.end(vid.buffered.length - 1);
-            if (end - vid.currentTime > 2.5) {
-              vid.currentTime = Math.max(0, end - 1.2);
-            }
-          }
-          vid.play().catch(function () {});
-        } catch (_) {}
+        maintainLead();
+        vid.play().catch(function () {});
       };
 
       vid.onwaiting = () => {
         clearStall();
-        stallTimer = setTimeout(softRecover, 1800);
+        // Prefer buffer-ahead fix before hard recover
+        maintainLead();
+        stallTimer = setTimeout(softRecover, 900);
       };
       vid.onstalled = () => {
         clearStall();
-        stallTimer = setTimeout(softRecover, 1200);
+        maintainLead();
+        stallTimer = setTimeout(softRecover, 700);
       };
       vid.onplaying = () => {
         clearStall();
         recoveries = Math.max(0, recoveries - 1);
         setStreamStatus("Live · " + label);
       };
+      vid.onprogress = () => {
+        if (!started && bufferedEnd() >= MIN_START) {
+          started = true;
+          try {
+            vid.currentTime = Math.max(0, bufferedEnd() - TARGET_LEAD);
+          } catch (_) {}
+          vid.play()
+            .then(() => setStreamStatus("Live · " + label))
+            .catch(() => setStreamStatus("Live · tap play · " + label));
+        }
+        maintainLead();
+      };
 
-      const tryPlay = () =>
-        vid.play().then(
+      const tryPlay = () => {
+        if (bufferedEnd() < MIN_START) {
+          setStreamStatus("Live · buffering…");
+          return;
+        }
+        started = true;
+        try {
+          vid.currentTime = Math.max(0, bufferedEnd() - TARGET_LEAD);
+        } catch (_) {}
+        return vid.play().then(
           () => setStreamStatus("Live · " + label),
           () => setStreamStatus("Live · tap play · " + label)
         );
+      };
 
-      // Cache-bust reconnect URL on hard error
       const mp4Src =
         stream.mp4Url +
         (stream.mp4Url.indexOf("?") >= 0 ? "&" : "?") +
-        "smooth=1";
+        "buf=5";
       vid.src = mp4Src;
-      vid.onloadeddata = tryPlay;
+      vid.onloadeddata = () => {
+        setStreamStatus("Live · buffering…");
+        // Give MSE a moment to accumulate before sitting on live edge
+        setTimeout(tryPlay, 1200);
+      };
+      if (leadTimer) clearInterval(leadTimer);
+      leadTimer = setInterval(maintainLead, 1000);
+      // Store for stopLive cleanup
+      state._leadTimer = leadTimer;
+
       vid.onerror = () => {
         clearStall();
+        if (leadTimer) clearInterval(leadTimer);
         if (stream.hlsUrl && global.Hls && global.Hls.isSupported()) {
           vid.removeAttribute("src");
           vid.load();
           state.hls = new global.Hls({
             enableWorker: true,
-            // Smoother: more buffer, not ultra-low-latency
             lowLatencyMode: false,
-            maxBufferLength: 20,
-            maxMaxBufferLength: 40,
-            backBufferLength: 12,
-            liveSyncDurationCount: 3,
-            liveMaxLatencyDurationCount: 8,
+            maxBufferLength: 24,
+            maxMaxBufferLength: 48,
+            backBufferLength: 15,
+            liveSyncDurationCount: 4,
+            liveMaxLatencyDurationCount: 12,
           });
           state.hls.loadSource(stream.hlsUrl);
           state.hls.attachMedia(vid);
           state.hls.on(global.Hls.Events.MANIFEST_PARSED, () => {
             tryPlay();
-            setStreamStatus("Live · " + label);
           });
           state.hls.on(global.Hls.Events.ERROR, (_evt, data) => {
             if (!data || !data.fatal) return;
@@ -290,7 +352,6 @@
           fallBackToStills("");
         }
       };
-      tryPlay();
       return;
     }
 
