@@ -1,7 +1,8 @@
 /**
- * Flock Yeah — public camera defaults (no secrets).
- * Nest Cam A streams via same-origin /cam/* proxies on SolForge (go2rtc on the farm).
- * Local LAN day-tests can still override with cam-config.local.js on localhost only.
+ * Flock Yeah — public AREA camera defaults (no secrets).
+ * Streams are coop zones (Nest / Run / Gate), not per-hen "rooms."
+ * Nest Cam A → same-origin /cam/* (go2rtc on the farm).
+ * Run B / Gate C reserved for 2nd–3rd cameras (mode: none until live).
  */
 (function (global) {
   "use strict";
@@ -12,16 +13,27 @@
       vendor: "",
       mac: "",
       openPorts: [],
-      notes: "",
+      notes: "Area cams only — 2–3 coop zones planned.",
     },
 
+    /** Keys match AREA_CAMS ids in flock-data.js */
     streams: {
-      henrietta: {
+      "nest-a": {
         mode: "mp4",
         label: "Nest Cam A",
         mp4Url: "/cam/live.mp4",
         snapshotUrl: "/cam/snap",
         refreshMs: 2000,
+      },
+      "run-b": {
+        mode: "none",
+        label: "Run Cam B",
+        comingSoon: true,
+      },
+      "gate-c": {
+        mode: "none",
+        label: "Gate Cam C",
+        comingSoon: true,
       },
     },
 

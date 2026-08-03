@@ -34,8 +34,19 @@
         const accent = h.accent || "#d97706";
         const plateSub = h.breed || h.role || "";
         const mark = h.mugshot || h.name.slice(0, 1);
-        const photo = h.photo
-          ? '<img src="' + h.photo + '" alt="" onerror="this.remove()">'
+        const real =
+          (global.FlockData.henPhotoSrc && global.FlockData.henPhotoSrc(h)) ||
+          h.photo;
+        const fallback =
+          (global.FlockData.henPhotoFallback &&
+            global.FlockData.henPhotoFallback(h)) ||
+          h.photo;
+        const photo = real
+          ? '<img src="' +
+            real +
+            '" alt="" onerror="this.onerror=null;this.src=\'' +
+            fallback +
+            "'\">"
           : '<span class="mug-mark">' + mark + "</span>";
         return (
           '<button type="button" class="mug' +

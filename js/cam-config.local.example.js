@@ -5,6 +5,7 @@
  * Prefer same-origin proxies from `npm run dev`:
  *   mp4Url: "/cam/live.mp4"
  *   snapshotUrl: "/cam/snap"
+ * Keys = area cam ids: nest-a | run-b | gate-c
  * Never put camera passwords in files that ship to the public CDN.
  */
 (function (global) {
@@ -13,8 +14,8 @@
   const local = {
     discovery: { host: "", vendor: "", openPorts: [], notes: "" },
     streams: {
-      henrietta: {
-        mode: "mp4", // or "snapshot"
+      "nest-a": {
+        mode: "mp4",
         label: "Nest Cam A",
         mp4Url: "/cam/live.mp4",
         snapshotUrl: "/cam/snap",

@@ -18,7 +18,9 @@
       accent: "#d97706",
       mugshot: "H",
       photo: "assets/hens/henrietta.svg",
-      camLabel: "Nest Cam A",
+      /** Real photo when uploaded: assets/hens/photos/{id}.jpg — PIN: owner uploads */
+      photoReal: "assets/hens/photos/henrietta.jpg",
+      oftenSeen: "Nest Cam A",
       zone: "nests",
       personality: "proper, bossy, secretly soft",
       voice: "matriarch",
@@ -42,7 +44,8 @@
       accent: "#fbbf24",
       mugshot: "S",
       photo: "assets/hens/scratch.svg",
-      camLabel: "Run Cam B",
+      photoReal: "assets/hens/photos/scratch.jpg",
+      oftenSeen: "Run Cam B",
       zone: "run",
       personality: "curious digger, chaotic good",
       voice: "curious",
@@ -66,7 +69,8 @@
       accent: "#d97706",
       mugshot: "CN",
       photo: "assets/hens/cluck.svg",
-      camLabel: "Gate Cam C",
+      photoReal: "assets/hens/photos/cluck.jpg",
+      oftenSeen: "Gate Cam C",
       zone: "gate",
       personality: "tough one-liners, soft heart",
       voice: "tough",
@@ -90,7 +94,8 @@
       accent: "#fde68a",
       mugshot: "D",
       photo: "assets/hens/daisy.svg",
-      camLabel: "Dust Bath D",
+      photoReal: "assets/hens/photos/daisy.jpg",
+      oftenSeen: "Run / dust",
       zone: "dust",
       personality: "sweet, optimistic flower child",
       voice: "sweet",
@@ -114,7 +119,8 @@
       accent: "#f97316",
       mugshot: "P",
       photo: "assets/hens/pepper.svg",
-      camLabel: "Roost Cam E",
+      photoReal: "assets/hens/photos/pepper.jpg",
+      oftenSeen: "Roost / Nest Cam A",
       zone: "roost",
       personality: "spicy, sarcastic, honest",
       voice: "spicy",
@@ -138,7 +144,8 @@
       accent: "#fcd34d",
       mugshot: "M",
       photo: "assets/hens/maple.svg",
-      camLabel: "Feeder Cam F",
+      photoReal: "assets/hens/photos/maple.jpg",
+      oftenSeen: "Feeder / Nest Cam A",
       zone: "feeder",
       personality: "calm, syrupy warm, steady",
       voice: "calm",
@@ -169,14 +176,47 @@
       "You are Clucky, witty self-moderating AI host of Flock Yeah at Lone Tree Acres. Fun, clear, farm-smart. Credit Mom when relevant: Keep flocks for the birds. Never discuss license plates or ALPR.",
   };
 
-  /** Simulated flock/zone commentary templates (v1 — no face ID) */
+  /**
+   * Area cams (coop zones) — not per-hen livestreams.
+   * Chat still spoofs each hen; live video is Nest/Run/Gate areas only.
+   */
+  const AREA_CAMS = [
+    {
+      id: "nest-a",
+      name: "Nest Cam A",
+      short: "Nests",
+      blurb: "Nest boxes & indoor coop — main live stage.",
+      color: "#047857",
+      accent: "#d97706",
+      status: "live",
+    },
+    {
+      id: "run-b",
+      name: "Run Cam B",
+      short: "Run",
+      blurb: "Outdoor run & dig sites — coming online soon.",
+      color: "#065f46",
+      accent: "#fbbf24",
+      status: "soon",
+    },
+    {
+      id: "gate-c",
+      name: "Gate Cam C",
+      short: "Gate",
+      blurb: "Perimeter / gate watch — coming online soon.",
+      color: "#1a1816",
+      accent: "#d97706",
+      status: "soon",
+    },
+  ];
+
+  /** Zone commentary for area cams (v1 — no chicken face ID) */
   const ZONE_EVENTS = [
     { zone: "nests", text: "Nest Cam A: soft rustle — someone is negotiating a lease." },
-    { zone: "run", text: "Run Cam B: Scratch opened an unauthorized dig site." },
-    { zone: "gate", text: "Gate Cam C: Cluck Norris completed a perimeter stare-down." },
-    { zone: "dust", text: "Dust Bath D: Daisy rated today's dirt five stars." },
-    { zone: "roost", text: "Roost Cam E: Pepper dropped a beat. Literally dust." },
-    { zone: "feeder", text: "Feeder Cam F: Maple is doing treat diplomacy." },
+    { zone: "run", text: "Run Cam B: unauthorized dig site reported (Scratch denies everything)." },
+    { zone: "gate", text: "Gate Cam C: perimeter stare-down complete. Bugs rescheduled." },
+    { zone: "nests", text: "Nest Cam A: egg diplomacy in progress." },
+    { zone: "run", text: "Run Cam B: dust-bath five-star review pending." },
     { zone: "sky", text: "Sky watch: no drama. Clucky approves." },
     { zone: "coop", text: "Coop ambient: waterer topped, vibes stable." },
   ];
@@ -215,47 +255,47 @@
   const GIFTS = [
     {
       id: "mealworms",
-      name: "Mealworm Drop",
+      name: "Support · Mealworm Fund",
       priceCents: 300,
       costCents: 225,
       emoji: "🐛",
-      blurb: "Instant snack chaos.",
-      dispense: "mealworms", // Pi Zero hook (TreatHook)
+      blurb: "Tips the snack jar — supports real treats when stocked (not instant dispense).",
+      dispense: "mealworms",
     },
     {
       id: "scratch-grain",
-      name: "Scratch Grain",
+      name: "Support · Scratch Fund",
       priceCents: 500,
       costCents: 375,
       emoji: "🌾",
-      blurb: "Scatter feast for the run.",
+      blurb: "Funds the run scatter budget. Thanks from the dig crew.",
       dispense: "scratch",
     },
     {
       id: "nest-box",
-      name: "Nest Box Fluff",
+      name: "Support · Nest Comfort",
       priceCents: 800,
       costCents: 600,
       emoji: "🪺",
-      blurb: "Soft landing for the next egg.",
+      blurb: "Helps keep boxes soft — coop care fund.",
       dispense: null,
     },
     {
       id: "dust-bath",
-      name: "Dust Bath Spa",
+      name: "Support · Spa Day Fund",
       priceCents: 1000,
       costCents: 750,
       emoji: "✨",
-      blurb: "Daisy's favorite upgrade.",
+      blurb: "Dust-bath maintenance fund. Daisy approves.",
       dispense: null,
     },
     {
       id: "hawk-watch",
-      name: "Hawk Watch Hour",
+      name: "Support · Sky Watch",
       priceCents: 1500,
       costCents: 1125,
       emoji: "🦅",
-      blurb: "Sponsor an hour of sky watch.",
+      blurb: "Sponsors an hour of peace-of-mind for the flock.",
       dispense: null,
     },
   ];
@@ -613,6 +653,20 @@
     return HENS.find((h) => h.id === id) || null;
   }
 
+  function getAreaCam(id) {
+    return AREA_CAMS.find((c) => c.id === id) || null;
+  }
+
+  /** Prefer real photo path; img onerror should fall back to SVG stub. */
+  function henPhotoSrc(hen) {
+    if (!hen) return CLUCKY.photo;
+    return hen.photoReal || hen.photo || CLUCKY.photo;
+  }
+
+  function henPhotoFallback(hen) {
+    return (hen && hen.photo) || CLUCKY.photo;
+  }
+
   function formatMoney(cents) {
     return "$" + (cents / 100).toFixed(2);
   }
@@ -633,6 +687,7 @@
 
   global.FlockData = {
     HENS,
+    AREA_CAMS,
     CLUCKY,
     ZONE_EVENTS,
     HORSES,
@@ -643,6 +698,9 @@
     FARM,
     STORAGE_KEYS,
     getHen,
+    getAreaCam,
+    henPhotoSrc,
+    henPhotoFallback,
     getDesign,
     formatMoney,
     priceFromCost,

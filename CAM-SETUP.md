@@ -80,10 +80,11 @@ Stills (`/cam/snap`) are choppy on purpose. For real video:
 powershell -File scripts\start-go2rtc.ps1
 ```
 
-3. `js/cam-config.local.js` should use `mode: "hls"` +  
-   `hlsUrl: "http://127.0.0.1:1984/api/stream.m3u8?src=nest-a"`  
-   and keep `snapshotUrl` for fallback (hen-cam.js falls back if HLS dies).
-4. Hard-refresh hens.html — status should say **LIVE video (HLS)**.
+3. Keep `npm run dev` running — it proxies smooth video at  
+   `http://127.0.0.1:8080/cam/live.mp4` → go2rtc.
+4. `js/cam-config.local.js` should use `mode: "mp4"` + `mp4Url: "/cam/live.mp4"`  
+   (HLS + snapshot kept as fallbacks).
+5. Hard-refresh hens.html — status should say **LIVE video** (not “Stills”).
 
 ## Security
 

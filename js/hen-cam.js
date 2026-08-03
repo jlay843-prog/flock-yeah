@@ -6,6 +6,7 @@
 
   const {
     HENS,
+    AREA_CAMS,
     CLUCKY,
     GIFTS,
     FARM,
@@ -13,10 +14,16 @@
     formatMoney,
     randomZoneEvent,
     getHen,
+    getAreaCam,
+    henPhotoSrc,
+    henPhotoFallback,
   } = global.FlockData;
 
   const state = {
-    activeCam: HENS[0].id,
+    /** Area cam id: nest-a | run-b | gate-c */
+    activeCam: (AREA_CAMS && AREA_CAMS[0] && AREA_CAMS[0].id) || "nest-a",
+    /** Optional hen for gift dedicate / plasma — not a live "room" */
+    giftHenId: null,
     chatTarget: "clucky",
     eggs: 0,
     sponsor: null,
@@ -26,10 +33,24 @@
     hls: null,
   };
 
-  function camStream(henId) {
+  function camStream(areaId) {
     const cfg = global.CamConfig || {};
     const streams = cfg.streams || {};
-    return streams[henId] || null;
+    return streams[areaId] || null;
+  }
+
+  function photoImgAttrs(hen) {
+    const real = henPhotoSrc ? henPhotoSrc(hen) : hen.photo;
+    const fallback = henPhotoFallback ? henPhotoFallback(hen) : hen.photo;
+    return (
+      'src="' +
+      real +
+      '" alt="' +
+      escapeHtml(hen.name) +
+      '" onerror="this.onerror=null;this.src=\'' +
+      fallback +
+      "'\""
+    );
   }
 
   function stopLive() {
@@ -64,9 +85,9 @@
     if (s) s.textContent = text || "";
   }
 
-  function mountLive(henId) {
+  function mountLive(areaId) {
     stopLive();
-    const stream = camStream(henId);
+    const stream = camStream(areaId);
     const statusEl = el("cam-stream-status");
     const stage = el("cam-stage");
     const vid = el("stage-live-video");
@@ -321,83 +342,145 @@
   function photoFor(speakerId) {
     if (speakerId === "clucky") return CLUCKY.photo;
     const hen = getHen(speakerId);
-    return hen ? hen.photo : CLUCKY.photo;
+    return hen ? henPhotoSrc(hen) : CLUCKY.photo;
   }
 
   function renderCams() {
     const grid = el("cam-grid");
     if (!grid) return;
-    grid.innerHTML = HENS.map((h) => {
-      const active = h.id === state.activeCam ? " is-active" : "";
-      return (
-        '<button type="button" class="cam-tile' +
-        active +
-        '" data-hen="' +
-        h.id +
-        '" style="--hen:' +
-        h.color +
-        ";--hen-accent:" +
-        h.accent +
-        '">' +
-        '<div class="cam-screen">' +
-        '<span class="cam-live">LIVE</span>' +
-        '<img src="' +
-        h.photo +
-        '" alt="' +
-        escapeHtml(h.name) +
-        '" onerror="this.style.display=\'none\'">' +
-        '<span class="cam-hen-mark" aria-hidden="true">' +
-        h.mugshot +
-        "</span>" +
-        '<div class="cam-scanlines"></div>' +
-        "</div>" +
-        '<div class="cam-meta">' +
-        "<strong>" +
-        h.name +
-        "</strong>" +
-        "<span>" +
-        h.camLabel +
-        " · " +
-        h.mood +
-        "</span>" +
-        "</div>" +
-        "</button>"
-      );
-    }).join("");
+    const areas = AREA_CAMS || [];
+    grid.innerHTML = areas
+      .map((c) => {
+        const stream = camStream(c.id);
+        const live =
+          stream && stream.mode && stream.mode !== "none" && !stream.comingSoon;
+        const active = c.id === state.activeCam ? " is-active" : "";
+        const badge = live ? "LIVE" : "SOON";
+        const badgeClass = live ? "cam-live" : "cam-soon";
+        return (
+          '<button type="button" class="cam-tile cam-tile-area' +
+          active +
+          (live ? "" : " is-soon") +
+          '" data-area="' +
+          c.id +
+          '" style="--hen:' +
+          c.color +
+          ";--hen-accent:" +
+          c.accent +
+          '">' +
+          '<div class="cam-screen">' +
+          '<span class="' +
+          badgeClass +
+          '">' +
+          badge +
+          "</span>" +
+          '<div class="cam-area-icon" aria-hidden="true">' +
+          escapeHtml(c.short || "Cam") +
+          "</div>" +
+          '<div class="cam-scanlines"></div>' +
+          "</div>" +
+          '<div class="cam-meta">' +
+          "<strong>" +
+          escapeHtml(c.name) +
+          "</strong>" +
+          "<span>" +
+          escapeHtml(c.blurb) +
+          "</span>" +
+          "</div>" +
+          "</button>"
+        );
+      })
+      .join("");
 
-    grid.querySelectorAll("[data-hen]").forEach((btn) => {
+    grid.querySelectorAll("[data-area]").forEach((btn) => {
       btn.addEventListener("click", () => {
-        state.activeCam = btn.getAttribute("data-hen");
-        state.chatTarget = state.activeCam;
+        state.activeCam = btn.getAttribute("data-area");
         renderCams();
         renderStage();
+        const cam = getAreaCam ? getAreaCam(state.activeCam) : null;
+        pushSystemChat(
+          "Watching " + (cam ? cam.name : "area cam") + " — flock area, not a private hen booth."
+        );
+      });
+    });
+
+    renderFlockStrip();
+  }
+
+  /** Hen portraits — chat / who they are, NOT individual live streams */
+  function renderFlockStrip() {
+    const strip = el("flock-strip");
+    if (!strip) return;
+    strip.innerHTML =
+      '<p class="flock-strip-label">Meet the flock <span class="muted">(chat with them — not private cams)</span></p>' +
+      '<div class="flock-strip-row">' +
+      HENS.map((h) => {
+        const on = state.giftHenId === h.id || state.chatTarget === h.id ? " is-active" : "";
+        return (
+          '<button type="button" class="flock-chip' +
+          on +
+          '" data-hen="' +
+          h.id +
+          '" style="--hen:' +
+          h.color +
+          '">' +
+          "<img " +
+          photoImgAttrs(h) +
+          " loading=\"lazy\" decoding=\"async\">" +
+          "<span>" +
+          escapeHtml(h.name) +
+          "</span>" +
+          "</button>"
+        );
+      }).join("") +
+      "</div>";
+
+    strip.querySelectorAll("[data-hen]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.getAttribute("data-hen");
+        state.giftHenId = id;
+        state.chatTarget = id;
+        renderFlockStrip();
         renderChatTabs();
-        const hen = getHen(state.activeCam);
-        pushSystemChat("Switched to " + (hen ? hen.name : "cam") + ".");
+        updateChatLabel();
+        const hen = getHen(id);
+        pushSystemChat(
+          "Now chatting with " +
+            (hen ? hen.name : "a hen") +
+            ". Cameras stay on the coop areas above."
+        );
       });
     });
   }
 
   function renderStage() {
-    const hen = getHen(state.activeCam) || HENS[0];
+    const cam =
+      (getAreaCam && getAreaCam(state.activeCam)) ||
+      (AREA_CAMS && AREA_CAMS[0]) ||
+      { id: "nest-a", name: "Nest Cam A", blurb: "Coop area", color: "#047857", accent: "#d97706" };
     const stage = el("cam-stage");
     if (!stage) return;
-    stage.style.setProperty("--hen", hen.color);
-    stage.style.setProperty("--hen-accent", hen.accent);
+    stage.style.setProperty("--hen", cam.color);
+    stage.style.setProperty("--hen-accent", cam.accent);
     const name = el("stage-hen-name");
     const label = el("stage-cam-label");
     const bio = el("stage-hen-bio");
     const mark = el("stage-mark");
     const photo = el("stage-photo");
-    if (name) name.textContent = hen.name;
-    if (label) label.textContent = hen.camLabel + " · " + hen.role + " · " + hen.mood;
-    if (bio) bio.textContent = hen.bio;
-    if (mark) mark.textContent = hen.mugshot;
-    if (photo) {
-      photo.src = hen.photo;
-      photo.alt = hen.name;
+    if (name) name.textContent = cam.name;
+    if (label) {
+      label.textContent =
+        (cam.short || "Area") + " · coop camera · birds not private rooms";
     }
-    mountLive(hen.id);
+    if (bio) bio.textContent = cam.blurb || "";
+    if (mark) mark.textContent = (cam.short || "FY").slice(0, 4);
+    if (photo) {
+      // Stage background: flock collage vibe via first hen stub until live fills
+      photo.src = (HENS[0] && HENS[0].photo) || CLUCKY.photo;
+      photo.alt = cam.name;
+      photo.hidden = false;
+    }
+    mountLive(cam.id);
   }
 
   function renderCommentary(text, opts) {
@@ -543,17 +626,18 @@
   function sendGift(giftId) {
     const gift = GIFTS.find((g) => g.id === giftId);
     if (!gift) return;
-    const hen = getHen(state.activeCam);
+    const hen =
+      getHen(state.giftHenId) ||
+      (state.chatTarget !== "clucky" ? getHen(state.chatTarget) : null);
     pushSystemChat(
-      "Opening checkout for " +
+      "Opening support checkout for " +
         gift.emoji +
         " " +
         gift.name +
-        " → " +
-        (hen ? hen.name : "the flock") +
+        (hen ? " (for " + hen.name + ")" : " (whole flock)") +
         " (" +
         formatMoney(gift.priceCents) +
-        ")…"
+        ")… Funds coop care — not a live dispenser."
     );
 
     const pay = global.PayConfig || global.StripeConfig;
@@ -568,7 +652,7 @@
       return;
     }
     const line = recordGiftLocal(gift, hen);
-    pushSystemChat(line + " — noted on the farm desk.");
+    pushSystemChat(line + " — thanks for supporting the flock.");
   }
 
   /** After checkout-success return — log gift on the board. */
@@ -725,26 +809,11 @@
       });
     }
 
+    // Public egg +/- removed — owner labor sink; display-only tally if present
     const eggPlus = el("egg-plus");
     const eggMinus = el("egg-minus");
-    if (eggPlus) {
-      eggPlus.addEventListener("click", () => {
-        state.eggs += 1;
-        saveEggs();
-        renderEggs();
-        state.deskNotes.unshift({ t: "Eggs", m: "Counter +1 → " + state.eggs });
-        saveDesk();
-        renderDesk();
-        renderCommentary("Nest zone: egg tally moved to " + state.eggs + ".");
-      });
-    }
-    if (eggMinus) {
-      eggMinus.addEventListener("click", () => {
-        state.eggs = Math.max(0, state.eggs - 1);
-        saveEggs();
-        renderEggs();
-      });
-    }
+    if (eggPlus) eggPlus.hidden = true;
+    if (eggMinus) eggMinus.hidden = true;
 
     const deskForm = el("desk-form");
     if (deskForm) {
@@ -789,7 +858,7 @@
           pay.beginCheckout("sponsor-day", {
             kind: "sponsor",
             name: "Sponsor: " + name.trim(),
-            henId: state.activeCam,
+            henId: state.giftHenId || "",
             priceCents: 2500,
             method: "chooser",
           });
@@ -800,16 +869,19 @@
     const solforgeBtn = el("btn-solforge");
     if (solforgeBtn && global.SolForgeBridge) {
       solforgeBtn.addEventListener("click", () => {
-        const hen = getHen(state.activeCam);
+        const hen =
+          getHen(state.giftHenId) ||
+          (state.chatTarget !== "clucky" ? getHen(state.chatTarget) : null) ||
+          HENS[0];
         global.SolForgeBridge.openOrder({
           process: "plasma",
           title: (hen ? hen.name : "Flock") + " silhouette — plasma",
-          sku: "cam-" + state.activeCam,
+          sku: "hen-" + (hen ? hen.id : "flock"),
           saying: hen ? hen.name : "Flock Yeah",
-          designUrl: "designs/plasma/" + state.activeCam + "-plasma.svg",
+          designUrl: "designs/plasma/" + (hen ? hen.id : "flock-yeah") + "-plasma.svg",
           materialHint: '1/8" mild steel',
           dimensions: "12in x 10in x 0.125in",
-          note: global.SolForgeBridge.plasmaOrderNote(state.activeCam),
+          note: global.SolForgeBridge.plasmaOrderNote(hen ? hen.id : "flock"),
         });
       });
     }
@@ -824,12 +896,13 @@
   }
 
   function startLiveNestWatch() {
-    const henStream = camStream("henrietta");
+    // Vision/chat tick only when Nest Cam A is live (LAN day-test path)
+    const nestStream = camStream("nest-a") || camStream("henrietta");
     const live =
-      henStream &&
-      henStream.mode &&
-      henStream.mode !== "none" &&
-      henStream.snapshotUrl &&
+      nestStream &&
+      nestStream.mode &&
+      nestStream.mode !== "none" &&
+      nestStream.snapshotUrl &&
       global.CluckyWatch;
 
     if (!live) {
@@ -865,7 +938,9 @@
         publishCluckyLine(line, { bridge: false });
       },
       onGiftCta: () => {
-        pushSystemChat("Treat tray's open — pick a gift for the hen on cam.");
+        pushSystemChat(
+          "Support tray's open — tip the flock fund (not a live snack machine)."
+        );
       },
     });
   }
@@ -885,6 +960,9 @@
     startLiveNestWatch();
     if (!el("chat-log") || !el("chat-log").children.length) {
       pushSystemChat(CLUCKY.greetings[0]);
+      pushSystemChat(
+        "Tip: cameras show coop areas (Nest / Run / Gate). Chat tabs still talk to each hen."
+      );
     }
     const brand = el("brand-tagline");
     if (brand) brand.textContent = FARM.tagline + " " + FARM.attribution;
@@ -894,10 +972,15 @@
       banner.hidden = true;
       banner.textContent = "";
     }
-    // Public CDN has no cam proxy — quiet offline (no LAN/dev chatter)
     const stream = camStream(state.activeCam);
     if (!stream || !stream.mode || stream.mode === "none") {
-      setStreamStatus("Nest Cam A · offline");
+      const cam = getAreaCam ? getAreaCam(state.activeCam) : null;
+      setStreamStatus((cam ? cam.name : "Cam") + " · offline or coming soon");
+    }
+
+    const eggNote = el("egg-note");
+    if (eggNote) {
+      eggNote.textContent = "Farm estimate (not live-weighed).";
     }
   }
 
