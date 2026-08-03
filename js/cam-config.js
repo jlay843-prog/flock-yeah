@@ -1,6 +1,7 @@
 /**
- * Flock Yeah — public camera defaults (no secrets, no LAN inventory).
- * Local overrides: js/cam-config.local.js (gitignored).
+ * Flock Yeah — public camera defaults (no secrets).
+ * Nest Cam A streams via same-origin /cam/* proxies on SolForge (go2rtc on the farm).
+ * Local LAN day-tests can still override with cam-config.local.js on localhost only.
  */
 (function (global) {
   "use strict";
@@ -16,8 +17,10 @@
 
     streams: {
       henrietta: {
-        mode: "none",
+        mode: "mp4",
         label: "Nest Cam A",
+        mp4Url: "/cam/live.mp4",
+        snapshotUrl: "/cam/snap",
         refreshMs: 2000,
       },
     },
