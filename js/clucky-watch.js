@@ -26,11 +26,7 @@
           onStatus("Clucky: " + data.skipped);
         }
       } catch (e) {
-        onStatus(
-          "Clucky watch offline — is npm run dev up? (" +
-            (e && e.message ? e.message : "fetch failed") +
-            ")"
-        );
+        onStatus("");
       }
     }
 
@@ -38,18 +34,12 @@
       if (started) return;
       started = true;
       try {
-        const st = await fetch("/api/clucky/status", { cache: "no-store" }).then((r) =>
+        await fetch("/api/clucky/status", { cache: "no-store" }).then((r) =>
           r.json()
         );
-        onStatus(
-          "Clucky Nest Cam A watch on · " +
-            (st.visionModel || "vision") +
-            " → " +
-            (st.voiceModel || "voice") +
-            " · activity-gated"
-        );
+        onStatus("Clucky is watching Nest Cam A");
       } catch (_) {
-        onStatus("Clucky watch: waiting for /api/clucky (use npm run dev)");
+        onStatus("");
       }
       await tick(true);
       if (!stopped) timer = setInterval(function () { tick(false); }, POLL_MS);

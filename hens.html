@@ -18,7 +18,6 @@
       <a href="whos-who.html">Who's Who</a>
       <a href="herd.html">Herd</a>
       <a href="shop.html">Shop</a>
-      <a href="ops.html">Ops</a>
       <a href="https://lonetreeacres.com" target="_blank" rel="noopener noreferrer">Lone Tree Acres</a>
     </nav>
   </header>
@@ -33,7 +32,7 @@
       <div class="live-pill">Nest Cam A · Clucky on air</div>
       <h1>The ladies are on air.</h1>
       <p class="hero-lead">
-        Clucky calls what Nest Cam A sees — funny, brief, PG. Send a treat, ask a hen, or sponsor the coop today.
+        Clucky calls the coop — funny, brief, PG. Send a treat, ask a hen, or sponsor the board.
       </p>
       <div class="hero-cta" role="group" aria-label="Primary actions">
         <a class="btn btn-primary" href="#gifts">Send a treat</a>
@@ -71,14 +70,14 @@
         </div>
 
         <div class="commentary" id="cam-commentary" aria-live="polite">
-          <strong>Cam commentary</strong> Loading flock/zone events…
+          <strong>Live commentary</strong> Waiting for the flock…
         </div>
         <div class="gift-bridge" id="gift-bridge" hidden></div>
-        <p class="muted" id="cam-lan-banner" style="margin-top:0.65rem"></p>
+        <p class="muted" id="cam-lan-banner" hidden style="margin-top:0.65rem"></p>
         <div class="cam-grid" id="cam-grid" aria-label="Hen camera grid"></div>
         <div class="btn-row" style="margin-top:1rem">
-          <button type="button" class="btn" id="btn-solforge">Cut this hen in steel (SolForge)</button>
-          <a class="btn" href="whos-who.html">Jail lineup</a>
+          <button type="button" class="btn" id="btn-solforge">Cut this hen in steel</button>
+          <a class="btn" href="whos-who.html">Who's who</a>
         </div>
       </div>
 
@@ -96,13 +95,12 @@
               <button type="button" class="btn btn-primary" id="egg-plus" aria-label="Increase eggs">+</button>
             </div>
           </div>
-          <p class="muted">Ops / Clucky can bump the tally when a nest pays rent.</p>
         </div>
 
         <div class="panel" id="chat">
           <h2>Chat</h2>
           <div class="chat-tabs" id="chat-tabs"></div>
-          <p class="muted" id="chat-target-label">Clucky · AI Coop Host</p>
+          <p class="muted" id="chat-target-label">Clucky</p>
           <div class="chat-chips" id="chat-chips" aria-label="Suggested questions"></div>
           <div class="chat-log" id="chat-log" aria-live="polite"></div>
           <form class="chat-form" id="chat-form">
@@ -113,10 +111,6 @@
 
         <div class="panel" id="gifts">
           <h2>Gifts</h2>
-          <p class="muted">
-            One-click treats for the active hen.
-            <span class="treat-pi-note">Mealworms &amp; scratch queue a Pi Zero dispense hook (coming soon).</span>
-          </p>
           <div class="gift-tray" id="gift-tray"></div>
           <ul class="gift-log" id="gift-log"></ul>
         </div>
@@ -125,16 +119,15 @@
           <h2>Sponsor</h2>
           <div class="sponsor-slot" id="sponsor-slot"></div>
           <form class="sponsor-form" id="sponsor-form">
-            <input id="sponsor-name" type="text" placeholder="Sponsor name" required>
+            <input id="sponsor-name" type="text" placeholder="Your name" required>
             <input id="sponsor-note" type="text" placeholder="Optional note">
             <button class="btn btn-primary" type="submit">Sponsor today · $25</button>
           </form>
-          <p class="muted">Your name on the board for 24 hours. Real Stripe link when configured; demo checkout works now.</p>
+          <p class="muted">Your name on the board for 24 hours.</p>
         </div>
 
         <div class="panel" id="notify">
-          <h2>Get the weird bits</h2>
-          <p class="muted">Nest Cam A alerts + best Clucky line of the day. No account.</p>
+          <h2>Stay in the loop</h2>
           <form class="notify-form" id="notify-form">
             <input id="notify-contact" type="text" placeholder="Email or mobile" required autocomplete="email">
             <button class="btn btn-primary" type="submit">Notify me</button>
@@ -144,10 +137,10 @@
         </div>
 
         <details class="panel farm-desk-panel">
-          <summary><h2>Farm desk <span class="muted">(Jeff / ops)</span></h2></summary>
+          <summary><h2>Farm desk</h2></summary>
           <ul class="farm-desk-list" id="farm-desk-list"></ul>
           <form class="desk-form" id="desk-form" style="margin-top:0.65rem">
-            <input id="desk-input" type="text" placeholder="Add a desk note…" required>
+            <input id="desk-input" type="text" placeholder="Add a note…" required>
             <button class="btn" type="submit">Post</button>
           </form>
         </details>

@@ -282,7 +282,7 @@
         '<div class="btn-row" id="fy-pay-actions"></div>' +
         '<p class="muted" style="margin-top:0.75rem;font-size:0.85rem">' +
         "Same rails as SolForge fab checkout (PayPal.me / Venmo). " +
-        "No card data on this site." +
+        "Secure checkout via PayPal or Venmo." +
         "</p>" +
         '<button type="button" class="btn" id="fy-pay-cancel" style="margin-top:0.5rem">Cancel</button>' +
         "</div>";
@@ -301,7 +301,7 @@
 
     document.getElementById("fy-pay-title").textContent = "Send " + name;
     document.getElementById("fy-pay-blurb").textContent =
-      "Amount: $" + dollars + " USD. Pick PayPal or Venmo (SolForge handles). Demo skips payment for LAN day-tests.";
+      "Amount: $" + dollars + " USD.";
 
     const actions = document.getElementById("fy-pay-actions");
     actions.innerHTML = "";
@@ -324,16 +324,12 @@
     if (PayConfig.isVenmoConfigured()) {
       addBtn("Venmo · $" + dollars, "btn-primary", "venmo");
     }
-    addBtn("Demo (no charge)", "", "demo");
-
     if (!PayConfig.isLiveConfigured()) {
+      addBtn("Continue", "btn-primary", "demo");
       document.getElementById("fy-pay-blurb").textContent =
-        "Loading SolForge payment rails… if offline, use Demo. Amount $" +
-        dollars +
-        ". (Handles auto-fill from SolForge — no manual paste.)";
+        "Amount: $" + dollars + " USD. Loading payment options…";
       PayConfig.loadFromSolforge().then(function () {
         if (!overlay.classList.contains("is-open")) return;
-        // Rebuild buttons if rails arrived
         if (PayConfig.isLiveConfigured()) {
           PayConfig.showChooser(id, m);
         }

@@ -288,13 +288,13 @@
     }
     const hen = pending.henId ? getHen(pending.henId) : null;
     const label = hen ? hen.name : "the flock";
-    const prefix = pending.demo ? "Demo checkout locked in: " : "Paid & queued: ";
+    const prefix = pending.demo ? "Thanks for the send: " : "Paid & queued: ";
     const line =
       prefix +
-      (pending.name || "support") +
+      (pending.name || "your support") +
       " → " +
       label +
-      ". Clucky approves. Keep flocks for the birds.";
+      ". Keep flocks for the birds.";
     if (typeof h.onAnnounce === "function") h.onAnnounce(line, pending);
     if (params.get("thanks")) {
       params.delete("thanks");

@@ -62,24 +62,15 @@
         (last && last.name) ||
         "Your support";
 
-      // ERP + Pi queue only after checkout success (not on gift click)
-      var erpNote = "";
+      // ERP queue only after checkout (not on gift click) — silent to visitor
       if (gift && gift.dispense && window.TreatHook) {
         try {
-          var treat = TreatHook.requestDispense({
+          TreatHook.requestDispense({
             giftId: gift.id,
             henId: hen || (last && last.henId) || "",
             demo: isDemo,
             source: "checkout-success",
           });
-          if (treat && treat.queued) {
-            erpNote =
-              " Treat Pi placeholder (" +
-              treat.action +
-              ") + SolForge ERP notify queued" +
-              (isDemo ? " [demo]" : "") +
-              ".";
-          }
         } catch (e) {}
       }
 
@@ -91,10 +82,9 @@
               ? " via Venmo"
               : "";
         el.textContent =
-          (isDemo ? "Demo checkout for " : "Paid / queued" + rail + ": ") +
+          (isDemo ? "Noted: " : "Thank you" + rail + ": ") +
           displayName +
-          ". Clucky will announce it when you return to cams." +
-          erpNote;
+          ". Clucky will announce it when you return to cams.";
       }
 
       var pending = {

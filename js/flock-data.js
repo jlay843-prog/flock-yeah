@@ -510,7 +510,7 @@
       designId: "flock-yeah-classic",
       materialHint: '1/8" mild steel',
       dimensions: "12in x 10in x 0.125in",
-      blurb: "Opens SolForge intake — plasma cut from designs/plasma SVGs.",
+      blurb: "Custom plasma cut through SolForge.",
     },
     {
       id: "saying-plasma",
@@ -523,7 +523,7 @@
       designId: "flock-safety-nah",
       materialHint: '1/8" mild steel',
       dimensions: "14in x 10in x 0.125in",
-      blurb: "Pick a saying in the lightbox, then SolForge cuts the steel.",
+      blurb: "Pick a saying — cut in steel at the farm shop.",
     },
     {
       id: "spy-print",
@@ -536,7 +536,7 @@
       designId: "spy-chicken",
       materialHint: "PLA / PETG (X2D)",
       dimensions: "3in x 3in x 0.5in",
-      blurb: "Queues a SolForge X2D 3D-print job (desk buddy / keychain scale).",
+      blurb: "Desk buddy / keychain-scale 3D print.",
     },
     {
       id: "cop-print",
@@ -549,7 +549,7 @@
       designId: "cop-chicken",
       materialHint: "PLA / PETG (X2D)",
       dimensions: "3in x 3in x 0.5in",
-      blurb: "3D-print badge bird via SolForge — plates optional.",
+      blurb: "3D-print badge bird — plates optional.",
     },
     {
       id: "clucky-print",
@@ -562,7 +562,7 @@
       designId: "clucky-saw-car",
       materialHint: "PLA (X2D)",
       dimensions: "4in x 3in x 3in",
-      blurb: "Host figurine — SolForge print queue from Flock Yeah art.",
+      blurb: "Host figurine from Flock Yeah art.",
     },
     {
       id: "sponsor-day",
@@ -572,7 +572,7 @@
       kind: "sponsor",
       designId: "neighborhood-watch",
       image: "assets/merch/sponsor-desk.png",
-      blurb: "Your name on the Farm desk ticker.",
+      blurb: "Your name on the board for a day.",
     },
   ];
 

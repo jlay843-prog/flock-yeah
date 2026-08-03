@@ -74,19 +74,7 @@
     const disc = (global.CamConfig && global.CamConfig.discovery) || {};
 
     if (!stream || !stream.mode || stream.mode === "none") {
-      if (disc.host) {
-        setStreamStatus(
-          "LAN cam " +
-            disc.host +
-            " detected (" +
-            (disc.vendor || "camera") +
-            ", :" +
-            ((disc.openPorts || []).join(",") || "?") +
-            ") — enable RTSP/HTTP, then set js/cam-config.local.js"
-        );
-      } else {
-        setStreamStatus("");
-      }
+      setStreamStatus("");
       return;
     }
 
@@ -98,12 +86,7 @@
         let fails = 0;
         const onOk = () => {
           fails = 0;
-          setStreamStatus(
-            "Stills · ~every " +
-              ((stream.refreshMs || 2000) / 1000) +
-              "s (not video) · " +
-              label
-          );
+          setStreamStatus("Live · " + label);
         };
         const onFail = () => {
           fails += 1;
@@ -112,13 +95,9 @@
               clearInterval(state.snapshotTimer);
               state.snapshotTimer = null;
             }
-            setStreamStatus(
-              "Snapshot failed (auth lock or proxy down). Close this tab, wait for the camera unlock, then restart npm run dev."
-            );
+            setStreamStatus("Cam offline — check back soon.");
           } else {
-            setStreamStatus(
-              "Snapshot retry " + fails + "/3 · " + label
-            );
+            setStreamStatus("Reconnecting…");
           }
         };
         img.onload = onOk;
@@ -133,7 +112,7 @@
         };
         tick();
         state.snapshotTimer = setInterval(tick, stream.refreshMs || 2000);
-        setStreamStatus("Connecting snapshot · " + label);
+        setStreamStatus("Connecting…");
       }
       return;
     }
@@ -142,13 +121,13 @@
       img.hidden = false;
       stage.classList.add("has-live");
       img.src = stream.mjpegUrl;
-      setStreamStatus("LIVE MJPEG · " + label);
+      setStreamStatus("Live · " + label);
       return;
     }
 
     const fallBackToStills = (why) => {
       if (!stream.snapshotUrl || !img) {
-        setStreamStatus((why || "Video failed") + " — no stills fallback");
+        setStreamStatus(why || "");
         return;
       }
       stopLive();
@@ -157,19 +136,14 @@
       let fails = 0;
       img.onload = () => {
         fails = 0;
-        setStreamStatus(
-          "Stills fallback · ~every " +
-            ((stream.refreshMs || 2000) / 1000) +
-            "s · " +
-            label
-        );
+        setStreamStatus("Live · " + label);
       };
       img.onerror = () => {
         fails += 1;
         if (fails >= 3 && state.snapshotTimer) {
           clearInterval(state.snapshotTimer);
           state.snapshotTimer = null;
-          setStreamStatus("Snapshot fallback failed");
+          setStreamStatus("Cam offline — check back soon.");
         }
       };
       const tick = () => {
@@ -181,10 +155,10 @@
       };
       tick();
       state.snapshotTimer = setInterval(tick, stream.refreshMs || 2000);
-      setStreamStatus((why || "Video down") + " — stills · " + label);
+      setStreamStatus("Live · " + label);
     };
 
-    // go2rtc continuous MP4 (smoother than HLS stills fallback)
+    // Continuous MP4 / video
     if (
       (stream.mode === "mp4" || stream.mode === "hls" || stream.mode === "video") &&
       stream.mp4Url &&
@@ -198,8 +172,8 @@
       vid.src = stream.mp4Url;
       const tryPlay = () =>
         vid.play().then(
-          () => setStreamStatus("LIVE video · " + label),
-          () => setStreamStatus("LIVE video (tap play) · " + label)
+          () => setStreamStatus("Live · " + label),
+          () => setStreamStatus("Live · tap play · " + label)
         );
       vid.onloadeddata = tryPlay;
       vid.onerror = () => {
@@ -216,7 +190,7 @@
           state.hls.attachMedia(vid);
           state.hls.on(global.Hls.Events.MANIFEST_PARSED, () => {
             tryPlay();
-            setStreamStatus("LIVE video (HLS) · " + label);
+            setStreamStatus("Live · " + label);
           });
           state.hls.on(global.Hls.Events.ERROR, (_evt, data) => {
             if (!data || !data.fatal) return;
@@ -228,10 +202,10 @@
               state.hls.recoverMediaError();
               return;
             }
-            fallBackToStills("HLS fatal");
+            fallBackToStills("");
           });
         } else {
-          fallBackToStills("MP4 failed");
+          fallBackToStills("");
         }
       };
       tryPlay();
@@ -251,7 +225,7 @@
         state.hls.attachMedia(vid);
         state.hls.on(global.Hls.Events.MANIFEST_PARSED, () => {
           vid.play().catch(() => {});
-          setStreamStatus("LIVE video (HLS) · " + label);
+          setStreamStatus("Live · " + label);
         });
         state.hls.on(global.Hls.Events.ERROR, (_evt, data) => {
           if (!data || !data.fatal) return;
@@ -263,31 +237,26 @@
             state.hls.recoverMediaError();
             return;
           }
-          fallBackToStills("HLS fatal");
+          fallBackToStills("");
         });
       } else if (vid.canPlayType("application/vnd.apple.mpegurl")) {
         vid.src = stream.hlsUrl;
-        vid.play().catch(() => fallBackToStills("HLS play blocked"));
-        setStreamStatus("LIVE video (HLS) · " + label);
+        vid.play().catch(() => fallBackToStills(""));
+        setStreamStatus("Live · " + label);
       } else if (stream.snapshotUrl) {
-        fallBackToStills("HLS unsupported");
+        fallBackToStills("");
       } else {
-        setStreamStatus("HLS not supported in this browser");
+        setStreamStatus("");
       }
       return;
     }
 
     if (stream.mode === "iframe" && stream.iframeUrl) {
-      setStreamStatus("iframe mode — open " + stream.iframeUrl);
+      setStreamStatus("Live · " + label);
       return;
     }
 
-    setStreamStatus(
-      "Stream mode “" +
-        stream.mode +
-        "” needs URLs in cam-config.local.js · hint: " +
-        (stream.rtspHint || "see CAM-SETUP.md")
-    );
+    setStreamStatus("");
   }
 
   function load() {
@@ -543,13 +512,10 @@
       source: "gift-checkout",
     });
     if (!result.queued) return null;
-    const tip =
-      result.mode === "live"
-        ? "Pi treat hook pinged (" + result.action + "). SolForge ERP consume notified."
-        : "Pi treat hook queued (" +
-          result.action +
-          ") + SolForge ERP consume notify — set treatDispenseUrl / solforge-secrets.json when ready.";
-    state.deskNotes.unshift({ t: "Treat Pi", m: tip });
+    state.deskNotes.unshift({
+      t: "Treat",
+      m: gift.emoji + " " + gift.name + " queued for the coop",
+    });
     saveDesk();
     renderDesk();
     return result;
@@ -568,14 +534,6 @@
     state.giftLog.unshift(line);
     saveGifts();
     state.deskNotes.unshift({ t: "Gift", m: line });
-    const auto =
-      gift.dispense && global.TreatHook
-        ? "Auto-dispense placeholder → Pi Zero (" + gift.dispense + ")."
-        : "Queue for Jeff: deliver " + gift.name + " to " + (hen ? hen.zone : "coop");
-    state.deskNotes.unshift({
-      t: "Farm desk",
-      m: auto,
-    });
     saveDesk();
     renderGifts();
     renderDesk();
@@ -586,18 +544,16 @@
     const gift = GIFTS.find((g) => g.id === giftId);
     if (!gift) return;
     const hen = getHen(state.activeCam);
-    // Do not inventory-consume or log paid gift until checkout-success
-    // (PayPal/Venmo/demo). Demo LAN tests still complete via pay chooser.
     pushSystemChat(
-      "Checkout for " +
+      "Opening checkout for " +
         gift.emoji +
         " " +
         gift.name +
         " → " +
-        (hen ? hen.name : "flock") +
+        (hen ? hen.name : "the flock") +
         " (" +
         formatMoney(gift.priceCents) +
-        "). PayPal / Venmo (SolForge rails) or Demo…"
+        ")…"
     );
 
     const pay = global.PayConfig || global.StripeConfig;
@@ -611,30 +567,18 @@
       });
       return;
     }
-    // Offline fallback: local demo record only
     const line = recordGiftLocal(gift, hen);
-    pushSystemChat(line + " — queued on the Farm desk for Jeff (no pay-config).");
+    pushSystemChat(line + " — noted on the farm desk.");
   }
 
-  /**
-   * Called when returning to cams after checkout-success.
-   * ERP/Pi are already triggered on checkout-success.html (once).
-   * Here we only log locally + chat so the board matches payment.
-   */
+  /** After checkout-success return — log gift on the board. */
   function completeGiftAfterCheckout(opts) {
     const o = opts || {};
     const gift = GIFTS.find((g) => g.id === o.giftId);
     if (!gift) return null;
     const hen = o.henId ? getHen(o.henId) : getHen(state.activeCam);
     const line = recordGiftLocal(gift, hen);
-    const demo = !!o.demo;
-    pushSystemChat(
-      line +
-        (demo ? " (demo)" : " (paid)") +
-        (gift.dispense
-          ? " — treat/ERP was queued at checkout success"
-          : "")
-    );
+    pushSystemChat(line + " — thanks from the flock.");
     return { line: line, treat: null };
   }
 
@@ -932,26 +876,10 @@
     const brand = el("brand-tagline");
     if (brand) brand.textContent = FARM.tagline + " " + FARM.attribution;
 
-    const disc = (global.CamConfig && global.CamConfig.discovery) || {};
     const banner = el("cam-lan-banner");
-    if (banner && disc.host) {
-      banner.innerHTML =
-        "<strong>LAN test cam:</strong> " +
-        escapeHtml(disc.host) +
-        " · " +
-        escapeHtml(disc.vendor || "camera") +
-        " · open ports " +
-        escapeHtml((disc.openPorts || []).join(", ") || "none") +
-        " · <a href=\"CAM-SETUP.md\">CAM-SETUP.md</a> · " +
-        escapeHtml(disc.notes || "");
-    }
-    const stream = camStream(state.activeCam);
-    if (!stream || stream.mode === "none") {
-      pushSystemChat(
-        "Test Reolink is on the LAN at " +
-          (disc.host || "?") +
-          " (client port 9000). Enable RTSP/HTTP in the Reolink app, copy js/cam-config.local.example.js → cam-config.local.js, then Nest Cam A goes live."
-      );
+    if (banner) {
+      banner.hidden = true;
+      banner.textContent = "";
     }
   }
 
