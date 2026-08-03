@@ -211,9 +211,59 @@
     });
   }
 
+  function loadAgentReport() {
+    var box = document.getElementById("agent-report");
+    if (!box) return;
+    fetch(solforgeBase() + "/api/ops/ritual-status", { cache: "no-store" })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || !j.report) {
+          box.innerHTML =
+            "<p class='muted'>No agent report yet. Fleet: <code>bash .../OPS-RITUAL-AGENT.sh</code></p>";
+          return;
+        }
+        var r = j.report;
+        var html =
+          "<p><strong>Agent score:</strong> " +
+          r.pass +
+          " pass · " +
+          r.warn +
+          " warn · " +
+          r.fail +
+          " fail <span class='muted'>(" +
+          (r.at || "") +
+          ")</span></p><ul class='ops-ritual-list'>";
+        (r.checks || []).forEach(function (c) {
+          html +=
+            "<li><strong>" +
+            (c.status || "").toUpperCase() +
+            "</strong> " +
+            c.id +
+            " — " +
+            c.detail +
+            "</li>";
+        });
+        html += "</ul>";
+        if (r.human_todo && r.human_todo.length) {
+          html += "<p><strong>You only need:</strong></p><ul>";
+          r.human_todo.forEach(function (t) {
+            html += "<li>" + t + "</li>";
+          });
+          html += "</ul>";
+        }
+        box.innerHTML = html;
+      })
+      .catch(function () {
+        box.innerHTML = "<p class='muted'>Agent report unavailable.</p>";
+      });
+  }
+
   function init() {
     bind();
     renderList();
+    loadAgentReport();
   }
 
   if (document.readyState === "loading") {
