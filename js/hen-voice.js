@@ -1,6 +1,7 @@
 /**
  * Flock Yeah — Clucky + per-hen chat
- * Prefers local Ollama via /api/clucky/chat (npm run dev); canned replies as fallback.
+ * Prefers /api/clucky/chat (SolForge production or npm run dev Ollama).
+ * Instant witty canned replies when the LLM is slow or offline — never generic echo.
  */
 (function (global) {
   "use strict";
@@ -9,9 +10,9 @@
 
   const FALLBACKS = {
     clucky: [
-      "Cameras rolling. Ask about eggs, gifts, or which hen is causing drama.",
-      "Farm desk tip: sponsors keep the mealworms flowing.",
+      "Live from Lone Tree Acres — eggs, drama, and zero ALPR.",
       "Mom's rule still stands: keep flocks for the birds.",
+      "I've got Nest Cam A, a short attention span, and strong opinions about dirt.",
     ],
     default: [
       "Cluck. (Translation: interesting question.)",
@@ -32,21 +33,39 @@
       .trim();
   }
 
+  function eggCount() {
+    return global.HenCam && typeof global.HenCam.getEggCount === "function"
+      ? global.HenCam.getEggCount()
+      : "?";
+  }
+
   function topicReply(hen, text) {
     const t = normalize(text);
     if (!t) return pick(hen.catchphrases || FALLBACKS.default);
 
+    if (/\b(clean|messy|mess|dirt|poop|manure|smell|stink|gross)\b/.test(t)) {
+      if (hen.id === "henrietta") {
+        return "The coop has standards. Farm desk — get the rake before I issue a formal complaint.";
+      }
+      if (hen.id === "scratch") {
+        return "Messy? That's my research archive. Do not touch the dig site.";
+      }
+      if (hen.id === "daisy") {
+        return "A little dust is a spa day. Actual mess? Jeff's department, not mine.";
+      }
+      return "If it's under the roost, that's a farm-desk job. We just generate the evidence.";
+    }
     if (/\b(egg|lay|nest)\b/.test(t)) {
       return hen.id === "henrietta"
         ? "Eggs are a schedule, not a suggestion. Check the counter."
-        : "Egg talk! Watch the nest cams — we don't spoil the count on purpose.";
+        : "Egg talk! Nest cams don't spoil the count — Pepper might.";
     }
-    if (/\b(food|treat|mealworm|grain|snack)\b/.test(t)) {
+    if (/\b(food|treat|mealworm|grain|snack|hungry)\b/.test(t)) {
       return hen.id === "pepper"
         ? "Gifts unlock snacks. Bribery works. I respect the system."
         : "Send a gift from the tray — we notice generosity.";
     }
-    if (/\b(hawk|fox|danger|safe)\b/.test(t)) {
+    if (/\b(hawk|fox|danger|safe|predator|coyote)\b/.test(t)) {
       return hen.id === "cluck"
         ? "Sky threats get the roundhouse stare. We're covered."
         : "Sky watch is serious. Clucky calls it if something circles.";
@@ -60,9 +79,19 @@
     if (/\b(name|who are you|about you)\b/.test(t)) {
       return "I'm " + hen.name + ". " + (hen.bio || "");
     }
+    if (/\b(cam|camera|video|stream|see|watching)\b/.test(t)) {
+      return "Nest Cam A is the main stage. I perform when the light's good.";
+    }
+    if (/\b(love|cute|pretty|beautiful|adorable)\b/.test(t)) {
+      return hen.id === "pepper"
+        ? "Flattery noted. Mealworms would make it official."
+        : pick(hen.catchphrases || FALLBACKS.default);
+    }
 
-    if (t.length < 40) {
-      return pick(hen.catchphrases) + " (re: “" + text.trim().slice(0, 48) + "”)";
+    // Wit bounce — catchphrase + light topic hook, never dumb echo of full sentence
+    const hook = t.split(/\s+/).filter((w) => w.length > 3).slice(0, 3).join(" ");
+    if (hook && hen.catchphrases && hen.catchphrases.length) {
+      return pick(hen.catchphrases) + " (topic: " + hook + ")";
     }
     return pick(hen.catchphrases || FALLBACKS.default);
   }
@@ -71,31 +100,86 @@
     const t = normalize(text);
     if (!t) return pick(CLUCKY.greetings);
 
-    if (/\b(who|hen|flock|lineup)\b/.test(t)) {
+    if (/\b(clean|messy|mess|dirt|poop|manure|smell|stink|gross|filthy|rake|shovel)\b/.test(t)) {
+      return pick([
+        "Honest take: the coop always needs a cleaning. I just host; Jeff owns the rake.",
+        "Filed under farm desk. The hens call it 'interior design.' Visitors call it 'yikes.'",
+        "Correct. Someone leave a note for Jeff — mealworms optional, shovel mandatory.",
+        "Nest Cam A confirms: rustic vibes, ambitious dust. Cleaning is a plot arc, not a one-liner.",
+      ]);
+    }
+    if (/\b(who|hen|flock|lineup|roster)\b/.test(t)) {
       return (
         "Tonight's lineup: " +
         HENS.map((h) => h.name).join(", ") +
-        ". Visit Who's Who for the jail lineup zoom."
+        ". Who's Who has the jail-lineup zoom."
       );
     }
-    if (/\b(egg|count)\b/.test(t)) {
-      const n =
-        global.HenCam && global.HenCam.getEggCount ? global.HenCam.getEggCount() : "?";
-      return "Egg counter reads " + n + ". Fresh math, questionable honesty from Pepper.";
+    if (/\b(egg|count|lay)\b/.test(t)) {
+      return (
+        "Egg counter reads " +
+        eggCount() +
+        ". Fresh math, questionable honesty from Pepper."
+      );
     }
-    if (/\b(shop|buy|gift|sponsor)\b/.test(t)) {
+    if (/\b(shop|buy|gift|sponsor|merch|tee|sticker)\b/.test(t)) {
       return "Shop and gifts keep the coop glamorous. SolForge cuts the metal hens if you want steel.";
     }
-    if (/\b(horse|herd)\b/.test(t)) {
+    if (/\b(horse|herd|lincoln|grace|tia|winchester)\b/.test(t)) {
       return "Horses live next door — open Herd for Lincoln, Grace, and the rest.";
     }
-    if (/\b(mom|tagline|flock yeah)\b/.test(t)) {
+    if (/\b(mom|tagline|flock yeah|birds not plates)\b/.test(t)) {
       return 'Brand check: Flock Yeah — “Keep flocks for the birds.” — Mom. I just host.';
     }
-    if (/\b(hello|hi|hey)\b/.test(t)) {
+    if (/\b(hello|hi|hey|howdy|sup)\b/.test(t)) {
       return pick(CLUCKY.greetings);
     }
-    return pick(FALLBACKS.clucky) + " You said: “" + text.trim().slice(0, 60) + "”";
+    if (/\b(cam|camera|video|stream|live|watching|see)\b/.test(t)) {
+      return pick([
+        "Nest Cam A is rolling — Fluent MP4, farm grit included. Ask what's happening and I'll color-comment.",
+        "Cameras are hot. Hens are hotter. I'm the third-wheeling narrator.",
+      ]);
+    }
+    if (/\b(treat|mealworm|food|feed|snack|hungry)\b/.test(t)) {
+      return "Treat tray is open. Send a gift and the flock develops sudden religious feelings.";
+    }
+    if (/\b(drama|fight|peck|bully|mean)\b/.test(t)) {
+      return "Drama suspects: Pepper (mouth), Scratch (dirt crimes), Henrietta (HR). Pick a hen and interrogate.";
+    }
+    if (/\b(weather|cold|hot|rain|snow|wind|storm)\b/.test(t)) {
+      return "If it's nasty out, they pile into the coop and rewrite the pecking order. Indoor politics.";
+    }
+    if (/\b(jeff|owner|farmer|desk)\b/.test(t)) {
+      return "Jeff runs the farm desk. I run the commentary. Split responsibilities, shared blame.";
+    }
+    if (/\b(alpr|plate|license|surveillance|spy)\b/.test(t)) {
+      return "Birds, not plates. Zero ALPR. Maximum dirt baths. Mom was very clear.";
+    }
+    if (/\b(joke|funny|pun|laugh)\b/.test(t)) {
+      return pick([
+        "Why did the chicken cross the livestream? Content.",
+        "I'd tell a longer joke, but Henrietta bills by the cluck.",
+      ]);
+    }
+    if (/\b(thank|thanks|thx)\b/.test(t)) {
+      return "You're welcome. Tip the flock with a treat if the bit landed.";
+    }
+    if (/\b(help|what can|commands|menu)\b/.test(t)) {
+      return "Ask about eggs, the lineup, Nest Cam A, gifts, or which hen is causing drama. Short questions, sharp answers.";
+    }
+
+    // Contextual bounce from keywords — never “You said: …”
+    const words = t.split(/\s+/).filter((w) => w.length > 3 && !/^(looks|like|the|this|that|with|from|have|what|when|where|about)$/.test(w));
+    const topic = words.slice(0, 4).join(" ");
+    if (topic) {
+      return pick([
+        "Noted on air: " + topic + ". Nest Cam A stays honest; I editorialize.",
+        "Interesting beat — " + topic + ". Want the hen roster take or the farm-desk version?",
+        "Copy that. " + topic + " is now part of tonight's coop plot.",
+        "I'll put “" + topic + "” on the run sheet between egg count and dust-bath reviews.",
+      ]);
+    }
+    return pick(FALLBACKS.clucky);
   }
 
   function reply(speakerId, userText) {
@@ -111,7 +195,7 @@
     if (!hen) {
       return {
         speaker: "Clucky",
-        text: pick(FALLBACKS.clucky),
+        text: cluckyReply(userText),
         style: CLUCKY.chatStyle,
         source: "canned",
       };
@@ -133,39 +217,51 @@
     }
   }
 
-  async function replyViaOllama(speakerId, userText) {
-    const eggCount =
+  /**
+   * POST /api/clucky/chat — works on SolForge production (farm Ollama)
+   * and local `npm run dev`. Hard timeout so UI stays snappy.
+   */
+  async function replyViaApi(speakerId, userText) {
+    const egg =
       global.HenCam && typeof global.HenCam.getEggCount === "function"
         ? global.HenCam.getEggCount()
         : undefined;
-    const res = await fetch("/api/clucky/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        speakerId: speakerId || "clucky",
-        text: userText,
-        nestLine: nestLineHint(),
-        eggCount: eggCount,
-      }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data || !data.ok || !data.text) return null;
-    return {
-      speaker: data.speaker || "Clucky",
-      text: data.text,
-      style: CLUCKY.chatStyle,
-      source: "ollama",
-      model: data.model,
-    };
+    const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 8000) : null;
+    try {
+      const res = await fetch("/api/clucky/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          speakerId: speakerId || "clucky",
+          text: userText,
+          nestLine: nestLineHint(),
+          eggCount: egg,
+        }),
+        signal: ctrl ? ctrl.signal : undefined,
+        cache: "no-store",
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!data || !data.ok || !data.text) return null;
+      return {
+        speaker: data.speaker || "Clucky",
+        text: data.text,
+        style: CLUCKY.chatStyle,
+        source: data.source || "ollama",
+        model: data.model,
+      };
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }
 
   /**
-   * Prefer local Ollama (/api/clucky/chat), then optional bridge, then canned.
+   * Prefer farm/local LLM, then optional bridge, then witty canned (instant).
    */
   async function replyAsync(speakerId, userText, bridge) {
     try {
-      const llm = await replyViaOllama(speakerId, userText);
+      const llm = await replyViaApi(speakerId, userText);
       if (llm) return llm;
     } catch (_) {
       /* fall through */
