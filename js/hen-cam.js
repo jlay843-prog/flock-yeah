@@ -146,50 +146,107 @@
       return;
     }
 
-    if (stream.mode === "hls" && stream.hlsUrl && vid && stage) {
-      const fallBackToStills = () => {
-        if (!stream.snapshotUrl || !img) {
-          setStreamStatus("HLS failed — no snapshot fallback");
-          return;
-        }
-        stopLive();
-        // Snapshot path without re-entering hls
-        img.hidden = false;
-        stage.classList.add("has-live");
-        let fails = 0;
-        img.onload = () => {
-          fails = 0;
-          setStreamStatus(
-            "Stills fallback · ~every " +
-              ((stream.refreshMs || 2000) / 1000) +
-              "s · " +
-              label
-          );
-        };
-        img.onerror = () => {
-          fails += 1;
-          if (fails >= 3 && state.snapshotTimer) {
-            clearInterval(state.snapshotTimer);
-            state.snapshotTimer = null;
-            setStreamStatus("Snapshot fallback failed");
-          }
-        };
-        const tick = () => {
-          img.src =
-            stream.snapshotUrl +
-            (stream.snapshotUrl.indexOf("?") >= 0 ? "&" : "?") +
-            "_ts=" +
-            Date.now();
-        };
-        tick();
-        state.snapshotTimer = setInterval(tick, stream.refreshMs || 2000);
-        setStreamStatus("HLS down — stills fallback · " + label);
+    const fallBackToStills = (why) => {
+      if (!stream.snapshotUrl || !img) {
+        setStreamStatus((why || "Video failed") + " — no stills fallback");
+        return;
+      }
+      stopLive();
+      img.hidden = false;
+      stage.classList.add("has-live");
+      let fails = 0;
+      img.onload = () => {
+        fails = 0;
+        setStreamStatus(
+          "Stills fallback · ~every " +
+            ((stream.refreshMs || 2000) / 1000) +
+            "s · " +
+            label
+        );
       };
+      img.onerror = () => {
+        fails += 1;
+        if (fails >= 3 && state.snapshotTimer) {
+          clearInterval(state.snapshotTimer);
+          state.snapshotTimer = null;
+          setStreamStatus("Snapshot fallback failed");
+        }
+      };
+      const tick = () => {
+        img.src =
+          stream.snapshotUrl +
+          (stream.snapshotUrl.indexOf("?") >= 0 ? "&" : "?") +
+          "_ts=" +
+          Date.now();
+      };
+      tick();
+      state.snapshotTimer = setInterval(tick, stream.refreshMs || 2000);
+      setStreamStatus((why || "Video down") + " — stills · " + label);
+    };
 
+    // go2rtc continuous MP4 (smoother than HLS stills fallback)
+    if (
+      (stream.mode === "mp4" || stream.mode === "hls" || stream.mode === "video") &&
+      stream.mp4Url &&
+      vid &&
+      stage
+    ) {
+      vid.hidden = false;
+      stage.classList.add("has-live");
+      vid.muted = true;
+      vid.playsInline = true;
+      vid.src = stream.mp4Url;
+      const tryPlay = () =>
+        vid.play().then(
+          () => setStreamStatus("LIVE video · " + label),
+          () => setStreamStatus("LIVE video (tap play) · " + label)
+        );
+      vid.onloadeddata = tryPlay;
+      vid.onerror = () => {
+        // Prefer HLS next if configured
+        if (stream.hlsUrl && global.Hls && global.Hls.isSupported()) {
+          vid.removeAttribute("src");
+          vid.load();
+          state.hls = new global.Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 30,
+          });
+          state.hls.loadSource(stream.hlsUrl);
+          state.hls.attachMedia(vid);
+          state.hls.on(global.Hls.Events.MANIFEST_PARSED, () => {
+            tryPlay();
+            setStreamStatus("LIVE video (HLS) · " + label);
+          });
+          state.hls.on(global.Hls.Events.ERROR, (_evt, data) => {
+            if (!data || !data.fatal) return;
+            if (data.type === global.Hls.ErrorTypes.NETWORK_ERROR) {
+              state.hls.startLoad();
+              return;
+            }
+            if (data.type === global.Hls.ErrorTypes.MEDIA_ERROR) {
+              state.hls.recoverMediaError();
+              return;
+            }
+            fallBackToStills("HLS fatal");
+          });
+        } else {
+          fallBackToStills("MP4 failed");
+        }
+      };
+      tryPlay();
+      return;
+    }
+
+    if (stream.mode === "hls" && stream.hlsUrl && vid && stage) {
       vid.hidden = false;
       stage.classList.add("has-live");
       if (global.Hls && global.Hls.isSupported()) {
-        state.hls = new global.Hls({ enableWorker: true, enableStashBuffer: false });
+        state.hls = new global.Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 30,
+        });
         state.hls.loadSource(stream.hlsUrl);
         state.hls.attachMedia(vid);
         state.hls.on(global.Hls.Events.MANIFEST_PARSED, () => {
@@ -197,14 +254,23 @@
           setStreamStatus("LIVE video (HLS) · " + label);
         });
         state.hls.on(global.Hls.Events.ERROR, (_evt, data) => {
-          if (data && data.fatal) fallBackToStills();
+          if (!data || !data.fatal) return;
+          if (data.type === global.Hls.ErrorTypes.NETWORK_ERROR) {
+            state.hls.startLoad();
+            return;
+          }
+          if (data.type === global.Hls.ErrorTypes.MEDIA_ERROR) {
+            state.hls.recoverMediaError();
+            return;
+          }
+          fallBackToStills("HLS fatal");
         });
       } else if (vid.canPlayType("application/vnd.apple.mpegurl")) {
         vid.src = stream.hlsUrl;
-        vid.play().catch(() => fallBackToStills());
+        vid.play().catch(() => fallBackToStills("HLS play blocked"));
         setStreamStatus("LIVE video (HLS) · " + label);
       } else if (stream.snapshotUrl) {
-        fallBackToStills();
+        fallBackToStills("HLS unsupported");
       } else {
         setStreamStatus("HLS not supported in this browser");
       }
@@ -520,29 +586,56 @@
     const gift = GIFTS.find((g) => g.id === giftId);
     if (!gift) return;
     const hen = getHen(state.activeCam);
-    const line = recordGiftLocal(gift, hen);
-    const treat = queueTreatDispense(gift, hen, true);
-    if (treat) {
-      pushSystemChat(
-        line +
-          " — treat bot placeholder armed (" +
-          treat.action +
-          "). Opening checkout…"
-      );
-    } else {
-      pushSystemChat(line + " — opening checkout…");
-    }
+    // Do not inventory-consume or log paid gift until checkout-success
+    // (PayPal/Venmo/demo). Demo LAN tests still complete via pay chooser.
+    pushSystemChat(
+      "Checkout for " +
+        gift.emoji +
+        " " +
+        gift.name +
+        " → " +
+        (hen ? hen.name : "flock") +
+        " (" +
+        formatMoney(gift.priceCents) +
+        "). PayPal / Venmo (SolForge rails) or Demo…"
+    );
 
-    const cfg = global.StripeConfig;
-    if (cfg && typeof cfg.beginCheckout === "function") {
-      cfg.beginCheckout(giftId, {
+    const pay = global.PayConfig || global.StripeConfig;
+    if (pay && typeof pay.beginCheckout === "function") {
+      pay.beginCheckout(giftId, {
         kind: "gift",
         name: gift.emoji + " " + gift.name,
         henId: hen ? hen.id : "",
+        priceCents: gift.priceCents,
+        method: "chooser",
       });
       return;
     }
-    pushSystemChat(line + " — queued on the Farm desk for Jeff.");
+    // Offline fallback: local demo record only
+    const line = recordGiftLocal(gift, hen);
+    pushSystemChat(line + " — queued on the Farm desk for Jeff (no pay-config).");
+  }
+
+  /**
+   * Called when returning to cams after checkout-success.
+   * ERP/Pi are already triggered on checkout-success.html (once).
+   * Here we only log locally + chat so the board matches payment.
+   */
+  function completeGiftAfterCheckout(opts) {
+    const o = opts || {};
+    const gift = GIFTS.find((g) => g.id === o.giftId);
+    if (!gift) return null;
+    const hen = o.henId ? getHen(o.henId) : getHen(state.activeCam);
+    const line = recordGiftLocal(gift, hen);
+    const demo = !!o.demo;
+    pushSystemChat(
+      line +
+        (demo ? " (demo)" : " (paid)") +
+        (gift.dispense
+          ? " — treat/ERP was queued at checkout success"
+          : "")
+    );
+    return { line: line, treat: null };
   }
 
   function renderChatTabs() {
@@ -732,14 +825,16 @@
         saveDesk();
         renderDesk();
         pushSystemChat(
-          "Sponsor locked: " + name.trim() + ". Opening checkout…"
+          "Sponsor board hold: " + name.trim() + ". Opening PayPal/Venmo checkout…"
         );
-        const cfg = global.StripeConfig;
-        if (cfg && typeof cfg.beginCheckout === "function") {
-          cfg.beginCheckout("sponsor-day", {
+        const pay = global.PayConfig || global.StripeConfig;
+        if (pay && typeof pay.beginCheckout === "function") {
+          pay.beginCheckout("sponsor-day", {
             kind: "sponsor",
-            name: name.trim(),
+            name: "Sponsor: " + name.trim(),
             henId: state.activeCam,
+            priceCents: 2500,
+            method: "chooser",
           });
         }
       });
@@ -864,6 +959,10 @@
     init,
     getEggCount: () => state.eggs,
     getState: () => state,
+    sendGift,
+    completeGiftAfterCheckout,
+    queueTreatDispense,
+    recordGiftLocal,
   };
 
   if (document.readyState === "loading") {

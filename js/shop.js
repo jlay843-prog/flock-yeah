@@ -301,11 +301,15 @@
     const { FARM } = data();
     if (tag && FARM) tag.textContent = FARM.tagline + " " + FARM.attribution;
     const status = el("shop-status");
-    const cfg = global.StripeConfig;
-    if (status && cfg) {
-      status.textContent = cfg.isConfigured()
-        ? "Stripe publishable key detected. Click a product image to preview designs."
-        : "Demo mode — click any product photo or title to preview designs (images should show on each card).";
+    const pay = global.PayConfig;
+    if (status) {
+      if (pay && pay.isLiveConfigured && pay.isLiveConfigured()) {
+        status.textContent =
+          "PayPal/Venmo ready for gifts · plasma/print open SolForge intake. Click a product to preview.";
+      } else {
+        status.textContent =
+          "Demo / SolForge mode — plasma & 3D print open SolForge. Gifts use PayPal/Venmo when pay-config.local.js is set (same handles as SolForge).";
+      }
     }
   }
 

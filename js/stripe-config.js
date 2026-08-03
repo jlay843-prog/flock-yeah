@@ -1,10 +1,9 @@
 /**
- * Flock Yeah — Stripe client config (publishable key + Payment Links only)
- * Never put secret keys in this static site.
+ * Flock Yeah — LEGACY Stripe stubs (kept for optional merch Payment Links only).
+ * Gifts / sponsor use PayConfig (PayPal.me + Venmo) — same rails as SolForge.
+ * Do NOT expand Stripe for the farm stack. Never put secret keys here.
  *
- * To go live: set publishableKey + paymentLinks.* URLs from Stripe Dashboard,
- * and point each Payment Link success URL at:
- *   checkout-success.html?item=ITEM_ID
+ * Prefer: js/pay-config.js + pay-config.local.js
  */
 (function (global) {
   "use strict";

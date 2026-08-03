@@ -13,6 +13,7 @@ cam-secrets.json
 ai-secrets.json
 solforge-secrets.json
 stripe-config.local.js
+js/pay-config.local.js
 tmp-snap-test.jpg
 tmp-ollama-req.json
 logs/

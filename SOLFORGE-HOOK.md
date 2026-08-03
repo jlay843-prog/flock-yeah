@@ -1,5 +1,8 @@
 # Flock Yeah → SolForge fabrication hook
 
+> **Production / Grok Builder deploy handoff:** see [GROK-BUILDER-SOLFORGE-HANDOFF.md](./GROK-BUILDER-SOLFORGE-HANDOFF.md)  
+> (git sync, PayPal/Venmo — not Stripe, treat ERP, acceptance tests).
+
 Tie chicken-cam merch designs into **SolForge** for:
 
 - **Plasma** — steel silhouettes / saying signs (`designs/plasma`, `designs/merch`)
@@ -53,6 +56,22 @@ Do **not** call intake from browser JS on the Flock origin.
 - Flock Yeah: ship updated `js/solforge-bridge.js` + shop SKUs (this repo `dev`).
 - SolForge: deploy `fabrication-agent` with the IntakeForm prefill change so `/start?from=flock-yeah…` actually fills the form.
 - Until SolForge is redeployed, deep links still open `/start` but fields may be empty — customer can paste the note from the URL.
+
+## Payments (gifts / sponsor)
+
+**Do not use Stripe** for the farm stack. SolForge production is **PayPal.me + Venmo**.
+
+| Piece | Path |
+|-------|------|
+| URL builders + chooser | `js/pay-config.js` |
+| **Auto-link handles** | `PayConfig.loadFromSolforge()` → `GET {solforge}/api/payments/rails` (no paste) |
+| Optional local override | `js/pay-config.local.js` (wins over auto if set) |
+| ERP secret link | `scripts/link-solforge.ps1` → `solforge-secrets.json` from SolForge `.env` |
+| Gift click | Chooser → PayPal \| Venmo \| Demo — **no ERP yet** |
+| After pay / demo | `checkout-success.html` → TreatHook ERP notify (once) → cams announce |
+
+Integration stage gates: sibling control plane `../flock-solforge-integration/` (S0–S7).  
+SolForge safe branch worktree: `../solforge-flock-integration` (`flock-integration`).
 
 ## Treat inventory + min-qty auto-reorder (ERP-lite)
 

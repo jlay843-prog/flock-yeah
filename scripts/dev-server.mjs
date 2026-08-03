@@ -15,6 +15,8 @@ import { createCluckyChat } from "./clucky-chat.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const port = Number(process.env.FLOCK_DEV_PORT || 8080);
+const go2rtcBase = (process.env.GO2RTC_URL || "http://127.0.0.1:1984").replace(/\/$/, "");
+const go2rtcSrc = process.env.GO2RTC_SRC || "nest-a";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -207,6 +209,55 @@ async function readJsonBody(req) {
   }
 }
 
+/** Same-origin proxy to go2rtc continuous MP4 (smoother Nest Cam A video). */
+async function handleCamLiveMp4(req, res) {
+  const upstreamUrl = `${go2rtcBase}/api/stream.mp4?src=${encodeURIComponent(go2rtcSrc)}`;
+  try {
+    const upstream = await fetch(upstreamUrl, {
+      headers: { Accept: "video/mp4,*/*" },
+    });
+    if (!upstream.ok || !upstream.body) {
+      const t = upstream.body ? await upstream.text() : "";
+      return send(
+        res,
+        upstream.status || 502,
+        t || "go2rtc stream.mp4 unavailable — run scripts/start-go2rtc.ps1",
+        { "Content-Type": "text/plain; charset=utf-8" }
+      );
+    }
+    res.writeHead(200, {
+      "Content-Type": upstream.headers.get("content-type") || "video/mp4",
+      "Cache-Control": "no-store",
+      Connection: "keep-alive",
+    });
+    const reader = upstream.body.getReader();
+    const pump = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (!res.write(Buffer.from(value))) {
+          await new Promise((resolve) => res.once("drain", resolve));
+        }
+      }
+      res.end();
+    };
+    req.on("close", () => {
+      try {
+        reader.cancel();
+      } catch (_) {}
+    });
+    await pump();
+  } catch (e) {
+    if (!res.headersSent) {
+      send(res, 502, "go2rtc proxy failed: " + (e.message || e), {
+        "Content-Type": "text/plain; charset=utf-8",
+      });
+    } else {
+      res.end();
+    }
+  }
+}
+
 /** Proxy gift consume → SolForge ERP-lite (secrets stay on disk). */
 async function handleSolforgeFlockConsume(req, res) {
   const secrets = loadSolforgeSecrets();
@@ -214,7 +265,7 @@ async function handleSolforgeFlockConsume(req, res) {
     return sendJson(res, 503, {
       ok: false,
       error:
-        "Missing solforge-secrets.json — copy solforge-secrets.example.json and set baseUrl + farmSecret (FLOCK_FARM_SECRET or CRON_SECRET on SolForge).",
+        "Missing solforge-secrets.json — run scripts/link-solforge.ps1 (or copy solforge-secrets.example.json).",
     });
   }
   const body = await readJsonBody(req);
@@ -244,6 +295,32 @@ async function handleSolforgeFlockConsume(req, res) {
   }
 }
 
+/** Proxy public payment rails (no secrets) — same origin for Flock browser. */
+async function handleSolforgeRails(_req, res) {
+  const secrets = loadSolforgeSecrets();
+  const base = (secrets?.baseUrl || "https://solforge.lonetreeacres.com").replace(
+    /\/$/,
+    ""
+  );
+  const url = base + "/api/payments/rails";
+  try {
+    const upstream = await fetch(url, { method: "GET" });
+    const text = await upstream.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { ok: false, error: text.slice(0, 300) };
+    }
+    return sendJson(res, upstream.status, data);
+  } catch (e) {
+    return sendJson(res, 502, {
+      ok: false,
+      error: e.message || "SolForge rails proxy failed",
+    });
+  }
+}
+
 const clucky = createCluckyWatcher(root, async () => {
   const secrets = loadSecrets();
   if (!secrets?.host || !secrets?.password) {
@@ -259,6 +336,9 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "GET" && (urlPath === "/cam/snap" || urlPath === "/cam/snap.jpg")) {
     return handleCamSnap(res);
+  }
+  if (req.method === "GET" && (urlPath === "/cam/live.mp4" || urlPath === "/cam/live")) {
+    return handleCamLiveMp4(req, res);
   }
   if (req.method === "GET" && urlPath === "/api/clucky/status") {
     const ai = loadAiConfig(root);
@@ -290,6 +370,19 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "POST" && urlPath === "/api/solforge/flock-consume") {
     return handleSolforgeFlockConsume(req, res);
   }
+  if (req.method === "GET" && urlPath === "/api/solforge/rails") {
+    return handleSolforgeRails(req, res);
+  }
+  if (req.method === "GET" && urlPath === "/api/solforge/status") {
+    const secrets = loadSolforgeSecrets();
+    return sendJson(res, 200, {
+      ok: true,
+      baseUrl: secrets?.baseUrl || null,
+      farmSecretConfigured: Boolean(secrets?.farmSecret),
+      consumeProxy: "/api/solforge/flock-consume",
+      railsProxy: "/api/solforge/rails",
+    });
+  }
   if (req.method !== "GET" && req.method !== "HEAD") {
     return send(res, 405, "Method not allowed");
   }
@@ -308,6 +401,14 @@ server.listen(port, "127.0.0.1", () => {
       (secrets?.host
         ? "http://localhost:" + port + "/cam/snap → " + secrets.host
         : "no cam-secrets.json (run link-cam.ps1)")
+  );
+  console.log(
+    "  Live: http://localhost:" +
+      port +
+      "/cam/live.mp4 → " +
+      go2rtcBase +
+      " src=" +
+      go2rtcSrc
   );
   console.log(
     "  Clucky: /api/clucky/tick · " +

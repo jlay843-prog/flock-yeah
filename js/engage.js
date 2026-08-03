@@ -271,6 +271,21 @@
       };
     }
     if (!pending) return;
+    // Complete gift ERP / local log after pay or demo (not on gift click)
+    if (
+      pending.giftId &&
+      global.HenCam &&
+      typeof global.HenCam.completeGiftAfterCheckout === "function"
+    ) {
+      try {
+        global.HenCam.completeGiftAfterCheckout({
+          giftId: pending.giftId,
+          henId: pending.henId || "",
+          demo: !!pending.demo,
+          method: pending.method || "",
+        });
+      } catch (_) {}
+    }
     const hen = pending.henId ? getHen(pending.henId) : null;
     const label = hen ? hen.name : "the flock";
     const prefix = pending.demo ? "Demo checkout locked in: " : "Paid & queued: ";

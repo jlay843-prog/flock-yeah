@@ -37,12 +37,15 @@
   </main>
 
   <script src="js/flock-data.js"></script>
+  <script src="js/engage-config.js"></script>
+  <script src="js/treat-hook.js"></script>
   <script>
     (function () {
       var params = new URLSearchParams(location.search);
       var item = params.get("item");
       var demo = params.get("demo");
       var kind = params.get("kind") || "order";
+      var method = params.get("method") || "";
       var hen = params.get("hen") || "";
       var nameParam = params.get("name") || "";
       var el = document.getElementById("success-detail");
@@ -51,6 +54,7 @@
       var last = null;
       try { last = JSON.parse(sessionStorage.getItem("fy_last_order") || "null"); } catch (e) {}
 
+      var isDemo = demo === "1" || method === "demo" || !!(last && last.demo);
       var displayName =
         nameParam ||
         (gift ? gift.emoji + " " + gift.name : "") ||
@@ -58,19 +62,39 @@
         (last && last.name) ||
         "Your support";
 
+      // ERP + Pi queue only after checkout success (not on gift click)
+      var erpNote = "";
+      if (gift && gift.dispense && window.TreatHook) {
+        try {
+          var treat = TreatHook.requestDispense({
+            giftId: gift.id,
+            henId: hen || (last && last.henId) || "",
+            demo: isDemo,
+            source: "checkout-success",
+          });
+          if (treat && treat.queued) {
+            erpNote =
+              " Treat Pi placeholder (" +
+              treat.action +
+              ") + SolForge ERP notify queued" +
+              (isDemo ? " [demo]" : "") +
+              ".";
+          }
+        } catch (e) {}
+      }
+
       if (gift || found || last || nameParam) {
-        var treatNote = "";
-        if (gift && gift.dispense) {
-          treatNote =
-            " Treat Pi placeholder queued (" +
-            gift.dispense +
-            ") — auto-dispense when the Zero is hooked up.";
-        }
+        var rail =
+          method === "paypal"
+            ? " via PayPal"
+            : method === "venmo"
+              ? " via Venmo"
+              : "";
         el.textContent =
-          (demo === "1" ? "Demo checkout for " : "Paid / queued: ") +
+          (isDemo ? "Demo checkout for " : "Paid / queued" + rail + ": ") +
           displayName +
           ". Clucky will announce it when you return to cams." +
-          treatNote;
+          erpNote;
       }
 
       var pending = {
@@ -78,7 +102,8 @@
         name: displayName,
         henId: hen || (last && last.henId) || "",
         giftId: gift ? gift.id : "",
-        demo: demo === "1" || !!(last && last.demo),
+        demo: isDemo,
+        method: method || (isDemo ? "demo" : "paid"),
       };
       try {
         sessionStorage.setItem("fy_pending_announce_v1", JSON.stringify(pending));
@@ -93,6 +118,7 @@
         if (pending.henId) u.searchParams.set("hen", pending.henId);
         if (pending.giftId) u.searchParams.set("gift", pending.giftId);
         if (pending.demo) u.searchParams.set("demo", "1");
+        if (pending.method) u.searchParams.set("method", pending.method);
         back.href = u.toString();
       }
     })();
