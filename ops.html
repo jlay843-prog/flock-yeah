@@ -102,6 +102,23 @@
         <p class="muted">Farm token (Bearer, stays in this browser only):</p>
         <input id="ops-token" type="password" placeholder="CRON / FLOCK_FARM secret" autocomplete="off" style="width:100%">
       </article>
+
+      <article class="ops-card" style="grid-column:1/-1">
+        <h3>Marketing (Phase A + B)</h3>
+        <p>
+          <strong>Wed 10:00</strong> weekly: agent syncs channels, emails dual-brand digest, posts
+          <em>Flock</em> blurb to Bluesky if enabled.
+        </p>
+        <ul class="ops-ritual-list">
+          <li>Phase A (always): email checklist — no social accounts required</li>
+          <li>Phase B (dream autopost): Bluesky account + <code>MARKETING_AUTO_BLUESKY=true</code> on webhost</li>
+          <li>Forums (BYC, Reddit, FB groups): still manual — open digest links when you feel like it</li>
+        </ul>
+        <div class="btn-row">
+          <a class="btn" href="/admin/marketing" target="_blank" rel="noopener">Admin marketing</a>
+          <a class="btn" href="/api/marketing/flock" target="_blank" rel="noopener">Flock research JSON</a>
+        </div>
+      </article>
     </section>
   </main>
 
