@@ -696,6 +696,67 @@ code {
   border-color: rgba(4, 120, 87, 0.45);
 }
 
+.flock-chip.is-provisional {
+  border-style: dashed;
+  opacity: 0.92;
+}
+
+.flock-chip-tag {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(120, 113, 108, 0.15);
+  color: #57534e;
+}
+
+.flock-chip-tag.rooster {
+  background: rgba(217, 119, 6, 0.18);
+  color: #92400e;
+}
+
+.flock-strip-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.flock-filter.is-active {
+  border-color: var(--emerald);
+  background: rgba(4, 120, 87, 0.1);
+}
+
+.flock-strip-row {
+  max-height: 11rem;
+  overflow-y: auto;
+  padding-bottom: 0.25rem;
+}
+
+.chat-pick {
+  width: 100%;
+  max-width: 100%;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font: inherit;
+  background: #fff;
+}
+
+.chat-pick-label {
+  display: block;
+  font-size: 0.78rem;
+}
+
+.chat-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
 .ops-ritual-list {
   list-style: none;
   margin: 0;
@@ -1070,11 +1131,18 @@ textarea:focus {
   z-index: 1;
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.55rem;
   min-height: 280px;
-  padding-bottom: 0.5rem;
+  padding: 0.25rem 0.5rem 0.5rem;
   overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.lineup-row .mug {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
 }
 
 .mug {

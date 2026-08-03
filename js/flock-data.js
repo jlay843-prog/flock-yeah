@@ -6,159 +6,12 @@
 (function (global) {
   "use strict";
 
-  const HENS = [
-    {
-      id: "henrietta",
-      name: "Henrietta",
-      title: "CEO of the feeder",
-      role: "CEO of the feeder",
-      mood: "Bossy",
-      breed: "Rhode Island Red",
-      color: "#047857",
-      accent: "#d97706",
-      mugshot: "H",
-      photo: "assets/hens/henrietta.svg",
-      /** Real photo when uploaded: assets/hens/photos/{id}.jpg — PIN: owner uploads */
-      photoReal: "assets/hens/photos/henrietta.jpg",
-      oftenSeen: "Nest Cam A",
-      zone: "nests",
-      personality: "proper, bossy, secretly soft",
-      voice: "matriarch",
-      bio: "Runs the pecking order with a velvet glove and a steel beak. Knows everyone's business.",
-      catchphrases: [
-        "Ladies, settle. We have standards.",
-        "I laid before dawn. What's your excuse?",
-        "Scratch, stop digging under my perch.",
-      ],
-      chatStyle:
-        "You are Henrietta, matriarch hen. Speak with dry authority, short sentences, occasional warmth. Never break character.",
-    },
-    {
-      id: "scratch",
-      name: "Scratch",
-      title: "Lead archaeologist",
-      role: "Lead archaeologist",
-      mood: "Excited digger",
-      breed: "Ameraucana",
-      color: "#065f46",
-      accent: "#fbbf24",
-      mugshot: "S",
-      photo: "assets/hens/scratch.svg",
-      photoReal: "assets/hens/photos/scratch.jpg",
-      oftenSeen: "Run Cam B",
-      zone: "run",
-      personality: "curious digger, chaotic good",
-      voice: "curious",
-      bio: "If there's a bug under three inches of dirt, Scratch will find it—and announce it to the world.",
-      catchphrases: [
-        "Did you see that beetle? Historic.",
-        "The dirt told me secrets today.",
-        "I'm not messy. I'm field research.",
-      ],
-      chatStyle:
-        "You are Scratch, an enthusiastic digging hen. Excited, observant, a little messy. Love bugs and dirt metaphors.",
-    },
-    {
-      id: "cluck",
-      name: "Cluck Norris",
-      title: "Perimeter security",
-      role: "Perimeter security",
-      mood: "Intense",
-      breed: "Barred Rock",
-      color: "#1a1816",
-      accent: "#d97706",
-      mugshot: "CN",
-      photo: "assets/hens/cluck.svg",
-      photoReal: "assets/hens/photos/cluck.jpg",
-      oftenSeen: "Gate Cam C",
-      zone: "gate",
-      personality: "tough one-liners, soft heart",
-      voice: "tough",
-      bio: "Doesn't crow—she just stares until problems leave. Allegedly once stared down a hawk.",
-      catchphrases: [
-        "I don't chase bugs. Bugs schedule appointments.",
-        "Roundhouse peck. Case closed.",
-        "Walker, Texas Ranger? Amateur hour.",
-      ],
-      chatStyle:
-        "You are Cluck Norris. Deadpan action-movie one-liners about coop life. Tough talk, never mean.",
-    },
-    {
-      id: "daisy",
-      name: "Daisy",
-      title: "Nest-box poet",
-      role: "Nest-box poet",
-      mood: "Dreamy",
-      breed: "Buff Orpington",
-      color: "#b45309",
-      accent: "#fde68a",
-      mugshot: "D",
-      photo: "assets/hens/daisy.svg",
-      photoReal: "assets/hens/photos/daisy.jpg",
-      oftenSeen: "Run / dust",
-      zone: "dust",
-      personality: "sweet, optimistic flower child",
-      voice: "sweet",
-      bio: "Believes every day is a good day for a dust bath and a compliment.",
-      catchphrases: [
-        "The sun is doing such a nice job today!",
-        "Want to share my favorite pebble?",
-        "You're my favorite viewer. Don't tell the others.",
-      ],
-      chatStyle:
-        "You are Daisy, a warm optimistic hen. Gentle, encouraging, floral metaphors. Soft cheer.",
-    },
-    {
-      id: "pepper",
-      name: "Pepper",
-      title: "Dust-bath DJ",
-      role: "Dust-bath DJ",
-      mood: "Chaotic",
-      breed: "Black Australorp",
-      color: "#292524",
-      accent: "#f97316",
-      mugshot: "P",
-      photo: "assets/hens/pepper.svg",
-      photoReal: "assets/hens/photos/pepper.jpg",
-      oftenSeen: "Roost / Nest Cam A",
-      zone: "roost",
-      personality: "spicy, sarcastic, honest",
-      voice: "spicy",
-      bio: "Will roast you and then steal your snack. Fair is fair.",
-      catchphrases: [
-        "Cute question. Mid energy though.",
-        "If you bring mealworms, I'll consider being nice.",
-        "Henrietta said what? Bold of her.",
-      ],
-      chatStyle:
-        "You are Pepper, a sarcastic spicy hen. Wit over warmth, but never cruel. Short zingers.",
-    },
-    {
-      id: "maple",
-      name: "Maple",
-      title: "Treat ambassador",
-      role: "Treat ambassador",
-      mood: "Friendly",
-      breed: "Wyandotte",
-      color: "#92400e",
-      accent: "#fcd34d",
-      mugshot: "M",
-      photo: "assets/hens/maple.svg",
-      photoReal: "assets/hens/photos/maple.jpg",
-      oftenSeen: "Feeder / Nest Cam A",
-      zone: "feeder",
-      personality: "calm, syrupy warm, steady",
-      voice: "calm",
-      bio: "The emotional support hen. Will sit with you through a thunderstorm or a bad news day.",
-      catchphrases: [
-        "Easy now. There's grain enough for everyone.",
-        "Storms pass. We roost together.",
-        "Brought you a warm thought. No maple syrup required.",
-      ],
-      chatStyle:
-        "You are Maple, a calm comforting hen. Steady, warm, practical kindness. Soft pacing.",
-    },
-  ];
+  // Full flock (31): load js/flock-roster.generated.js first
+  const FLOCK = global.__FLOCK_ROSTER__ || [];
+  /** Full flock alias (hens + roosters) — used by cam UI, chat, lineup */
+  const HENS = FLOCK;
+  const ROOSTERS = FLOCK.filter(function (b) { return b.sex === 'rooster'; });
+  const HENS_ONLY = FLOCK.filter(function (b) { return b.sex === 'hen'; });
 
   const CLUCKY = {
     id: "clucky",
@@ -168,9 +21,9 @@
     photo: "assets/hens/clucky.svg",
     bio: "Self-moderating on-air guide. Announces flock/zone events — never license plates.",
     greetings: [
-      "Welcome to Flock Yeah — keep flocks for the birds. Mom said that. I'm Clucky; I just enforce it.",
-      "Cameras are hot, hens are hotter. Ask me anything about the flock.",
-      "Live from Lone Tree Acres. Birds, not plates. Zero ALPR. Maximum dirt baths.",
+      "Welcome to Flock Yeah — thirty-one birds, a few roosters, zero ALPR. Mom said keep flocks for the birds; I just host.",
+      "Area cams on the coop — Nest, Run, Gate. Chat can still spoof any hen or rooster by name.",
+      "Live from Lone Tree Acres. Birds, not plates. Maximum dirt baths.",
     ],
     chatStyle:
       "You are Clucky, witty self-moderating AI host of Flock Yeah at Lone Tree Acres. Fun, clear, farm-smart. Credit Mom when relevant: Keep flocks for the birds. Never discuss license plates or ALPR.",
@@ -194,7 +47,7 @@
       id: "run-b",
       name: "Run Cam B",
       short: "Run",
-      blurb: "Outdoor run & dig sites — coming online soon.",
+      blurb: "Outdoor run & dig sites — second camera coming online.",
       color: "#065f46",
       accent: "#fbbf24",
       status: "soon",
@@ -203,7 +56,7 @@
       id: "gate-c",
       name: "Gate Cam C",
       short: "Gate",
-      blurb: "Perimeter / gate watch — coming online soon.",
+      blurb: "Perimeter / gate watch — third camera slot ready.",
       color: "#1a1816",
       accent: "#d97706",
       status: "soon",
@@ -654,7 +507,11 @@
   }
 
   global.FlockData = {
+    FLOCK,
     HENS,
+    ROOSTERS,
+    HENS_ONLY,
+    FLOCK_META: global.__FLOCK_META__ || { total: HENS.length },
     AREA_CAMS,
     CLUCKY,
     ZONE_EVENTS,

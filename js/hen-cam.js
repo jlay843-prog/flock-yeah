@@ -24,6 +24,7 @@
     activeCam: (AREA_CAMS && AREA_CAMS[0] && AREA_CAMS[0].id) || "nest-a",
     /** Optional hen for gift dedicate / plasma — not a live "room" */
     giftHenId: null,
+    flockFilter: "all",
     chatTarget: "clucky",
     eggs: 0,
     sponsor: null,
@@ -534,29 +535,63 @@
     const strip = el("flock-strip");
     if (!strip) return;
     strip.innerHTML =
-      '<p class="flock-strip-label">Meet the flock <span class="muted">(chat with them — not private cams)</span></p>' +
+      '<p class="flock-strip-label">Meet the flock <span class="muted">(' +
+      HENS.length +
+      " birds · chat only, not private cams)</span></p>" +
+      '<div class="flock-strip-filters" role="group" aria-label="Filter flock">' +
+      '<button type="button" class="btn flock-filter' +
+      (state.flockFilter === "all" ? " is-active" : "") +
+      '" data-ff="all">All</button>' +
+      '<button type="button" class="btn flock-filter' +
+      (state.flockFilter === "hen" ? " is-active" : "") +
+      '" data-ff="hen">Hens</button>' +
+      '<button type="button" class="btn flock-filter' +
+      (state.flockFilter === "rooster" ? " is-active" : "") +
+      '" data-ff="rooster">Roosters</button>' +
+      "</div>" +
       '<div class="flock-strip-row">' +
-      HENS.map((h) => {
-        const on = state.giftHenId === h.id || state.chatTarget === h.id ? " is-active" : "";
-        return (
-          '<button type="button" class="flock-chip' +
-          on +
-          '" data-hen="' +
-          h.id +
-          '" style="--hen:' +
-          h.color +
-          '">' +
-          "<img " +
-          photoImgAttrs(h) +
-          " loading=\"lazy\" decoding=\"async\">" +
-          "<span>" +
-          escapeHtml(h.name) +
-          "</span>" +
-          "</button>"
-        );
-      }).join("") +
+      HENS.filter(function (h) {
+        if (!state.flockFilter || state.flockFilter === "all") return true;
+        return (h.sex || "hen") === state.flockFilter;
+      })
+        .map((h) => {
+          const on =
+            state.giftHenId === h.id || state.chatTarget === h.id ? " is-active" : "";
+          const badge = h.provisional
+            ? '<span class="flock-chip-tag">TBD</span>'
+            : h.sex === "rooster"
+              ? '<span class="flock-chip-tag rooster">♂</span>'
+              : "";
+          return (
+            '<button type="button" class="flock-chip' +
+            on +
+            (h.provisional ? " is-provisional" : "") +
+            '" data-hen="' +
+            h.id +
+            '" style="--hen:' +
+            h.color +
+            '" title="' +
+            escapeHtml(h.role || h.title || "") +
+            '">' +
+            "<img " +
+            photoImgAttrs(h) +
+            ' loading="lazy" decoding="async">' +
+            "<span>" +
+            escapeHtml(h.name) +
+            "</span>" +
+            badge +
+            "</button>"
+          );
+        })
+        .join("") +
       "</div>";
 
+    strip.querySelectorAll("[data-ff]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        state.flockFilter = btn.getAttribute("data-ff") || "all";
+        renderFlockStrip();
+      });
+    });
     strip.querySelectorAll("[data-hen]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const id = btn.getAttribute("data-hen");
@@ -568,7 +603,8 @@
         const hen = getHen(id);
         pushSystemChat(
           "Now chatting with " +
-            (hen ? hen.name : "a hen") +
+            (hen ? hen.name : "a bird") +
+            (hen && hen.provisional ? " (provisional name — farm is still labeling the flock)." : "") +
             ". Cameras stay on the coop areas above."
         );
       });
@@ -833,26 +869,65 @@
   function renderChatTabs() {
     const tabs = el("chat-tabs");
     if (!tabs) return;
-    const items = [{ id: "clucky", name: "Clucky" }].concat(
-      HENS.map((h) => ({ id: h.id, name: h.name }))
-    );
-    tabs.innerHTML = items
-      .map((it) => {
-        const on = it.id === state.chatTarget ? " is-active" : "";
+    // Clucky + compact select for 31 birds (tabs would overflow)
+    const current = state.chatTarget || "clucky";
+    const opts =
+      '<option value="clucky"' +
+      (current === "clucky" ? " selected" : "") +
+      ">Clucky (host)</option>" +
+      HENS.map(function (h) {
         return (
-          '<button type="button" class="chat-tab' +
-          on +
-          '" data-chat="' +
-          it.id +
-          '">' +
-          it.name +
-          "</button>"
+          '<option value="' +
+          h.id +
+          '"' +
+          (current === h.id ? " selected" : "") +
+          ">" +
+          (h.sex === "rooster" ? "♂ " : "") +
+          h.name +
+          (h.provisional ? " · TBD" : "") +
+          "</option>"
         );
+      }).join("");
+    tabs.innerHTML =
+      '<label class="chat-pick-label muted">Talk to</label>' +
+      '<select id="chat-pick" class="chat-pick" aria-label="Choose Clucky or a bird">' +
+      opts +
+      "</select>" +
+      '<div class="chat-tab-row">' +
+      '<button type="button" class="chat-tab' +
+      (current === "clucky" ? " is-active" : "") +
+      '" data-chat="clucky">Clucky</button>' +
+      HENS.filter(function (h) {
+        return !h.provisional;
       })
-      .join("");
+        .slice(0, 8)
+        .map(function (h) {
+          const on = h.id === current ? " is-active" : "";
+          return (
+            '<button type="button" class="chat-tab' +
+            on +
+            '" data-chat="' +
+            h.id +
+            '">' +
+            h.name +
+            "</button>"
+          );
+        })
+        .join("") +
+      "</div>";
+    const pick = el("chat-pick");
+    if (pick) {
+      pick.addEventListener("change", function () {
+        state.chatTarget = pick.value;
+        if (pick.value !== "clucky") state.giftHenId = pick.value;
+        renderChatTabs();
+        updateChatLabel();
+      });
+    }
     tabs.querySelectorAll("[data-chat]").forEach((btn) => {
       btn.addEventListener("click", () => {
         state.chatTarget = btn.getAttribute("data-chat");
+        if (state.chatTarget !== "clucky") state.giftHenId = state.chatTarget;
         renderChatTabs();
         updateChatLabel();
       });

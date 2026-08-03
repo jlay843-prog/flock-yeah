@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Flock Yeah · Live Hen Cams · Lone Tree Acres</title>
   <meta name="description" content="Flock Yeah coop area cams at Lone Tree Acres. Watch Nest/Run/Gate, chat with Clucky and the hens, support the flock, shop merch.">
-  <link rel="stylesheet" href="css/hens.css?v=area-cams1">
+  <link rel="stylesheet" href="css/hens.css?v=flock31">
 </head>
 <body class="has-merch-bg">
   <header class="site-header">
@@ -33,7 +33,7 @@
       <h1>The coop is on air.</h1>
       <p class="hero-lead">
         Watch Nest, Run, and Gate cameras (2–3 area views — not private per-hen booths).
-        Chat still spoofs each hen. Clucky hosts, PG and brief.
+        Full flock of 31 (3 roosters, 28 hens) — chat spoofs any bird by name. Clucky hosts, PG and brief.
       </p>
       <div class="hero-cta" role="group" aria-label="Primary actions">
         <a class="btn btn-primary" href="#gifts">Support the flock</a>
@@ -160,7 +160,8 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
-  <script src="js/flock-data.js?v=area-cams1"></script>
+  <script src="js/flock-roster.generated.js?v=flock31"></script>
+  <script src="js/flock-data.js?v=flock31"></script>
   <script src="js/cam-config.js?v=area-cams1"></script>
   <script src="js/stripe-config.js"></script>
   <script src="js/pay-config.js?v=shop-stock1"></script>
@@ -183,7 +184,7 @@
         /^10\./.test(h);
       function bootHenCam() {
         var s = document.createElement("script");
-        s.src = "js/hen-cam.js?v=buf-ahead5";
+        s.src = "js/hen-cam.js?v=flock31";
         document.body.appendChild(s);
       }
       if (!isLocal) {

@@ -4,7 +4,7 @@
 (function (global) {
   "use strict";
 
-  const { HENS, HORSES, FARM } = global.FlockData;
+  const { HENS, HORSES, FARM, FLOCK_META } = global.FlockData;
   const mode = (document.body && document.body.dataset.lineup) || "hens";
   const roster = mode === "horses" ? HORSES : HENS;
 
@@ -72,7 +72,9 @@
           h.name.toUpperCase() +
           "</strong>" +
           "<span>" +
+          (h.sex === "rooster" ? "Rooster · " : "") +
           plateSub +
+          (h.provisional ? " · TBD name" : "") +
           "</span>" +
           "<span>#" +
           String(i + 1).padStart(2, "0") +
@@ -110,13 +112,22 @@
       lens.style.setProperty("--pan-y", state.panY + "%");
       const mark = lens.querySelector(".lens-subject");
       if (mark) {
-        if (sub.photo) {
+        const real =
+          (global.FlockData.henPhotoSrc && global.FlockData.henPhotoSrc(sub)) ||
+          sub.photo;
+        const fallback =
+          (global.FlockData.henPhotoFallback &&
+            global.FlockData.henPhotoFallback(sub)) ||
+          sub.photo;
+        if (real || fallback) {
           mark.outerHTML =
             '<img class="lens-subject" src="' +
-            sub.photo +
+            (real || fallback) +
             '" alt="' +
             sub.name +
-            '">';
+            '" onerror="this.onerror=null;this.src=\'' +
+            (fallback || real) +
+            "'\">";
         } else {
           mark.textContent = sub.mugshot || sub.name.slice(0, 1);
           mark.classList.add("lens-subject-fallback");
