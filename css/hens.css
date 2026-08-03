@@ -1227,6 +1227,30 @@ textarea:focus {
   opacity: 1;
 }
 
+/* Design wall media box: never stretch mockups */
+.design-tile .design-media,
+.design-tile picture {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.design-tile .design-media img,
+.design-tile picture img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: center;
+  background: var(--cream);
+}
+
 .shop-card h3 {
   cursor: zoom-in;
 }
@@ -1316,13 +1340,15 @@ textarea:focus {
 
 .design-wall {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.85rem;
   padding: 0 0 2.5rem;
 }
 
 .design-tile {
   margin: 0;
+  display: flex;
+  flex-direction: column;
   background: #fff;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -1330,10 +1356,12 @@ textarea:focus {
   box-shadow: var(--shadow);
 }
 
-.design-tile img {
+/* Fallback if markup lacks .design-media wrapper */
+.design-tile > img {
   width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  object-position: center;
   background: var(--cream);
 }
 
@@ -1341,6 +1369,7 @@ textarea:focus {
   display: grid;
   gap: 0.15rem;
   padding: 0.55rem 0.65rem 0.7rem;
+  flex: 1;
 }
 
 .design-tile strong {

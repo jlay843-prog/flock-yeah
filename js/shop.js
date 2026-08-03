@@ -294,28 +294,34 @@
       const raw = d.mockup || d.art;
       const v = merchVariants(raw);
       const src = v.thumb || raw;
+      const art = d.art || "designs/merch/flock-yeah-classic.svg";
       const loading = index < 4 ? "eager" : "lazy";
+      const alt = escapeHtml(d.saying);
+      const media = v.hasWebp
+        ? '<div class="design-media"><picture>' +
+          '<source srcset="' +
+          v.thumb +
+          '" type="image/webp">' +
+          '<img src="' +
+          art +
+          '" alt="' +
+          alt +
+          '" loading="' +
+          loading +
+          '" decoding="async" class="shop-img is-ready" onload="this.classList.add(\'is-ready\')">' +
+          "</picture></div>"
+        : '<div class="design-media"><img src="' +
+          src +
+          '" alt="' +
+          alt +
+          '" loading="' +
+          loading +
+          '" decoding="async" class="shop-img" onload="this.classList.add(\'is-ready\')"></div>';
       return (
         '<figure class="design-tile" data-design="' +
         d.id +
         '">' +
-        (v.hasWebp
-          ? '<picture><source srcset="' +
-            v.thumb +
-            '" type="image/webp"><img src="' +
-            (d.art || "designs/merch/flock-yeah-classic.svg") +
-            '" alt="' +
-            escapeHtml(d.saying) +
-            '" loading="' +
-            loading +
-            '" decoding="async" width="480" height="480" class="shop-img is-ready" onload="this.classList.add(\'is-ready\')"></picture>'
-          : '<img src="' +
-            src +
-            '" alt="' +
-            escapeHtml(d.saying) +
-            '" loading="' +
-            loading +
-            '" decoding="async" class="shop-img" onload="this.classList.add(\'is-ready\')">') +
+        media +
         "<figcaption><strong>" +
         escapeHtml(d.saying) +
         "</strong><span>" +
