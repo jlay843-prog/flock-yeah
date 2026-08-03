@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Flock Yeah · Live Hen Cams · Lone Tree Acres</title>
   <meta name="description" content="Flock Yeah coop area cams at Lone Tree Acres. Watch Nest/Run/Gate, chat with Clucky and the hens, support the flock, shop merch.">
-  <link rel="stylesheet" href="css/hens.css?v=flock31">
+  <link rel="stylesheet" href="css/hens.css?v=cams3">
 </head>
 <body class="has-merch-bg">
   <header class="site-header">
@@ -32,8 +32,9 @@
       <div class="live-pill">Area cams · Clucky on air</div>
       <h1>The coop is on air.</h1>
       <p class="hero-lead">
-        Watch Nest, Run, and Gate cameras (2–3 area views — not private per-hen booths).
-        Full flock of 31 (3 roosters, 28 hens) — chat spoofs any bird by name. Clucky hosts, PG and brief.
+        <strong>Coop</strong> live · <strong>Chicken Run</strong> next ·
+        <strong>Cam 3</strong> asks if you want more chickens (donate today).
+        Not private per-hen booths. Full flock of 31 — chat spoofs any bird by name. Clucky hosts, PG and brief.
       </p>
       <div class="hero-cta" role="group" aria-label="Primary actions">
         <a class="btn btn-primary" href="#gifts">Support the flock</a>
@@ -49,11 +50,12 @@
           <img class="stage-photo" id="stage-photo" src="assets/hens/henrietta.svg" alt="">
           <img class="stage-live-img" id="stage-live-img" alt="Live area camera" hidden>
           <video class="stage-live-video" id="stage-live-video" playsinline muted autoplay controls hidden></video>
+          <div class="stage-cta" id="stage-cta" hidden></div>
           <div class="stage-mark" id="stage-mark" aria-hidden="true">FY</div>
           <div class="stage-inner">
-            <h2 id="stage-hen-name">Nest Cam A</h2>
-            <p id="stage-cam-label">Nests · coop area camera</p>
-            <p id="stage-hen-bio">Main live stage — nest boxes &amp; indoor coop.</p>
+            <h2 id="stage-hen-name">Coop Cam</h2>
+            <p id="stage-cam-label">Coop · area camera</p>
+            <p id="stage-hen-bio">Inside the coop — main live stage.</p>
             <p class="cam-stream-status" id="cam-stream-status"></p>
           </div>
         </div>
@@ -75,8 +77,8 @@
         </div>
         <div class="gift-bridge" id="gift-bridge" hidden></div>
         <p class="muted" id="cam-lan-banner" hidden style="margin-top:0.65rem"></p>
-        <p class="cam-grid-caption muted">Area cameras (2–3 zones)</p>
-        <div class="cam-grid" id="cam-grid" aria-label="Coop area cameras"></div>
+        <p class="cam-grid-caption muted">Coop · Chicken Run · Donate (cam 3)</p>
+        <div class="cam-grid" id="cam-grid" aria-label="Area cameras and donate channel"></div>
         <div id="flock-strip" class="flock-strip" aria-label="Hen roster for chat"></div>
         <div class="btn-row" style="margin-top:1rem">
           <button type="button" class="btn" id="btn-solforge">Cut a hen in steel</button>
@@ -161,8 +163,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
   <script src="js/flock-roster.generated.js?v=flock31"></script>
-  <script src="js/flock-data.js?v=flock31"></script>
-  <script src="js/cam-config.js?v=area-cams1"></script>
+  <script src="js/flock-data.js?v=cams3"></script>
+  <script src="js/cam-config.js?v=cams3"></script>
   <script src="js/stripe-config.js"></script>
   <script src="js/pay-config.js?v=shop-stock1"></script>
   <script src="js/engage-config.js"></script>
@@ -184,7 +186,7 @@
         /^10\./.test(h);
       function bootHenCam() {
         var s = document.createElement("script");
-        s.src = "js/hen-cam.js?v=flock31";
+        s.src = "js/hen-cam.js?v=cams3";
         document.body.appendChild(s);
       }
       if (!isLocal) {

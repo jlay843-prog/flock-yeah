@@ -476,6 +476,17 @@ code {
   animation: none;
 }
 
+.stage.has-cta .stage-photo,
+.stage.has-cta .stage-mark {
+  opacity: 0.08;
+  animation: none;
+}
+
+.stage.has-cta .stage-inner {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .stage-live-img,
 .stage-live-video {
   position: absolute;
@@ -485,6 +496,76 @@ code {
   object-fit: cover;
   z-index: 2;
   background: #0a100d;
+}
+
+/* Cam 3 — donate / expand-the-flock overlay (no live stream) */
+.stage-cta {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(217, 119, 6, 0.28), transparent 55%),
+    linear-gradient(160deg, #1a1816 0%, #0f2e24 55%, #1a1816 100%);
+  color: var(--cream);
+}
+
+.stage-cta[hidden] {
+  display: none !important;
+}
+
+.stage-cta-inner {
+  max-width: 28rem;
+  text-align: center;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.stage-cta-kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(247, 244, 239, 0.65);
+}
+
+.stage-cta-inner h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+  color: var(--cream);
+  line-height: 1.15;
+}
+
+.stage-cta-inner p {
+  margin: 0;
+  color: rgba(247, 244, 239, 0.88);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.stage-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.cam-cta {
+  background: rgba(217, 119, 6, 0.92);
+  color: #1a1816;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.cam-tile.is-cta .cam-screen {
+  background: linear-gradient(145deg, #1a1816, #0f2e24);
 }
 
 .stage-live-video {

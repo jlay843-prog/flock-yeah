@@ -35,6 +35,12 @@ Specs: ≤800px, &lt;150 KB JPG. Site prefers `photoReal`, falls back to SVG.
 
 ## Camera plan (production)
 
-- Area cams only (Nest / Run / Gate) — not 31 private streams.  
+| Slot | Name | Role |
+|------|------|------|
+| **1** | **Coop Cam** (`nest-a`) | Live indoors / nests |
+| **2** | **Chicken Run** (`run-b`) | Live outdoor run (hardware next) |
+| **3** | **Want more chickens?** (`donate-c`) | CTA overlay — *donate today* (no hardware) |
+
+- Area cams only — not 31 private streams.  
 - Chat still talks to any bird by name.  
-- Cam 2 arrives → flip `run-b` (or next) to live in `cam-config.js`.
+- Cam 2 arrives → flip `run-b` to live in `cam-config.js` (same go2rtc path as Coop).

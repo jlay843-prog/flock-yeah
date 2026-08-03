@@ -22,7 +22,7 @@
     bio: "Self-moderating on-air guide. Announces flock/zone events — never license plates.",
     greetings: [
       "Welcome to Flock Yeah — thirty-one birds, a few roosters, zero ALPR. Mom said keep flocks for the birds; I just host.",
-      "Area cams on the coop — Nest, Run, Gate. Chat can still spoof any hen or rooster by name.",
+      "Two live areas: Coop and Chicken Run. Cam 3 asks if you want more chickens — donate today. Chat spoofs any bird by name.",
       "Live from Lone Tree Acres. Birds, not plates. Maximum dirt baths.",
     ],
     chatStyle:
@@ -30,48 +30,57 @@
   };
 
   /**
-   * Area cams (coop zones) — not per-hen livestreams.
-   * Chat still spoofs each hen; live video is Nest/Run/Gate areas only.
+   * Area cams (zones) — not per-hen livestreams.
+   * 1 Coop · 2 Chicken Run · 3 Donate CTA overlay (no third physical cam).
+   * Chat still spoofs each bird by name.
    */
   const AREA_CAMS = [
     {
       id: "nest-a",
-      name: "Nest Cam A",
-      short: "Nests",
-      blurb: "Nest boxes & indoor coop — main live stage.",
+      name: "Coop Cam",
+      short: "Coop",
+      blurb: "Inside the coop — nests, waterer, and the main live stage.",
       color: "#047857",
       accent: "#d97706",
       status: "live",
+      kind: "live",
     },
     {
       id: "run-b",
-      name: "Run Cam B",
+      name: "Chicken Run",
       short: "Run",
-      blurb: "Outdoor run & dig sites — second camera coming online.",
+      blurb: "Outdoor run & dig sites — camera 2 coming online.",
       color: "#065f46",
       accent: "#fbbf24",
       status: "soon",
+      kind: "live",
     },
     {
-      id: "gate-c",
-      name: "Gate Cam C",
-      short: "Gate",
-      blurb: "Perimeter / gate watch — third camera slot ready.",
+      id: "donate-c",
+      name: "Want more chickens?",
+      short: "Donate",
+      blurb: "Camera 3 is your turn: expand the flock — donate today.",
       color: "#1a1816",
       accent: "#d97706",
-      status: "soon",
+      status: "cta",
+      kind: "cta",
+      ctaHeadline: "Want more chickens?",
+      ctaBody: "Tips and sponsorships help feed, shelter, and grow the flock at Lone Tree Acres.",
+      ctaButton: "Donate today",
+      ctaHref: "#sponsor",
     },
   ];
 
   /** Zone commentary for area cams (v1 — no chicken face ID) */
   const ZONE_EVENTS = [
-    { zone: "nests", text: "Nest Cam A: soft rustle — someone is negotiating a lease." },
-    { zone: "run", text: "Run Cam B: unauthorized dig site reported (Scratch denies everything)." },
-    { zone: "gate", text: "Gate Cam C: perimeter stare-down complete. Bugs rescheduled." },
-    { zone: "nests", text: "Nest Cam A: egg diplomacy in progress." },
-    { zone: "run", text: "Run Cam B: dust-bath five-star review pending." },
+    { zone: "coop", text: "Coop Cam: soft rustle — someone is negotiating a nest lease." },
+    { zone: "run", text: "Chicken Run: unauthorized dig site reported (Scratch denies everything)." },
+    { zone: "donate", text: "Cam 3: Want more chickens? Donate today — the flock is listening." },
+    { zone: "coop", text: "Coop Cam: egg diplomacy in progress." },
+    { zone: "run", text: "Chicken Run: dust-bath five-star review pending." },
     { zone: "sky", text: "Sky watch: no drama. Clucky approves." },
     { zone: "coop", text: "Coop ambient: waterer topped, vibes stable." },
+    { zone: "donate", text: "Cam 3: Every tip buys more snacks (and possibly more chickens)." },
   ];
 
   const HORSES = [

@@ -16,7 +16,7 @@
   const CHIPS = [
     { label: "Who's nesting?", text: "Who's nesting right now?" },
     { label: "Support the flock", text: "I'd like to support the flock", action: "gift:flock-tip" },
-    { label: "What's Nest Cam A seeing?", text: "What's Nest Cam A seeing?" },
+    { label: "What's Coop Cam seeing?", text: "What's Coop Cam seeing?" },
     { label: "Sponsor the coop", text: "How do I sponsor the coop today?", action: "scroll:sponsor" },
   ];
 

@@ -5,7 +5,7 @@
  * Prefer same-origin proxies from `npm run dev`:
  *   mp4Url: "/cam/live.mp4"
  *   snapshotUrl: "/cam/snap"
- * Keys = area cam ids: nest-a | run-b | gate-c
+ * Keys = area cam ids: nest-a (Coop) | run-b (Chicken Run) | donate-c (CTA)
  * Never put camera passwords in files that ship to the public CDN.
  */
 (function (global) {
@@ -16,7 +16,7 @@
     streams: {
       "nest-a": {
         mode: "mp4",
-        label: "Nest Cam A",
+        label: "Coop Cam",
         mp4Url: "/cam/live.mp4",
         snapshotUrl: "/cam/snap",
         refreshMs: 2000,

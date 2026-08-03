@@ -20,7 +20,7 @@
   } = global.FlockData;
 
   const state = {
-    /** Area cam id: nest-a | run-b | gate-c */
+    /** Area cam id: nest-a (Coop) | run-b (Run) | donate-c (CTA) */
     activeCam: (AREA_CAMS && AREA_CAMS[0] && AREA_CAMS[0].id) || "nest-a",
     /** Optional hen for gift dedicate / plasma — not a live "room" */
     giftHenId: null,
@@ -82,7 +82,12 @@
       img.hidden = true;
     }
     const stage = el("cam-stage");
-    if (stage) stage.classList.remove("has-live");
+    if (stage) {
+      stage.classList.remove("has-live");
+      stage.classList.remove("has-cta");
+    }
+    const cta = el("stage-cta");
+    if (cta) cta.hidden = true;
   }
 
   function setStreamStatus(text) {
@@ -90,17 +95,77 @@
     if (s) s.textContent = text || "";
   }
 
+  function mountCta(areaId, stream, cam) {
+    const stage = el("cam-stage");
+    const cta = el("stage-cta");
+    const photo = el("stage-photo");
+    if (stage) stage.classList.add("has-cta");
+    if (photo) photo.hidden = true;
+    const headline =
+      (stream && stream.headline) ||
+      (cam && cam.ctaHeadline) ||
+      "Want more chickens?";
+    const body =
+      (stream && stream.body) ||
+      (cam && cam.ctaBody) ||
+      "Help grow the flock — donate today.";
+    const btn =
+      (stream && stream.cta) || (cam && cam.ctaButton) || "Donate today";
+    const href =
+      (stream && stream.href) || (cam && cam.ctaHref) || "#sponsor";
+    const secHref = (stream && stream.secondaryHref) || "#gifts";
+    const secCta = (stream && stream.secondaryCta) || "Send a tip";
+    if (cta) {
+      cta.hidden = false;
+      cta.innerHTML =
+        '<div class="stage-cta-inner">' +
+        '<p class="stage-cta-kicker">Camera 3 · flock expansion</p>' +
+        "<h3>" +
+        escapeHtml(headline) +
+        "</h3>" +
+        "<p>" +
+        escapeHtml(body) +
+        "</p>" +
+        '<div class="stage-cta-actions">' +
+        '<a class="btn btn-primary" href="' +
+        escapeHtml(href) +
+        '">' +
+        escapeHtml(btn) +
+        "</a>" +
+        '<a class="btn" href="' +
+        escapeHtml(secHref) +
+        '">' +
+        escapeHtml(secCta) +
+        "</a>" +
+        "</div>" +
+        "</div>";
+    }
+    setStreamStatus("Support the flock · no live stream on this channel");
+  }
+
   function mountLive(areaId) {
     stopLive();
     const stream = camStream(areaId);
-    const statusEl = el("cam-stream-status");
+    const cam = getAreaCam ? getAreaCam(areaId) : null;
     const stage = el("cam-stage");
     const vid = el("stage-live-video");
     const img = el("stage-live-img");
     const disc = (global.CamConfig && global.CamConfig.discovery) || {};
 
+    if (
+      (stream && stream.mode === "cta") ||
+      (cam && cam.kind === "cta")
+    ) {
+      mountCta(areaId, stream, cam);
+      return;
+    }
+
     if (!stream || !stream.mode || stream.mode === "none") {
-      setStreamStatus("");
+      setStreamStatus(
+        cam && cam.status === "soon"
+          ? "Coming soon — camera hardware on the way."
+          : ""
+      );
       return;
     }
 
@@ -475,15 +540,21 @@
     grid.innerHTML = areas
       .map((c) => {
         const stream = camStream(c.id);
+        const isCta =
+          c.kind === "cta" || (stream && stream.mode === "cta");
         const live =
-          stream && stream.mode && stream.mode !== "none" && !stream.comingSoon;
+          !isCta &&
+          stream &&
+          stream.mode &&
+          stream.mode !== "none" &&
+          !stream.comingSoon;
         const active = c.id === state.activeCam ? " is-active" : "";
-        const badge = live ? "LIVE" : "SOON";
-        const badgeClass = live ? "cam-live" : "cam-soon";
+        const badge = isCta ? "DONATE" : live ? "LIVE" : "SOON";
+        const badgeClass = isCta ? "cam-cta" : live ? "cam-live" : "cam-soon";
         return (
           '<button type="button" class="cam-tile cam-tile-area' +
           active +
-          (live ? "" : " is-soon") +
+          (live ? "" : isCta ? " is-cta" : " is-soon") +
           '" data-area="' +
           c.id +
           '" style="--hen:' +
@@ -521,9 +592,17 @@
         renderCams();
         renderStage();
         const cam = getAreaCam ? getAreaCam(state.activeCam) : null;
-        pushSystemChat(
-          "Watching " + (cam ? cam.name : "area cam") + " — flock area, not a private hen booth."
-        );
+        if (cam && cam.kind === "cta") {
+          pushSystemChat(
+            "Cam 3: Want more chickens? Donate today — tips and day sponsors grow the flock."
+          );
+        } else {
+          pushSystemChat(
+            "Watching " +
+              (cam ? cam.name : "area cam") +
+              " — flock area, not a private hen booth."
+          );
+        }
       });
     });
 
@@ -615,7 +694,7 @@
     const cam =
       (getAreaCam && getAreaCam(state.activeCam)) ||
       (AREA_CAMS && AREA_CAMS[0]) ||
-      { id: "nest-a", name: "Nest Cam A", blurb: "Coop area", color: "#047857", accent: "#d97706" };
+      { id: "nest-a", name: "Coop Cam", blurb: "Coop area", color: "#047857", accent: "#d97706" };
     const stage = el("cam-stage");
     if (!stage) return;
     stage.style.setProperty("--hen", cam.color);
@@ -627,16 +706,22 @@
     const photo = el("stage-photo");
     if (name) name.textContent = cam.name;
     if (label) {
-      label.textContent =
-        (cam.short || "Area") + " · coop camera · birds not private rooms";
+      if (cam.kind === "cta") {
+        label.textContent = "Cam 3 · support overlay · not a live feed";
+      } else {
+        label.textContent =
+          (cam.short || "Area") + " · area camera · birds not private rooms";
+      }
     }
     if (bio) bio.textContent = cam.blurb || "";
-    if (mark) mark.textContent = (cam.short || "FY").slice(0, 4);
+    if (mark) {
+      mark.textContent =
+        cam.kind === "cta" ? "♥" : (cam.short || "FY").slice(0, 4);
+    }
     if (photo) {
-      // Stage background: flock collage vibe via first hen stub until live fills
       photo.src = (HENS[0] && HENS[0].photo) || CLUCKY.photo;
       photo.alt = cam.name;
-      photo.hidden = false;
+      photo.hidden = cam.kind === "cta";
     }
     mountLive(cam.id);
   }
