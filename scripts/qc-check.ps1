@@ -30,6 +30,7 @@ $required = @(
   "hens.html","whos-who.html","herd.html","shop.html","ops.html","checkout-success.html","index.html",
   "css/hens.css",
   "js/flock-data.js","js/hen-voice.js","js/hen-cam.js","js/lineup.js","js/shop.js","js/stripe-config.js","js/solforge-bridge.js",
+  "js/clucky-watch.js","js/engage.js","js/engage-config.js","js/treat-hook.js","scripts/dev-server.mjs","scripts/clucky-vision.mjs",
   "CHAT-HANDOFF.md","README.md","SECURITY.md","TRANSFER.md",
   "designs/plasma/henrietta-plasma.svg","designs/plasma/cluck-plasma.svg","designs/plasma/flock-yeah-mark.svg",
   "designs/print/logos/flock-yeah-wordmark.svg","designs/print/logos/flock-yeah-badge.svg",
@@ -67,7 +68,17 @@ Check -Name "brand tagline" -Ok ($data -match "Keep flocks for the birds") -Deta
 $hens = Get-Content "hens.html" -Raw
 Check -Name "hens:commentary" -Ok ($hens -match 'id="cam-commentary"') -Detail "cam-commentary missing"
 Check -Name "hens:stage-photo" -Ok ($hens -match 'id="stage-photo"') -Detail "stage-photo missing"
-Check -Name "hens:scripts" -Ok (($hens -match "flock-data.js") -and ($hens -match "hen-cam.js") -and ($hens -match "hen-voice.js")) -Detail "script tags incomplete"
+Check -Name "hens:clucky-pin" -Ok ($hens -match 'id="clucky-pin"') -Detail "clucky-pin missing"
+Check -Name "hens:hero-cta" -Ok ($hens -match 'hero-cta') -Detail "hero CTA missing"
+Check -Name "hens:notify" -Ok ($hens -match 'id="notify-form"') -Detail "notify form missing"
+Check -Name "hens:scripts" -Ok (($hens -match "flock-data.js") -and ($hens -match "hen-cam.js") -and ($hens -match "hen-voice.js") -and ($hens -match "engage.js")) -Detail "script tags incomplete"
+Check -Name "stripe:beginCheckout" -Ok ((Get-Content "js/stripe-config.js" -Raw) -match "beginCheckout") -Detail "beginCheckout missing"
+Check -Name "stripe:gift links" -Ok ((Get-Content "js/stripe-config.js" -Raw) -match "mealworms") -Detail "gift payment link keys missing"
+Check -Name "treat:solforge erp" -Ok ((Get-Content "js/treat-hook.js" -Raw) -match "solforgeConsumeUrl|flock-consume") -Detail "SolForge ERP consume hook missing"
+Check -Name "file:solforge-secrets.example.json" -Ok (Test-Path "solforge-secrets.example.json") -Detail "missing example secrets"
+Check -Name "file:stripe-config.local.example.js" -Ok (Test-Path "js/stripe-config.local.example.js") -Detail "missing stripe local example"
+Check -Name "file:start-go2rtc.ps1" -Ok (Test-Path "scripts/start-go2rtc.ps1") -Detail "missing go2rtc starter"
+Check -Name "file:clucky-chat.mjs" -Ok (Test-Path "scripts/clucky-chat.mjs") -Detail "missing clucky-chat"
 
 $herd = Get-Content "herd.html" -Raw
 Check -Name "herd:lineup mode" -Ok ($herd -match 'data-lineup="horses"') -Detail "herd missing data-lineup=horses"

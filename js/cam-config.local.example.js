@@ -11,7 +11,7 @@
 
   const USER = "admin";
   const PASS = "REPLACE_ME";
-  const HOST = "192.168.68.116";
+  const HOST = "192.168.68.118";
 
   const local = {
     discovery: {

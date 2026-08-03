@@ -1,6 +1,6 @@
 /**
- * Flock Yeah — local personality chat (Clucky + per-hen)
- * Offline-friendly canned replies; optional bridge hook for a real LLM later.
+ * Flock Yeah — Clucky + per-hen chat
+ * Prefers local Ollama via /api/clucky/chat (npm run dev); canned replies as fallback.
  */
 (function (global) {
   "use strict";
@@ -27,7 +27,7 @@
   function normalize(text) {
     return String(text || "")
       .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/[^a-z0-9\s']/g, " ")
       .replace(/\s+/g, " ")
       .trim();
   }
@@ -55,13 +55,12 @@
       return pick(hen.catchphrases || FALLBACKS.default);
     }
     if (/\b(mom|flock yeah|tagline)\b/.test(t)) {
-      return 'Keep flocks for the birds. — Mom. We take that personally.';
+      return "Keep flocks for the birds. — Mom. We take that personally.";
     }
     if (/\b(name|who are you|about you)\b/.test(t)) {
       return "I'm " + hen.name + ". " + (hen.bio || "");
     }
 
-    // Light keyword bounce into catchphrase + echo
     if (t.length < 40) {
       return pick(hen.catchphrases) + " (re: “" + text.trim().slice(0, 48) + "”)";
     }
@@ -80,7 +79,8 @@
       );
     }
     if (/\b(egg|count)\b/.test(t)) {
-      const n = global.HenCam && global.HenCam.getEggCount ? global.HenCam.getEggCount() : "?";
+      const n =
+        global.HenCam && global.HenCam.getEggCount ? global.HenCam.getEggCount() : "?";
       return "Egg counter reads " + n + ". Fresh math, questionable honesty from Pepper.";
     }
     if (/\b(shop|buy|gift|sponsor)\b/.test(t)) {
@@ -98,32 +98,78 @@
     return pick(FALLBACKS.clucky) + " You said: “" + text.trim().slice(0, 60) + "”";
   }
 
-  /**
-   * @param {string} speakerId hen id or "clucky"
-   * @param {string} userText
-   * @returns {{ speaker: string, text: string, style: string }}
-   */
   function reply(speakerId, userText) {
     if (speakerId === "clucky") {
       return {
         speaker: CLUCKY.name,
         text: cluckyReply(userText),
         style: CLUCKY.chatStyle,
+        source: "canned",
       };
     }
     const hen = getHen(speakerId);
     if (!hen) {
-      return { speaker: "Clucky", text: pick(FALLBACKS.clucky), style: CLUCKY.chatStyle };
+      return {
+        speaker: "Clucky",
+        text: pick(FALLBACKS.clucky),
+        style: CLUCKY.chatStyle,
+        source: "canned",
+      };
     }
     return {
       speaker: hen.name,
       text: topicReply(hen, userText),
       style: hen.chatStyle,
+      source: "canned",
     };
   }
 
-  /** Optional hook: replace with fetch to a farm LLM endpoint */
+  function nestLineHint() {
+    try {
+      const pin = JSON.parse(localStorage.getItem("fy_clucky_pin_v1") || "null");
+      return (pin && pin.line) || "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  async function replyViaOllama(speakerId, userText) {
+    const eggCount =
+      global.HenCam && typeof global.HenCam.getEggCount === "function"
+        ? global.HenCam.getEggCount()
+        : undefined;
+    const res = await fetch("/api/clucky/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        speakerId: speakerId || "clucky",
+        text: userText,
+        nestLine: nestLineHint(),
+        eggCount: eggCount,
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || !data.ok || !data.text) return null;
+    return {
+      speaker: data.speaker || "Clucky",
+      text: data.text,
+      style: CLUCKY.chatStyle,
+      source: "ollama",
+      model: data.model,
+    };
+  }
+
+  /**
+   * Prefer local Ollama (/api/clucky/chat), then optional bridge, then canned.
+   */
   async function replyAsync(speakerId, userText, bridge) {
+    try {
+      const llm = await replyViaOllama(speakerId, userText);
+      if (llm) return llm;
+    } catch (_) {
+      /* fall through */
+    }
     if (bridge && typeof bridge.chat === "function") {
       try {
         const remote = await bridge.chat(speakerId, userText);

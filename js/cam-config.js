@@ -2,9 +2,9 @@
  * Flock Yeah — public camera defaults (no secrets).
  * Override locally with js/cam-config.local.js (gitignored).
  *
- * Discovered test cam: 192.168.68.116
- * MAC EC-71-DB → Reolink · only Baichuan client port :9000 open
- * HTTP :80 / RTSP :554 currently closed — enable in Reolink app to stream in-browser.
+ * Discovered test cam: 192.168.68.118
+ * MAC EC-71-DB → Reolink
+ * HTTP :80 / RTSP :554 — enable in Reolink app; live stills via /cam/snap proxy.
  */
 (function (global) {
   "use strict";
@@ -12,12 +12,12 @@
   const CamConfig = {
     /** LAN discovery / ops panel */
     discovery: {
-      host: "192.168.68.116",
+      host: "192.168.68.118",
       vendor: "Reolink",
       mac: "EC-71-DB-19-18-56",
-      openPorts: [9000],
+      openPorts: [80, 554, 8000, 9000],
       notes:
-        "Port 9000 = Reolink client (Baichuan). Enable RTSP (554) and/or HTTP (80) in the Reolink app for browser streams.",
+        "HTTP 80 + RTSP 554 + ONVIF 8000 + client 9000. Nest Cam A needs js/cam-config.local.js + cam-secrets.json for /cam/snap. ONVIF optional for Home Assistant later.",
     },
 
     /**
@@ -32,12 +32,12 @@
       // Test cam wired to Nest Cam A until more cams arrive
       henrietta: {
         mode: "none",
-        label: "Test Reolink @ 192.168.68.116",
+        label: "Test Reolink @ 192.168.68.118",
         // Fill these in cam-config.local.js after enabling HTTP/RTSP:
-        // snapshotUrl: "http://192.168.68.116/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=flock&user=admin&password=***",
+        // snapshotUrl: "http://127.0.0.1:8080/cam/snap",
         // hlsUrl: "http://127.0.0.1:1984/api/stream.m3u8?src=reolink-test",
         // mjpegUrl: "http://127.0.0.1:1984/api/stream.mjpeg?src=reolink-test",
-        rtspHint: "rtsp://USER:PASS@192.168.68.116:554/h264Preview_01_sub",
+        rtspHint: "rtsp://USER:PASS@192.168.68.118:554/h264Preview_01_sub",
         refreshMs: 2000,
       },
     },

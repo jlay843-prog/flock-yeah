@@ -143,6 +143,8 @@
         item.kind +
         '" data-item="' +
         item.id +
+        '" data-sku="' +
+        item.id +
         '">' +
         '<button type="button" class="shop-art" data-open="' +
         item.id +
@@ -253,6 +255,11 @@
       return;
     }
 
+    if (cfg && typeof cfg.beginCheckout === "function") {
+      cfg.beginCheckout(item.id, { kind: "merch", name: item.name });
+      return;
+    }
+
     if (cfg && cfg.isConfigured() && link) {
       global.location.href = link;
       return;
@@ -273,6 +280,15 @@
       "checkout-success.html?demo=1&item=" + encodeURIComponent(item.id);
   }
 
+  function highlightHashSku() {
+    const hash = (location.hash || "").replace(/^#/, "");
+    if (!hash) return;
+    const card = document.querySelector('[data-sku="' + hash + '"]');
+    if (!card) return;
+    card.classList.add("is-spotlight");
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
   function init() {
     if (!data().SHOP_ITEMS) {
       console.error("FlockData missing — check script order on shop.html");
@@ -280,6 +296,7 @@
     }
     renderCatalog();
     renderDesignWall();
+    highlightHashSku();
     const tag = el("brand-tagline");
     const { FARM } = data();
     if (tag && FARM) tag.textContent = FARM.tagline + " " + FARM.attribution;

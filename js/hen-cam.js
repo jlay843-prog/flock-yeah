@@ -95,7 +95,36 @@
       if (img && stage) {
         img.hidden = false;
         stage.classList.add("has-live");
+        let fails = 0;
+        const onOk = () => {
+          fails = 0;
+          setStreamStatus(
+            "Stills · ~every " +
+              ((stream.refreshMs || 2000) / 1000) +
+              "s (not video) · " +
+              label
+          );
+        };
+        const onFail = () => {
+          fails += 1;
+          if (fails >= 3) {
+            if (state.snapshotTimer) {
+              clearInterval(state.snapshotTimer);
+              state.snapshotTimer = null;
+            }
+            setStreamStatus(
+              "Snapshot failed (auth lock or proxy down). Close this tab, wait for the camera unlock, then restart npm run dev."
+            );
+          } else {
+            setStreamStatus(
+              "Snapshot retry " + fails + "/3 · " + label
+            );
+          }
+        };
+        img.onload = onOk;
+        img.onerror = onFail;
         const tick = () => {
+          if (!state.snapshotTimer && fails >= 3) return;
           img.src =
             stream.snapshotUrl +
             (stream.snapshotUrl.indexOf("?") >= 0 ? "&" : "?") +
@@ -104,7 +133,7 @@
         };
         tick();
         state.snapshotTimer = setInterval(tick, stream.refreshMs || 2000);
-        setStreamStatus("LIVE snapshot · " + label);
+        setStreamStatus("Connecting snapshot · " + label);
       }
       return;
     }
@@ -118,20 +147,64 @@
     }
 
     if (stream.mode === "hls" && stream.hlsUrl && vid && stage) {
+      const fallBackToStills = () => {
+        if (!stream.snapshotUrl || !img) {
+          setStreamStatus("HLS failed — no snapshot fallback");
+          return;
+        }
+        stopLive();
+        // Snapshot path without re-entering hls
+        img.hidden = false;
+        stage.classList.add("has-live");
+        let fails = 0;
+        img.onload = () => {
+          fails = 0;
+          setStreamStatus(
+            "Stills fallback · ~every " +
+              ((stream.refreshMs || 2000) / 1000) +
+              "s · " +
+              label
+          );
+        };
+        img.onerror = () => {
+          fails += 1;
+          if (fails >= 3 && state.snapshotTimer) {
+            clearInterval(state.snapshotTimer);
+            state.snapshotTimer = null;
+            setStreamStatus("Snapshot fallback failed");
+          }
+        };
+        const tick = () => {
+          img.src =
+            stream.snapshotUrl +
+            (stream.snapshotUrl.indexOf("?") >= 0 ? "&" : "?") +
+            "_ts=" +
+            Date.now();
+        };
+        tick();
+        state.snapshotTimer = setInterval(tick, stream.refreshMs || 2000);
+        setStreamStatus("HLS down — stills fallback · " + label);
+      };
+
       vid.hidden = false;
       stage.classList.add("has-live");
       if (global.Hls && global.Hls.isSupported()) {
-        state.hls = new global.Hls({ enableWorker: true });
+        state.hls = new global.Hls({ enableWorker: true, enableStashBuffer: false });
         state.hls.loadSource(stream.hlsUrl);
         state.hls.attachMedia(vid);
         state.hls.on(global.Hls.Events.MANIFEST_PARSED, () => {
           vid.play().catch(() => {});
+          setStreamStatus("LIVE video (HLS) · " + label);
         });
-        setStreamStatus("LIVE HLS · " + label);
+        state.hls.on(global.Hls.Events.ERROR, (_evt, data) => {
+          if (data && data.fatal) fallBackToStills();
+        });
       } else if (vid.canPlayType("application/vnd.apple.mpegurl")) {
         vid.src = stream.hlsUrl;
-        vid.play().catch(() => {});
-        setStreamStatus("LIVE HLS · " + label);
+        vid.play().catch(() => fallBackToStills());
+        setStreamStatus("LIVE video (HLS) · " + label);
+      } else if (stream.snapshotUrl) {
+        fallBackToStills();
       } else {
         setStreamStatus("HLS not supported in this browser");
       }
@@ -157,6 +230,11 @@
       state.eggs = eggs != null ? parseInt(eggs, 10) || 0 : seedEggs();
       const sponsor = localStorage.getItem(STORAGE_KEYS.sponsor);
       state.sponsor = sponsor ? JSON.parse(sponsor) : null;
+      // Sponsor board is a 24h slot
+      if (state.sponsor && state.sponsor.until && Date.now() > state.sponsor.until) {
+        state.sponsor = null;
+        localStorage.removeItem(STORAGE_KEYS.sponsor);
+      }
       const desk = localStorage.getItem(STORAGE_KEYS.desk);
       state.deskNotes = desk ? JSON.parse(desk) : defaultDesk();
       const gifts = localStorage.getItem(STORAGE_KEYS.gifts);
@@ -287,13 +365,27 @@
     mountLive(hen.id);
   }
 
-  function renderCommentary(text) {
+  function renderCommentary(text, opts) {
     const box = el("cam-commentary");
     if (!box) return;
     const line = text || (randomZoneEvent() || {}).text || "Coop ambient: waiting…";
     box.innerHTML = "<strong>Cam commentary</strong>" + escapeHtml(line);
     const ticker = el("live-ticker");
     if (ticker) ticker.textContent = line;
+    const o = opts || {};
+    if (o.pin && global.FlockEngage) {
+      global.FlockEngage.renderPin(line);
+    }
+  }
+
+  function publishCluckyLine(line, opts) {
+    const o = opts || {};
+    if (!line) return;
+    renderCommentary(line, { pin: true });
+    if (o.chat !== false) pushSystemChat(line);
+    if (o.bridge && global.FlockEngage) {
+      global.FlockEngage.offerGiftBridge(line, pushSystemChat);
+    }
   }
 
   function renderEggs() {
@@ -305,8 +397,14 @@
     const box = el("sponsor-slot");
     if (!box) return;
     if (state.sponsor && state.sponsor.name) {
+      const hoursLeft =
+        state.sponsor.until != null
+          ? Math.max(0, Math.ceil((state.sponsor.until - Date.now()) / 3600000))
+          : 24;
       box.innerHTML =
-        '<p class="sponsor-live">Today\'s coop sponsor</p><strong>' +
+        '<p class="sponsor-live">On the board · ~' +
+        hoursLeft +
+        "h left</p><strong>" +
         escapeHtml(state.sponsor.name) +
         "</strong>" +
         (state.sponsor.note
@@ -314,7 +412,7 @@
           : "");
     } else {
       box.innerHTML =
-        '<p class="sponsor-live">Sponsor open</p><strong>Your name here</strong><span>Support the flock — use the form below.</span>';
+        '<p class="sponsor-live">Sponsor open</p><strong>Your name here</strong><span>24 hours on Nest Cam A’s board — use the form below.</span>';
     }
   }
 
@@ -369,10 +467,29 @@
     }
   }
 
-  function sendGift(giftId) {
-    const gift = GIFTS.find((g) => g.id === giftId);
-    if (!gift) return;
-    const hen = getHen(state.activeCam);
+  function queueTreatDispense(gift, hen, demo) {
+    if (!global.TreatHook || !gift || !gift.dispense) return null;
+    const result = global.TreatHook.requestDispense({
+      giftId: gift.id,
+      henId: hen ? hen.id : "",
+      zone: hen ? hen.zone : "",
+      demo: !!demo,
+      source: "gift-checkout",
+    });
+    if (!result.queued) return null;
+    const tip =
+      result.mode === "live"
+        ? "Pi treat hook pinged (" + result.action + "). SolForge ERP consume notified."
+        : "Pi treat hook queued (" +
+          result.action +
+          ") + SolForge ERP consume notify — set treatDispenseUrl / solforge-secrets.json when ready.";
+    state.deskNotes.unshift({ t: "Treat Pi", m: tip });
+    saveDesk();
+    renderDesk();
+    return result;
+  }
+
+  function recordGiftLocal(gift, hen) {
     const line =
       gift.emoji +
       " " +
@@ -385,19 +502,47 @@
     state.giftLog.unshift(line);
     saveGifts();
     state.deskNotes.unshift({ t: "Gift", m: line });
+    const auto =
+      gift.dispense && global.TreatHook
+        ? "Auto-dispense placeholder → Pi Zero (" + gift.dispense + ")."
+        : "Queue for Jeff: deliver " + gift.name + " to " + (hen ? hen.zone : "coop");
     state.deskNotes.unshift({
       t: "Farm desk",
-      m: "Queue for Jeff: deliver " + gift.name + " to " + (hen ? hen.zone : "coop"),
+      m: auto,
     });
     saveDesk();
     renderGifts();
     renderDesk();
-    pushSystemChat(line + " — queued on the Farm desk for Jeff.");
+    return line;
+  }
+
+  function sendGift(giftId) {
+    const gift = GIFTS.find((g) => g.id === giftId);
+    if (!gift) return;
+    const hen = getHen(state.activeCam);
+    const line = recordGiftLocal(gift, hen);
+    const treat = queueTreatDispense(gift, hen, true);
+    if (treat) {
+      pushSystemChat(
+        line +
+          " — treat bot placeholder armed (" +
+          treat.action +
+          "). Opening checkout…"
+      );
+    } else {
+      pushSystemChat(line + " — opening checkout…");
+    }
 
     const cfg = global.StripeConfig;
-    if (cfg && cfg.isConfigured() && cfg.paymentLinks[giftId]) {
-      global.open(cfg.paymentLinks[giftId], "_blank", "noopener,noreferrer");
+    if (cfg && typeof cfg.beginCheckout === "function") {
+      cfg.beginCheckout(giftId, {
+        kind: "gift",
+        name: gift.emoji + " " + gift.name,
+        henId: hen ? hen.id : "",
+      });
+      return;
     }
+    pushSystemChat(line + " — queued on the Farm desk for Jeff.");
   }
 
   function renderChatTabs() {
@@ -443,9 +588,17 @@
     }
   }
 
-  function pushChat(role, text, speakerId) {
+  function persistChatRow(entry) {
+    if (!global.FlockEngage) return;
+    const rows = global.FlockEngage.loadChat();
+    rows.push(entry);
+    global.FlockEngage.saveChat(rows);
+  }
+
+  function pushChat(role, text, speakerId, opts) {
     const log = el("chat-log");
     if (!log) return;
+    const o = opts || {};
     const row = document.createElement("div");
     const isYou = role === "you";
     row.className = "chat-row chat-" + (isYou ? "you" : "bot");
@@ -468,6 +621,23 @@
     }
     log.appendChild(row);
     log.scrollTop = log.scrollHeight;
+    if (!o.skipPersist) {
+      persistChatRow({
+        role: role,
+        text: text,
+        speakerId: speakerId || (isYou ? "you" : "clucky"),
+        at: Date.now(),
+      });
+    }
+  }
+
+  function restoreChat() {
+    if (!global.FlockEngage) return;
+    const rows = global.FlockEngage.loadChat();
+    if (!rows.length) return;
+    rows.slice(-24).forEach((r) => {
+      pushChat(r.role, r.text, r.speakerId, { skipPersist: true });
+    });
   }
 
   function pushSystemChat(text) {
@@ -547,18 +717,31 @@
         const name = (el("sponsor-name") || {}).value || "";
         const note = (el("sponsor-note") || {}).value || "";
         if (!name.trim()) return;
-        state.sponsor = { name: name.trim(), note: note.trim(), at: Date.now() };
+        state.sponsor = {
+          name: name.trim(),
+          note: note.trim(),
+          at: Date.now(),
+          until: Date.now() + 24 * 60 * 60 * 1000,
+        };
         saveSponsor();
         renderSponsor();
         state.deskNotes.unshift({
           t: "Sponsor",
-          m: name.trim() + " is on the board.",
+          m: name.trim() + " is on the board for 24h.",
         });
         saveDesk();
         renderDesk();
         pushSystemChat(
-          "Sponsor locked: " + name.trim() + ". Thank you for keeping flocks for the birds."
+          "Sponsor locked: " + name.trim() + ". Opening checkout…"
         );
+        const cfg = global.StripeConfig;
+        if (cfg && typeof cfg.beginCheckout === "function") {
+          cfg.beginCheckout("sponsor-day", {
+            kind: "sponsor",
+            name: name.trim(),
+            henId: state.activeCam,
+          });
+        }
       });
     }
 
@@ -588,6 +771,53 @@
     }, 14000);
   }
 
+  function startLiveNestWatch() {
+    const henStream = camStream("henrietta");
+    const live =
+      henStream &&
+      henStream.mode &&
+      henStream.mode !== "none" &&
+      henStream.snapshotUrl &&
+      global.CluckyWatch;
+
+    if (!live) {
+      simulateCamLife();
+      return;
+    }
+
+    global.CluckyWatch.start({
+      onLine: (data) => {
+        publishCluckyLine(data.line, { bridge: true });
+      },
+      onStatus: (msg) => {
+        setStreamStatus(msg);
+      },
+    });
+  }
+
+  function initEngage() {
+    if (!global.FlockEngage) return;
+    global.FlockEngage.init({
+      onChip: (chip) => {
+        if (chip.type === "gift") {
+          sendGift(chip.id);
+          return;
+        }
+        if (chip.type === "chat") {
+          const input = el("chat-input");
+          if (input) input.value = chip.text;
+          sendChat(chip.text);
+        }
+      },
+      onAnnounce: (line) => {
+        publishCluckyLine(line, { bridge: false });
+      },
+      onGiftCta: () => {
+        pushSystemChat("Treat tray's open — pick a gift for the hen on cam.");
+      },
+    });
+  }
+
   function init() {
     load();
     renderCams();
@@ -598,8 +828,12 @@
     renderGifts();
     renderChatTabs();
     bindForms();
-    simulateCamLife();
-    pushSystemChat(CLUCKY.greetings[0]);
+    restoreChat();
+    initEngage();
+    startLiveNestWatch();
+    if (!el("chat-log") || !el("chat-log").children.length) {
+      pushSystemChat(CLUCKY.greetings[0]);
+    }
     const brand = el("brand-tagline");
     if (brand) brand.textContent = FARM.tagline + " " + FARM.attribution;
 

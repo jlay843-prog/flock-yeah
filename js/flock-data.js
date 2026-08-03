@@ -213,11 +213,51 @@
   ];
 
   const GIFTS = [
-    { id: "mealworms", name: "Mealworm Drop", priceCents: 300, costCents: 225, emoji: "🐛", blurb: "Instant snack chaos." },
-    { id: "scratch-grain", name: "Scratch Grain", priceCents: 500, costCents: 375, emoji: "🌾", blurb: "Scatter feast for the run." },
-    { id: "nest-box", name: "Nest Box Fluff", priceCents: 800, costCents: 600, emoji: "🪺", blurb: "Soft landing for the next egg." },
-    { id: "dust-bath", name: "Dust Bath Spa", priceCents: 1000, costCents: 750, emoji: "✨", blurb: "Daisy's favorite upgrade." },
-    { id: "hawk-watch", name: "Hawk Watch Hour", priceCents: 1500, costCents: 1125, emoji: "🦅", blurb: "Sponsor an hour of sky watch." },
+    {
+      id: "mealworms",
+      name: "Mealworm Drop",
+      priceCents: 300,
+      costCents: 225,
+      emoji: "🐛",
+      blurb: "Instant snack chaos.",
+      dispense: "mealworms", // Pi Zero hook (TreatHook)
+    },
+    {
+      id: "scratch-grain",
+      name: "Scratch Grain",
+      priceCents: 500,
+      costCents: 375,
+      emoji: "🌾",
+      blurb: "Scatter feast for the run.",
+      dispense: "scratch",
+    },
+    {
+      id: "nest-box",
+      name: "Nest Box Fluff",
+      priceCents: 800,
+      costCents: 600,
+      emoji: "🪺",
+      blurb: "Soft landing for the next egg.",
+      dispense: null,
+    },
+    {
+      id: "dust-bath",
+      name: "Dust Bath Spa",
+      priceCents: 1000,
+      costCents: 750,
+      emoji: "✨",
+      blurb: "Daisy's favorite upgrade.",
+      dispense: null,
+    },
+    {
+      id: "hawk-watch",
+      name: "Hawk Watch Hour",
+      priceCents: 1500,
+      costCents: 1125,
+      emoji: "🦅",
+      blurb: "Sponsor an hour of sky watch.",
+      dispense: null,
+    },
   ];
 
   /**
@@ -565,6 +605,8 @@
     desk: "fy_farm_desk_v1",
     gifts: "fy_gifts_v1",
     chat: "fy_chat_v1",
+    notify: "fy_notify_v1",
+    pin: "fy_clucky_pin_v1",
   };
 
   function getHen(id) {

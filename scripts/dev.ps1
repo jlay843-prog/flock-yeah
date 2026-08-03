@@ -35,7 +35,10 @@ Start-Job -ScriptBlock {
 } -ArgumentList $Url | Out-Null
 
 if (Get-Command node -ErrorAction SilentlyContinue) {
-  npx --yes serve -l $Port
+  # Custom server: static files + /cam/snap proxy (token auth via cam-secrets.json)
+  $env:FLOCK_DEV_PORT = "$Port"
+  node (Join-Path $Root "scripts\dev-server.mjs")
 } else {
+  Write-Host "Node not found — static only (no /cam/snap proxy). Install Node for live Nest Cam A."
   python -m http.server $Port
 }

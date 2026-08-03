@@ -26,8 +26,11 @@
       <p id="success-detail">
         Your support keeps cameras warm, nests soft, and Clucky employed (sort of).
       </p>
+      <p class="muted" id="success-next">
+        Head back to cams — Clucky will announce it in chat.
+      </p>
       <div class="btn-row" style="justify-content:center;margin-top:1.25rem">
-        <a class="btn btn-primary" href="hens.html">Back to cams</a>
+        <a class="btn btn-primary" id="back-cams" href="hens.html">Back to cams · hear Clucky</a>
         <a class="btn" href="shop.html">More shop</a>
       </div>
     </section>
@@ -39,17 +42,58 @@
       var params = new URLSearchParams(location.search);
       var item = params.get("item");
       var demo = params.get("demo");
+      var kind = params.get("kind") || "order";
+      var hen = params.get("hen") || "";
+      var nameParam = params.get("name") || "";
       var el = document.getElementById("success-detail");
       var found = item && FlockData.SHOP_ITEMS.find(function (i) { return i.id === item; });
+      var gift = item && FlockData.GIFTS.find(function (g) { return g.id === item; });
       var last = null;
       try { last = JSON.parse(sessionStorage.getItem("fy_last_order") || "null"); } catch (e) {}
-      if (found) {
+
+      var displayName =
+        nameParam ||
+        (gift ? gift.emoji + " " + gift.name : "") ||
+        (found ? found.name : "") ||
+        (last && last.name) ||
+        "Your support";
+
+      if (gift || found || last || nameParam) {
+        var treatNote = "";
+        if (gift && gift.dispense) {
+          treatNote =
+            " Treat Pi placeholder queued (" +
+            gift.dispense +
+            ") — auto-dispense when the Zero is hooked up.";
+        }
         el.textContent =
-          (demo ? "Demo checkout for " : "Paid / queued: ") +
-          found.name +
-          ". Clucky will announce it on the Farm desk.";
-      } else if (last) {
-        el.textContent = "Last local order: " + last.name + ".";
+          (demo === "1" ? "Demo checkout for " : "Paid / queued: ") +
+          displayName +
+          ". Clucky will announce it when you return to cams." +
+          treatNote;
+      }
+
+      var pending = {
+        kind: kind,
+        name: displayName,
+        henId: hen || (last && last.henId) || "",
+        giftId: gift ? gift.id : "",
+        demo: demo === "1" || !!(last && last.demo),
+      };
+      try {
+        sessionStorage.setItem("fy_pending_announce_v1", JSON.stringify(pending));
+      } catch (e) {}
+
+      var back = document.getElementById("back-cams");
+      if (back) {
+        var u = new URL("hens.html", location.href);
+        u.searchParams.set("thanks", "1");
+        u.searchParams.set("kind", pending.kind);
+        u.searchParams.set("name", pending.name);
+        if (pending.henId) u.searchParams.set("hen", pending.henId);
+        if (pending.giftId) u.searchParams.set("gift", pending.giftId);
+        if (pending.demo) u.searchParams.set("demo", "1");
+        back.href = u.toString();
       }
     })();
   </script>

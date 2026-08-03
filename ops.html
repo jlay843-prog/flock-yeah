@@ -46,8 +46,26 @@
       </article>
       <article class="ops-card">
         <h3>Stripe</h3>
-        <p>Publishable key + Payment Links only in <code>js/stripe-config.js</code>. Secrets stay on SolForge / server.</p>
-        <a class="btn" href="shop.html">Shop config</a>
+        <p>
+          Base stubs in <code>js/stripe-config.js</code>. Live keys + Payment Links go in
+          gitignored <code>js/stripe-config.local.js</code> (copy from
+          <code>stripe-config.local.example.js</code>). Success URL:
+          <code>checkout-success.html?item=ITEM_ID</code>. Priority links: mealworms,
+          scratch-grain, sponsor-day.
+        </p>
+        <a class="btn" href="shop.html">Shop</a>
+        <a class="btn" href="hens.html#gifts">Gifts</a>
+      </article>
+      <article class="ops-card">
+        <h3>Treat Pi + SolForge restock</h3>
+        <p>
+          Mealworm Drop + Scratch Grain queue a Pi dispense job (<code>js/treat-hook.js</code>)
+          and consume SolForge ERP-lite SKUs via <code>/api/solforge/flock-consume</code>
+          (see <a href="SOLFORGE-HOOK.md">SOLFORGE-HOOK.md</a>). Min-qty triggers
+          <code>reorder-buyer</code> PO <strong>drafts</strong> to ops — not Amazon auto-buy.
+        </p>
+        <p class="muted">Secrets: <code>solforge-secrets.json</code> · Pi URL in <code>engage-config.js</code>.</p>
+        <a class="btn" href="hens.html#gifts">Gift tray</a>
       </article>
       <article class="ops-card">
         <h3>SolForge</h3>

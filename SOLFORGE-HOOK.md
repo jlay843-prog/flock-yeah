@@ -53,3 +53,46 @@ Do **not** call intake from browser JS on the Flock origin.
 - Flock Yeah: ship updated `js/solforge-bridge.js` + shop SKUs (this repo `dev`).
 - SolForge: deploy `fabrication-agent` with the IntakeForm prefill change so `/start?from=flock-yeah…` actually fills the form.
 - Until SolForge is redeployed, deep links still open `/start` but fields may be empty — customer can paste the note from the URL.
+
+## Treat inventory + min-qty auto-reorder (ERP-lite)
+
+Flock gift sales for **mealworms** / **scratch-grain** also hit SolForge inventory:
+
+| Gift | SolForge SKU | Consume / gift | Reorder when |
+|------|--------------|----------------|--------------|
+| Mealworm Drop | `TREAT-MEALWORMS-1LB` | 0.05 lb | onHand ≤ 2 → order 10 lb |
+| Scratch Grain | `TREAT-SCRATCH-25LB` | 0.25 lb | onHand ≤ 25 → order 50 lb |
+
+**Flow**
+
+1. Visitor buys treat on Flock → `TreatHook` → `POST /api/solforge/flock-consume` (local `npm run dev` proxy).
+2. Proxy → SolForge `POST /api/farm/flock-consume` with `Authorization: Bearer $FLOCK_FARM_SECRET` (or `CRON_SECRET`).
+3. SolForge decrements stock, runs `syncAutoReorders()`.
+4. Cron / worker `reorder-buyer` emails ops a **PO draft** (vendor text from `preferredVendor`).
+
+**Wire secrets (local)**
+
+```text
+copy solforge-secrets.example.json solforge-secrets.json
+# baseUrl: https://solforge.lonetreeacres.com
+# farmSecret: same value as FLOCK_FARM_SECRET or CRON_SECRET on SolForge
+```
+
+**Ensure SKUs on a live SolForge DB** (no full re-seed):
+
+```bash
+curl -H "Authorization: Bearer $FLOCK_FARM_SECRET" \
+  https://solforge.lonetreeacres.com/api/farm/flock-consume
+```
+
+### Online auto-buy? Not yet
+
+| Agent | What it does today |
+|-------|--------------------|
+| `reorder-buyer` | Creates `ReorderRequest` + emails PO draft to ops |
+| `price-watcher` | Cost notes (EIA/steel) — not a shopping cart |
+
+There is **no** Amazon / Chewy / McMaster auto-checkout in SolForge. Best path now:
+
+1. Keep min-qty → PO draft email (human buys at feed store or online).
+2. Later: add a `purchase-executor` agent with approval limits + one supplier API — never from the static Flock site.

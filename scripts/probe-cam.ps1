@@ -1,6 +1,6 @@
 # Probe Flock Yeah LAN test camera
-# Usage: powershell -File scripts/probe-cam.ps1 [-HostIp 192.168.68.116]
-param([string]$HostIp = "192.168.68.116")
+# Usage: powershell -File scripts/probe-cam.ps1 [-HostIp 192.168.68.118]
+param([string]$HostIp = "192.168.68.118")
 
 Write-Host ""
 Write-Host ("=== Probe " + $HostIp + " ===")
