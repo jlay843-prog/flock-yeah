@@ -1,5 +1,6 @@
 /**
  * Flock Yeah — shop UI with merch art + lightbox + Stripe/SolForge handoff
+ * Images: SVG/instant shell → WebP thumbs (lazy) → full WebP only in lightbox.
  */
 (function (global) {
   "use strict";
@@ -20,11 +21,98 @@
       .replace(/"/g, "&quot;");
   }
 
+  /**
+   * Map assets/merch/foo.png → optimized WebP paths when present.
+   * Thumbs (~480px) for grid; full (~960px) for lightbox.
+   */
+  function merchVariants(src) {
+    const original = String(src || "");
+    const m = original.match(/^(?:\.\/)?assets\/merch\/([^/]+)\.(png|jpe?g|webp)$/i);
+    if (!m) {
+      return { original: original, thumb: original, full: original, hasWebp: false };
+    }
+    const base = m[1];
+    return {
+      original: original,
+      thumb: "assets/merch/thumbs/" + base + ".webp",
+      full: "assets/merch/full/" + base + ".webp",
+      hasWebp: true,
+    };
+  }
+
   function itemImage(item) {
     if (item.image) return item.image;
     const design =
       item.designId && data().getDesign ? data().getDesign(item.designId) : null;
     return (design && (design.mockup || design.art)) || "";
+  }
+
+  function itemArtFallback(item) {
+    const design =
+      item.designId && data().getDesign ? data().getDesign(item.designId) : null;
+    if (design && design.art) return design.art;
+    return "designs/merch/flock-yeah-classic.svg";
+  }
+
+  /** Progressive card image: optional SVG shell, then WebP thumb (or PNG). */
+  function catalogImgHtml(item, index) {
+    const raw = itemImage(item);
+    const art = itemArtFallback(item);
+    const v = merchVariants(raw);
+    const eager = index < 6; // first row-ish: fetch soon; rest lazy
+    const loading = eager ? "eager" : "lazy";
+    const prio = index < 3 ? ' fetchpriority="high"' : "";
+    const alt = escapeHtml(item.name);
+    const fallbackOnErr =
+      "this.onerror=null;this.src='" + escapeHtml(art).replace(/'/g, "\\'") + "'";
+
+    if (!raw) {
+      return (
+        '<img src="' +
+        art +
+        '" alt="' +
+        alt +
+        '" loading="' +
+        loading +
+        '" decoding="async" class="shop-img is-ready">'
+      );
+    }
+
+    // picture: webp thumb preferred; original PNG only as last resort
+    if (v.hasWebp) {
+      return (
+        '<picture class="shop-picture">' +
+        '<source srcset="' +
+        v.thumb +
+        '" type="image/webp">' +
+        '<img src="' +
+        v.original +
+        '" alt="' +
+        alt +
+        '" loading="' +
+        loading +
+        '" decoding="async" width="480" height="480" class="shop-img"' +
+        prio +
+        " onerror=\"" +
+        fallbackOnErr +
+        '" onload="this.classList.add(\'is-ready\')">' +
+        "</picture>"
+      );
+    }
+
+    return (
+      '<img src="' +
+      raw +
+      '" alt="' +
+      alt +
+      '" loading="' +
+      loading +
+      '" decoding="async" class="shop-img"' +
+      prio +
+      " onerror=\"" +
+      fallbackOnErr +
+      '" onload="this.classList.add(\'is-ready\')">'
+    );
   }
 
   function ensureLightbox() {
@@ -37,7 +125,7 @@
     box.setAttribute("aria-modal", "true");
     box.innerHTML =
       '<div class="merch-lightbox-card">' +
-      '<img id="lb-img" alt="">' +
+      '<img id="lb-img" alt="" decoding="async" width="960" height="960">' +
       '<h3 id="lb-title"></h3>' +
       '<p class="shop-saying" id="lb-saying"></p>' +
       '<p id="lb-blurb" class="muted"></p>' +
@@ -69,27 +157,34 @@
     const item = (SHOP_ITEMS || []).find((i) => i.id === itemId);
     if (!item) return;
     const box = ensureLightbox();
-    const design = getDesign
-      ? getDesign(designId || item.designId)
-      : null;
-    const img = (design && (design.mockup || design.art)) || itemImage(item);
+    const design = getDesign ? getDesign(designId || item.designId) : null;
+    const raw = (design && (design.mockup || design.art)) || itemImage(item);
+    const v = merchVariants(raw);
+    // Prefer optimized full WebP; fall back to original PNG/SVG
+    const imgEl = el("lb-img");
+    imgEl.alt = item.name;
+    imgEl.onload = function () {
+      imgEl.classList.add("is-ready");
+    };
+    imgEl.onerror = function () {
+      imgEl.onerror = null;
+      imgEl.src = raw || itemArtFallback(item);
+    };
+    imgEl.classList.remove("is-ready");
+    imgEl.src = v.full || raw;
 
-    el("lb-img").src = img;
-    el("lb-img").alt = item.name;
     el("lb-title").textContent = item.name;
-    el("lb-saying").textContent = design
-      ? "“" + design.saying + "”"
-      : "";
+    el("lb-saying").textContent = design ? "“" + design.saying + "”" : "";
     el("lb-blurb").textContent =
-      item.blurb +
-      (formatMoney ? " · " + formatMoney(item.priceCents) : "");
+      item.blurb + (formatMoney ? " · " + formatMoney(item.priceCents) : "");
 
     const thumbs = el("lb-thumbs");
     thumbs.innerHTML = (MERCH_DESIGNS || [])
       .map((d) => {
-        const src = d.mockup || d.art;
-        const active =
-          design && d.id === design.id ? " is-active" : "";
+        const srcRaw = d.mockup || d.art;
+        const tv = merchVariants(srcRaw);
+        const src = tv.thumb || srcRaw;
+        const active = design && d.id === design.id ? " is-active" : "";
         return (
           '<button type="button" class="' +
           active.trim() +
@@ -101,7 +196,7 @@
           src +
           '" alt="' +
           escapeHtml(d.saying) +
-          '"></button>'
+          '" loading="lazy" decoding="async" width="72" height="72"></button>'
         );
       })
       .join("");
@@ -126,18 +221,11 @@
     const { SHOP_ITEMS, getDesign, formatMoney } = data();
     if (!grid || !SHOP_ITEMS) return;
 
-    grid.innerHTML = SHOP_ITEMS.map((item) => {
+    grid.innerHTML = SHOP_ITEMS.map((item, index) => {
       const design = item.designId && getDesign ? getDesign(item.designId) : null;
-      const img = itemImage(item);
       const saying = design
-        ? '<p class="shop-saying">“' + escapeHtml(design.saying) + '”</p>'
+        ? '<p class="shop-saying">“' + escapeHtml(design.saying) + "”</p>"
         : "";
-      const fallback =
-        "this.onerror=null;this.src='" +
-        (design && design.art
-          ? design.art
-          : "designs/merch/flock-yeah-classic.svg") +
-        "'";
       return (
         '<article class="shop-card" data-kind="' +
         item.kind +
@@ -151,15 +239,7 @@
         '" aria-label="Preview ' +
         escapeHtml(item.name) +
         '">' +
-        (img
-          ? '<img src="' +
-            img +
-            '" alt="' +
-            escapeHtml(item.name) +
-            '" loading="eager" onerror="' +
-            fallback +
-            '">'
-          : '<img src="designs/merch/flock-yeah-classic.svg" alt="">') +
+        catalogImgHtml(item, index) +
         "</button>" +
         '<h3 data-open="' +
         item.id +
@@ -202,17 +282,32 @@
     const wall = el("design-wall");
     const { MERCH_DESIGNS } = data();
     if (!wall || !MERCH_DESIGNS) return;
-    wall.innerHTML = MERCH_DESIGNS.map((d) => {
-      const src = d.mockup || d.art;
+    wall.innerHTML = MERCH_DESIGNS.map((d, index) => {
+      const raw = d.mockup || d.art;
+      const v = merchVariants(raw);
+      const src = v.thumb || raw;
+      const loading = index < 4 ? "eager" : "lazy";
       return (
         '<figure class="design-tile" data-design="' +
         d.id +
         '">' +
-        '<img src="' +
-        src +
-        '" alt="' +
-        escapeHtml(d.saying) +
-        '" loading="eager">' +
+        (v.hasWebp
+          ? '<picture><source srcset="' +
+            v.thumb +
+            '" type="image/webp"><img src="' +
+            v.original +
+            '" alt="' +
+            escapeHtml(d.saying) +
+            '" loading="' +
+            loading +
+            '" decoding="async" width="480" height="480" class="shop-img" onload="this.classList.add(\'is-ready\')"></picture>'
+          : '<img src="' +
+            src +
+            '" alt="' +
+            escapeHtml(d.saying) +
+            '" loading="' +
+            loading +
+            '" decoding="async" class="shop-img" onload="this.classList.add(\'is-ready\')">') +
         "<figcaption><strong>" +
         escapeHtml(d.saying) +
         "</strong><span>" +

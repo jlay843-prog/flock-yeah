@@ -483,8 +483,12 @@ code {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 0;
+  z-index: 2;
   background: #0a100d;
+}
+
+.stage-live-video {
+  background: #000;
 }
 
 .cam-stream-status {
@@ -1157,14 +1161,70 @@ textarea:focus {
   text-align: left;
 }
 
-.shop-art img {
+.shop-art .shop-picture,
+.shop-art img,
+.shop-art picture {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
+}
+
+.shop-art img {
+  object-fit: cover;
   background: var(--cream);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.shop-art img.is-ready,
+.shop-art img[src$=".svg"] {
+  opacity: 1;
+}
+
+/* Soft shimmer while WebP/PNG arrives (avoids empty flash) */
+.shop-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.35) 45%,
+    transparent 65%
+  );
+  background-size: 200% 100%;
+  animation: shop-shimmer 1.2s ease-in-out infinite;
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+
+.shop-art:has(img.is-ready)::after,
+.shop-art:has(img[src$=".svg"])::after {
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes shop-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+.design-tile img.shop-img {
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.design-tile img.shop-img.is-ready,
+.design-tile img[src$=".svg"] {
+  opacity: 1;
 }
 
 .shop-card h3 {
