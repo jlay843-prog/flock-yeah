@@ -49,10 +49,10 @@
       id: "run-b",
       name: "Chicken Run",
       short: "Run",
-      blurb: "Outdoor run & dig sites — camera 2 coming online.",
+      blurb: "Outdoor run & dig sites — live camera 2.",
       color: "#065f46",
       accent: "#fbbf24",
-      status: "soon",
+      status: "live",
       kind: "live",
     },
     {

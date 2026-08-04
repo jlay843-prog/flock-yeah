@@ -1,8 +1,7 @@
 /**
  * Flock Yeah — public AREA camera defaults (no secrets).
  * Cam 1 Coop · Cam 2 Chicken Run · Cam 3 donate CTA overlay (no stream).
- * Coop → same-origin /cam/* (go2rtc on the farm).
- * Run reserved for 2nd camera (mode: none until live).
+ * Streams are same-origin /cam/* → SolForge → go2rtc on the farm.
  */
 (function (global) {
   "use strict";
@@ -10,10 +9,10 @@
   const CamConfig = {
     discovery: {
       host: "",
-      vendor: "",
+      vendor: "Reolink",
       mac: "",
       openPorts: [],
-      notes: "Cam 1 Coop live · Cam 2 Run soon · Cam 3 donate CTA (no hardware).",
+      notes: "Cam 1 Coop live · Cam 2 Chicken Run live · Cam 3 donate CTA.",
     },
 
     /** Keys match AREA_CAMS ids in flock-data.js */
@@ -21,14 +20,16 @@
       "nest-a": {
         mode: "mp4",
         label: "Coop Cam",
-        mp4Url: "/cam/live.mp4",
-        snapshotUrl: "/cam/snap",
+        mp4Url: "/cam/coop/live.mp4",
+        snapshotUrl: "/cam/coop/snap",
         refreshMs: 2000,
       },
       "run-b": {
-        mode: "none",
+        mode: "mp4",
         label: "Chicken Run",
-        comingSoon: true,
+        mp4Url: "/cam/run/live.mp4",
+        snapshotUrl: "/cam/run/snap",
+        refreshMs: 2000,
       },
       "donate-c": {
         mode: "cta",

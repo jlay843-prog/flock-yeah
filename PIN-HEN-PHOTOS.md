@@ -38,7 +38,7 @@ Specs: ≤800px, &lt;150 KB JPG. Site prefers `photoReal`, falls back to SVG.
 | Slot | Name | Role |
 |------|------|------|
 | **1** | **Coop Cam** (`nest-a`) | Live indoors / nests |
-| **2** | **Chicken Run** (`run-b`) | Live outdoor run (hardware next) |
+| **2** | **Chicken Run** (`run-b`) | Live outdoor run (`/cam/run/*`) |
 | **3** | **Want more chickens?** (`donate-c`) | CTA overlay — *donate today* (no hardware) |
 
 - Area cams only — not 31 private streams.  

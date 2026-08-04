@@ -17,8 +17,15 @@
       "nest-a": {
         mode: "mp4",
         label: "Coop Cam",
-        mp4Url: "/cam/live.mp4",
-        snapshotUrl: "/cam/snap",
+        mp4Url: "/cam/coop/live.mp4",
+        snapshotUrl: "/cam/coop/snap",
+        refreshMs: 2000,
+      },
+      "run-b": {
+        mode: "mp4",
+        label: "Chicken Run",
+        mp4Url: "/cam/run/live.mp4",
+        snapshotUrl: "/cam/run/snap",
         refreshMs: 2000,
       },
     },
