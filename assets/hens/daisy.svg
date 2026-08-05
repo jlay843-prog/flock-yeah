@@ -6,12 +6,12 @@
     </linearGradient>
   </defs>
   <circle cx="60" cy="60" r="56" fill="url(#bg-daisy)" stroke="#1a1816" stroke-width="3"/>
-  <ellipse cx="60" cy="74" rx="30" ry="24" fill="#b45309"/>
-  <circle cx="72" cy="48" r="20" fill="#b45309"/>
-  <polygon points="88,48 106,53 88,60" fill="#fde68a"/>
+  <ellipse cx="60" cy="74" rx="30" ry="24" fill="#3e3889"/>
+  <circle cx="72" cy="48" r="20" fill="#3e3889"/>
+  <polygon points="88,48 106,53 88,60" fill="#8237bd"/>
   <circle cx="77" cy="46" r="3.2" fill="#1a1816"/>
   <path d="M62 34 Q70 22 78 32" fill="#ea580c" stroke="#1a1816" stroke-width="0.8"/>
   
   
-  <text x="60" y="112" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#1a1816">Daisy</text>
+  <text x="60" y="112" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="#1a1816">Daisy</text>
 </svg>

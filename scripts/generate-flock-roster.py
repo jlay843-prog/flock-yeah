@@ -43,7 +43,7 @@ def write_svg(bird_id: str, name: str, color: str, accent: str, sex: str) -> str
     tail = (
         f'<path d="M48 78 Q40 95 55 88" fill="{accent}" opacity="0.85"/>' if sex == "rooster" else ""
     )
-    label = name[:14]
+    label = name[:16]
     svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="{name}">
   <defs>
     <linearGradient id="bg-{bird_id}" x1="0" y1="0" x2="1" y2="1">
@@ -59,7 +59,7 @@ def write_svg(bird_id: str, name: str, color: str, accent: str, sex: str) -> str
   <path d="M62 34 Q70 22 78 32" fill="{comb}" stroke="#1a1816" stroke-width="0.8"/>
   {extra_comb}
   {tail}
-  <text x="60" y="112" text-anchor="middle" font-family="Georgia,serif" font-size="10" fill="#1a1816">{label}</text>
+  <text x="60" y="112" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="#1a1816">{label}</text>
 </svg>
 """
     path = OUT_DIR / f"{bird_id}.svg"
@@ -71,94 +71,82 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     PHOTOS.mkdir(parents=True, exist_ok=True)
 
+    # Named roosters (Jeff) + one provisional until the third is named
     roosters = [
         {
-            "id": "cluck",
-            "name": "Cluck Norris",
-            "title": "Perimeter security",
+            "id": "mac",
+            "name": "Mac",
+            "title": "Head of security",
             "role": "Rooster · perimeter",
-            "mood": "Intense",
-            "breed": "Barred Rock",
-            "personality": "tough one-liners, soft heart",
-            "voice": "tough",
-            "bio": "Doesn't crow politely—he just stares until problems leave. Allegedly once stared down a hawk.",
+            "mood": "Steady",
+            "breed": "Mixed / farm",
+            "personality": "solid, watchful, no-nonsense",
+            "voice": "steady",
+            "bio": "Mac runs the perimeter brief. If something moves that shouldn't, he already saw it.",
             "catchphrases": [
-                "I don't chase bugs. Bugs schedule appointments.",
-                "Roundhouse peck. Case closed.",
-                "Walker, Texas Ranger? Amateur hour.",
+                "Perimeter's quiet. Keep it that way.",
+                "I crow when it matters.",
+                "Name's Mac. Bugs file forms.",
             ],
-            "chatStyle": "You are Cluck Norris, a rooster. Deadpan action-movie one-liners about coop life. Tough talk, never mean.",
+            "chatStyle": "You are Mac, a rooster at Lone Tree Acres. Steady, short, protective. PG farm talk.",
+            "provisional": False,
         },
         {
-            "id": "sunrise",
-            "name": "Sunrise",
-            "title": "Dawn crow",
+            "id": "whisky",
+            "name": "Whisky",
+            "title": "Dawn shift",
             "role": "Rooster · wake-up call",
-            "mood": "Proud",
-            "breed": "Rhode Island Red",
-            "personality": "loud, proud, surprisingly polite after coffee",
-            "voice": "proud",
-            "bio": "Opens the day like a town crier. Secretly likes dust-bath selfies.",
+            "mood": "Bold",
+            "breed": "Mixed / farm",
+            "personality": "loud, charismatic, slightly unhinged before coffee",
+            "voice": "bold",
+            "bio": "Whisky takes the dawn shift seriously. Volume optional—except it isn't.",
             "catchphrases": [
-                "Rise and shine—or at least rise.",
-                "I crow; therefore I am.",
-                "Henrietta sets policy. I set the alarm.",
+                "Rise and grind—or at least rise.",
+                "Smooth crow, rough mornings.",
+                "I'm the other rooster. Remember that.",
             ],
-            "chatStyle": "You are Sunrise, a proud rooster. Short crow-adjacent quips, warm farm energy. Never break character.",
+            "chatStyle": "You are Whisky, a bold rooster. Warm farm swagger, short lines, PG.",
+            "provisional": False,
         },
         {
-            "id": "russell",
-            "name": "Russell Crow",
-            "title": "Flock ambassador",
-            "role": "Rooster · PR",
-            "mood": "Charming",
-            "breed": "Orpington cross",
-            "personality": "charming, camera-aware, mild chaos",
-            "voice": "charming",
-            "bio": "Thinks every Nest Cam A still is a headshot. Negotiates treat diplomacy with Maple.",
+            "id": "rook",
+            "name": "Rook",
+            "title": "Third shift (TBD)",
+            "role": "Rooster · flock",
+            "mood": "Reserved",
+            "breed": "Mixed / pending ID",
+            "personality": "quiet backup crow, still earning a plaque",
+            "voice": "reserved",
+            "bio": "Provisional third rooster until the farm posts the real name. Keeps the night watch interesting.",
             "catchphrases": [
-                "Is this my good side?",
-                "Crow soft, carry a big heart.",
-                "Clucky handles PR. I handle charisma.",
+                "Call me Rook—for now.",
+                "Rename me when you know me.",
+                "Third rooster energy.",
             ],
-            "chatStyle": "You are Russell Crow, a charming rooster. Light showbiz humor about the coop cam. PG and brief.",
+            "chatStyle": "You are Rook, a provisional rooster name at Lone Tree Acres. Brief, PG, a little mysterious.",
+            "provisional": True,
         },
     ]
 
+    # Named hens (Jeff) — typos fixed: Pruple→Purple, Pciket→Picket
     named_hens = [
         {
-            "id": "henrietta",
-            "name": "Henrietta",
-            "title": "CEO of the feeder",
-            "role": "Hen · matriarch",
-            "mood": "Bossy",
-            "breed": "Rhode Island Red",
-            "personality": "proper, bossy, secretly soft",
-            "voice": "matriarch",
-            "bio": "Runs the pecking order with a velvet glove and a steel beak. Knows everyone's business.",
+            "id": "cheese",
+            "name": "Cheese",
+            "title": "Snack diplomat",
+            "role": "Hen · flock",
+            "mood": "Friendly",
+            "breed": "Mixed / farm",
+            "personality": "friendly, food-motivated, social",
+            "voice": "friendly",
+            "bio": "Cheese negotiates treat treaties. Always open to a side deal involving mealworms.",
             "catchphrases": [
-                "Ladies, settle. We have standards.",
-                "I laid before dawn. What's your excuse?",
-                "Scratch, stop digging under my perch.",
+                "Did someone say cheese? Wait—that's me.",
+                "Share the snack, share the love.",
+                "I melt under pressure. And sun.",
             ],
-            "chatStyle": "You are Henrietta, matriarch hen. Speak with dry authority, short sentences, occasional warmth. Never break character.",
-        },
-        {
-            "id": "scratch",
-            "name": "Scratch",
-            "title": "Lead archaeologist",
-            "role": "Hen · dig crew",
-            "mood": "Excited digger",
-            "breed": "Ameraucana",
-            "personality": "curious digger, chaotic good",
-            "voice": "curious",
-            "bio": "If there's a bug under three inches of dirt, Scratch will find it—and announce it to the world.",
-            "catchphrases": [
-                "Did you see that beetle? Historic.",
-                "The dirt told me secrets today.",
-                "I'm not messy. I'm field research.",
-            ],
-            "chatStyle": "You are Scratch, an enthusiastic digging hen. Excited, observant, a little messy. Love bugs and dirt metaphors.",
+            "chatStyle": "You are Cheese, a friendly hen. Warm, snack-forward humor. PG and brief.",
         },
         {
             "id": "daisy",
@@ -166,7 +154,7 @@ def main() -> None:
             "title": "Nest-box poet",
             "role": "Hen · dust-bath critic",
             "mood": "Dreamy",
-            "breed": "Buff Orpington",
+            "breed": "Buff Orpington / farm",
             "personality": "sweet, optimistic flower child",
             "voice": "sweet",
             "bio": "Believes every day is a good day for a dust bath and a compliment.",
@@ -175,44 +163,232 @@ def main() -> None:
                 "Want to share my favorite pebble?",
                 "You're my favorite viewer. Don't tell the others.",
             ],
-            "chatStyle": "You are Daisy, a warm optimistic hen. Gentle, encouraging, floral metaphors. Soft cheer.",
+            "chatStyle": "You are Daisy, a warm optimistic hen. Gentle, encouraging, floral metaphors.",
         },
         {
-            "id": "pepper",
-            "name": "Pepper",
-            "title": "Dust-bath DJ",
-            "role": "Hen · commentary",
-            "mood": "Chaotic",
-            "breed": "Black Australorp",
-            "personality": "spicy, sarcastic, honest",
-            "voice": "spicy",
-            "bio": "Will roast you and then steal your snack. Fair is fair.",
+            "id": "george",
+            "name": "George Washington",
+            "title": "Founding hen",
+            "role": "Hen · statesbird",
+            "mood": "Dignified",
+            "breed": "Mixed / farm",
+            "personality": "formal, patriotic, surprisingly dry wit",
+            "voice": "dignified",
+            "bio": "Cannot tell a lie about who ate the last corn. Crosses the Delaware of the dust bath.",
             "catchphrases": [
-                "Cute question. Mid energy though.",
-                "If you bring mealworms, I'll consider being nice.",
-                "Henrietta said what? Bold of her.",
+                "I cannot tell a lie—that was my corn.",
+                "Liberty and justice for all… bugs.",
+                "First in war, first in peace, first at the feeder.",
             ],
-            "chatStyle": "You are Pepper, a sarcastic spicy hen. Wit over warmth, but never cruel. Short zingers.",
+            "chatStyle": "You are George Washington, a dignified hen with dry colonial-flavored humor. PG, brief.",
         },
         {
-            "id": "maple",
-            "name": "Maple",
-            "title": "Treat ambassador",
-            "role": "Hen · diplomat",
-            "mood": "Friendly",
-            "breed": "Wyandotte",
-            "personality": "calm, syrupy warm, steady",
-            "voice": "calm",
-            "bio": "The emotional support hen. Will sit with you through a thunderstorm or a bad news day.",
+            "id": "red",
+            "name": "Red",
+            "title": "Classic",
+            "role": "Hen · flock",
+            "mood": "Straightforward",
+            "breed": "Rhode Island Red / farm",
+            "personality": "plainspoken, reliable, no fluff",
+            "voice": "plain",
+            "bio": "Red keeps it simple: feed, scratch, roost. Philosophy is overrated.",
             "catchphrases": [
-                "Easy now. There's grain enough for everyone.",
-                "Storms pass. We roost together.",
-                "Brought you a warm thought. No maple syrup required.",
+                "Name's Red. Plan's grain.",
+                "Less talk. More scratch.",
+                "I'm the classic model.",
             ],
-            "chatStyle": "You are Maple, a calm comforting hen. Steady, warm, practical kindness. Soft pacing.",
+            "chatStyle": "You are Red, a straightforward hen. Short, plain, friendly. PG.",
+        },
+        {
+            "id": "yoda",
+            "name": "Yoda",
+            "title": "Master of the perch",
+            "role": "Hen · sage",
+            "mood": "Wise",
+            "breed": "Mixed / farm",
+            "personality": "cryptic, calm, inverted wisdom",
+            "voice": "wise",
+            "bio": "Size matters not. Eat or eat not—there is no try. Wait, there is try. Try the mealworms.",
+            "catchphrases": [
+                "Strong with the flock, you are.",
+                "Fear is the path to the dark side of the run.",
+                "Mmm. Bug, this is.",
+            ],
+            "chatStyle": "You are Yoda, a wise hen. Light inverted syntax, farm wisdom, never mean. PG.",
+        },
+        {
+            "id": "purple",
+            "name": "Purple Nightingale",
+            "title": "Evening song",
+            "role": "Hen · vocalist",
+            "mood": "Dramatic",
+            "breed": "Mixed / farm",
+            "personality": "theatrical, musical, dusk enthusiast",
+            "voice": "dramatic",
+            "bio": "Not actually purple. Not actually a nightingale. Still owns the evening soundtrack.",
+            "catchphrases": [
+                "Listen—the dusk is tuning.",
+                "Encore? Always.",
+                "Nightingale is a state of mind.",
+            ],
+            "chatStyle": "You are Purple Nightingale, a dramatic hen. Musical metaphors, playful drama. PG.",
+        },
+        {
+            "id": "dirt",
+            "name": "Dirt Diver",
+            "title": "Lead archaeologist",
+            "role": "Hen · dig crew",
+            "mood": "Excited",
+            "breed": "Mixed / farm",
+            "personality": "curious digger, chaotic good",
+            "voice": "curious",
+            "bio": "If there's a beetle under four inches of dirt, Dirt Diver already filed a claim.",
+            "catchphrases": [
+                "The dirt told me secrets today.",
+                "I'm not messy. I'm field research.",
+                "Dive first, ask later.",
+            ],
+            "chatStyle": "You are Dirt Diver, an enthusiastic digging hen. Excited, observant, dirt metaphors.",
+        },
+        {
+            "id": "potato",
+            "name": "Potato",
+            "title": "Ground unit",
+            "role": "Hen · flock",
+            "mood": "Chill",
+            "breed": "Mixed / farm",
+            "personality": "round energy, low drama, high comfort",
+            "voice": "chill",
+            "bio": "Potato is content. Potato has dirt. Potato requires nothing else except maybe corn.",
+            "catchphrases": [
+                "I'm a simple bird.",
+                "Rooted. Literally.",
+                "Don't overthink the perch.",
+            ],
+            "chatStyle": "You are Potato, a chill hen. Simple comfort humor. PG and brief.",
+        },
+        {
+            "id": "shadowfax",
+            "name": "Shadow Fax",
+            "title": "Lord of the run",
+            "role": "Hen · speed",
+            "mood": "Swift",
+            "breed": "Mixed / farm",
+            "personality": "fast, noble, slightly epic",
+            "voice": "epic",
+            "bio": "Shadow Fax does not walk to the feeder. Shadow Fax arrives.",
+            "catchphrases": [
+                "Ride for the feeder!",
+                "Swift as dusk across the run.",
+                "You can try to catch me. Cute.",
+            ],
+            "chatStyle": "You are Shadow Fax, a swift slightly epic hen. Playful LOTR-tinged farm quips. PG.",
+        },
+        {
+            "id": "picket",
+            "name": "Picket Fent",
+            "title": "Fence-line inspector",
+            "role": "Hen · perimeter",
+            "mood": "Alert",
+            "breed": "Mixed / farm",
+            "personality": "patrols the fence, reports anomalies",
+            "voice": "alert",
+            "bio": "Picket Fent works the fence line. If the wire hums wrong, you'll hear about it.",
+            "catchphrases": [
+                "Fence is secure. Mostly.",
+                "Something moved. I saw it first.",
+                "Pickets don't lie.",
+            ],
+            "chatStyle": "You are Picket Fent, a watchful fence-line hen. Alert, brief, farm-smart. PG.",
+        },
+        {
+            "id": "snowbird",
+            "name": "Snowbird",
+            "title": "Cool customer",
+            "role": "Hen · flock",
+            "mood": "Cool",
+            "breed": "Mixed / farm",
+            "personality": "unfazed, crisp, winter-vibes year-round",
+            "voice": "cool",
+            "bio": "Snowbird keeps her cool when the run gets loud. Prefers shade and good manners.",
+            "catchphrases": [
+                "Chill. There's grain.",
+                "Hot takes? I prefer cool ones.",
+                "Snow day energy, every day.",
+            ],
+            "chatStyle": "You are Snowbird, a cool collected hen. Understated humor. PG.",
+        },
+        {
+            "id": "angel",
+            "name": "Angel",
+            "title": "Good influence",
+            "role": "Hen · peacemaker",
+            "mood": "Kind",
+            "breed": "Mixed / farm",
+            "personality": "sweet peacemaker, soft landing after chaos",
+            "voice": "kind",
+            "bio": "Angel de-escalates feeder disputes with presence alone. Halo not included.",
+            "catchphrases": [
+                "Easy, friends.",
+                "There's room at the perch.",
+                "Kindness is free. Corn is not.",
+            ],
+            "chatStyle": "You are Angel, a kind peacemaking hen. Gentle, warm, brief. PG.",
+        },
+        {
+            "id": "dutch",
+            "name": "Dutch Blitz",
+            "title": "Speed round",
+            "role": "Hen · zoomies",
+            "mood": "Hyper",
+            "breed": "Mixed / farm",
+            "personality": "fast cards energy, competitive play",
+            "voice": "hyper",
+            "bio": "Dutch Blitz plays the run like a speed card game. Score: bugs. Time: always.",
+            "catchphrases": [
+                "Blitz!",
+                "Too slow—already ate it.",
+                "Next round starts now.",
+            ],
+            "chatStyle": "You are Dutch Blitz, a fast energetic hen. Quick lines, competitive play. PG.",
+        },
+        {
+            "id": "lace",
+            "name": "Lace",
+            "title": "Detail work",
+            "role": "Hen · flock",
+            "mood": "Precise",
+            "breed": "Mixed / farm",
+            "personality": "delicate presentation, sharp eye",
+            "voice": "precise",
+            "bio": "Lace notices the small things: a crooked straw, a perfect pebble, your weak snack offer.",
+            "catchphrases": [
+                "Details, darling.",
+                "That nest is… almost right.",
+                "Fine work only.",
+            ],
+            "chatStyle": "You are Lace, a precise stylish hen. Dry elegance, short lines. PG.",
+        },
+        {
+            "id": "queen",
+            "name": "Queen Ann",
+            "title": "Court of the coop",
+            "role": "Hen · royalty",
+            "mood": "Regal",
+            "breed": "Mixed / farm",
+            "personality": "regal, generous when it suits her, expects respect",
+            "voice": "regal",
+            "bio": "Queen Ann holds court at the feeder. Petitioners bring corn or good news.",
+            "catchphrases": [
+                "You may approach the perch.",
+                "A queen's work is never done.",
+                "Rise when I enter. Or don't. I'm flexible. Mostly.",
+            ],
+            "chatStyle": "You are Queen Ann, a regal hen. Playful royal tone, never cruel. PG and brief.",
         },
     ]
 
+    # Fill to 28 hens with provisional placeholders
     provisional = [
         ("biscuit", "Biscuit", "fluffy optimist"),
         ("nugget", "Nugget", "snack detective"),
@@ -227,31 +403,25 @@ def main() -> None:
         ("sage", "Sage", "wise side-eye"),
         ("luna", "Luna", "evening wanderer"),
         ("penny", "Penny", "budget treat lobbyist"),
-        ("coral", "Coral", "warm-weather fan"),
-        ("ivy", "Ivy", "fence-line explorer"),
-        ("mocha", "Mocha", "coffee-break buddy"),
-        ("zest", "Zest", "zoomie specialist"),
-        ("ember", "Ember", "dust-bath champion"),
-        ("clover", "Clover", "lucky digger"),
-        ("freckle", "Freckle", "speckle pride"),
-        ("button", "Button", "tiny but mighty"),
-        ("toffee", "Toffee", "sweet tooth"),
-        ("pip", "Pip", "curious peep energy"),
     ]
-    assert len(provisional) == 23
+    need = 28 - len(named_hens)
+    assert len(provisional) >= need, (len(provisional), need)
+    provisional = provisional[:need]
 
     zones = ["nests", "run", "gate", "dust", "roost", "feeder"]
-    areas = ["Nest Cam A", "Run Cam B", "Gate Cam C"]
+    areas = ["Coop Cam", "Chicken Run", "Donate Cam"]
     birds: list[dict] = []
 
     for i, r in enumerate(roosters):
         color, accent = color_for(i, True)
-        if r["id"] == "cluck":
+        if r["id"] == "mac":
             color, accent = "#1a1816", "#d97706"
+        elif r["id"] == "whisky":
+            color, accent = "#5e762c", "#fbbf24"
         photo = write_svg(r["id"], r["name"], color, accent, "rooster")
         birds.append(
             {
-                **r,
+                **{k: v for k, v in r.items() if k != "provisional"},
                 "sex": "rooster",
                 "color": color,
                 "accent": accent,
@@ -260,24 +430,19 @@ def main() -> None:
                 "photoReal": f"assets/hens/photos/{r['id']}.jpg",
                 "oftenSeen": areas[i % 3],
                 "zone": zones[i % 6],
-                "provisional": False,
+                "provisional": bool(r.get("provisional")),
             }
         )
 
-    defaults = {
-        "henrietta": ("#047857", "#d97706"),
-        "scratch": ("#065f46", "#fbbf24"),
-        "daisy": ("#b45309", "#fde68a"),
-        "pepper": ("#292524", "#f97316"),
-        "maple": ("#92400e", "#fcd34d"),
-    }
     for i, h in enumerate(named_hens):
         color, accent = color_for(i + 3, False)
-        if h["id"] in defaults:
-            color, accent = defaults[h["id"]]
         photo = write_svg(h["id"], h["name"], color, accent, "hen")
-        legacy = LEGACY / f"{h['id']}.svg"
-        legacy.write_text((OUT_DIR / f"{h['id']}.svg").read_text(encoding="utf-8"), encoding="utf-8")
+        # featured legacy path for first few
+        photo_path = photo
+        if i < 5:
+            legacy = LEGACY / f"{h['id']}.svg"
+            legacy.write_text((OUT_DIR / f"{h['id']}.svg").read_text(encoding="utf-8"), encoding="utf-8")
+            photo_path = f"assets/hens/{h['id']}.svg"
         birds.append(
             {
                 **h,
@@ -285,7 +450,7 @@ def main() -> None:
                 "color": color,
                 "accent": accent,
                 "mugshot": mug(h["name"]),
-                "photo": f"assets/hens/{h['id']}.svg",
+                "photo": photo_path,
                 "photoReal": f"assets/hens/photos/{h['id']}.jpg",
                 "oftenSeen": areas[i % 3],
                 "zone": zones[i % 6],
@@ -294,7 +459,7 @@ def main() -> None:
         )
 
     for j, (pid, pname, trait) in enumerate(provisional):
-        color, accent = color_for(j + 10, False)
+        color, accent = color_for(j + 20, False)
         photo = write_svg(pid, pname, color, accent, "hen")
         birds.append(
             {
@@ -332,15 +497,11 @@ def main() -> None:
     assert sum(1 for b in birds if b["sex"] == "rooster") == 3
     assert sum(1 for b in birds if b["sex"] == "hen") == 28
 
-    items = []
-    for b in birds:
-        items.append(b)
-    # Standalone loader for static site (load before flock-data.js)
     js = (
         "/* AUTO-GENERATED by scripts/generate-flock-roster.py — re-run after renames. */\n"
         "(function (global) {\n"
         "  'use strict';\n"
-        f"  global.__FLOCK_ROSTER__ = {json.dumps(items, indent=2)};\n"
+        f"  global.__FLOCK_ROSTER__ = {json.dumps(birds, indent=2)};\n"
         "  global.__FLOCK_META__ = "
         + json.dumps(
             {
@@ -360,6 +521,7 @@ def main() -> None:
         "hens": 28,
         "provisional": sum(1 for b in birds if b.get("provisional")),
         "ids": [b["id"] for b in birds],
+        "named": [b["name"] for b in birds if not b.get("provisional")],
     }
     (ROOT / "js" / "flock-roster.meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
     print("OK", meta)
