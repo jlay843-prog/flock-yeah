@@ -6,12 +6,16 @@
  *   Proxy reads solforge-secrets.json and POSTs to SolForge /api/farm/flock-consume.
  * solforgeErpEnabled — set false to skip ERP consume.
  *
- * notifyWebhook — POST JSON { contact, at, source } for alert signups.
+ * notifyWebhook — Formspree (same farm form as lonetreeacres.com inquiry).
+ *   Live LTA: https://formspree.io/f/xvzjvwqj
  */
 (function (global) {
   "use strict";
   global.EngageConfig = {
-    notifyWebhook: "",
+    /** Same Formspree form as Lone Tree Acres contact / inquiry. */
+    notifyWebhook: "https://formspree.io/f/xvzjvwqj",
+    /** formspree | json — Formspree wants Accept: application/json + email/message fields */
+    notifyProvider: "formspree",
     treatDispenseUrl: "",
     treatDispenseHeader: "",
     treatDispenseHeaderValue: "",

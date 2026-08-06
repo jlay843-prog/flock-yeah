@@ -208,6 +208,70 @@
     });
   }
 
+  function looksLikeEmail(s) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+  }
+
+  /**
+   * Submit notify signup to farm Formspree (same hook as lonetreeacres.com inquiry).
+   * Formspree docs: POST JSON with Accept: application/json.
+   */
+  function postNotifyWebhook(cfg, contact) {
+    const url = cfg.notifyWebhook;
+    if (!url) return Promise.resolve({ ok: false, skipped: true });
+
+    const isFormspree =
+      cfg.notifyProvider === "formspree" || /formspree\.io/i.test(url);
+    const message =
+      "Flock Yeah — Stay in the loop signup.\n" +
+      "Source: flock/hens\n" +
+      "Contact: " +
+      contact +
+      "\n" +
+      "Please add to coop cam / Clucky alerts list.\n";
+
+    let headers = { Accept: "application/json" };
+    let body;
+    if (isFormspree) {
+      // Match LTA inquiry fields so Formspree inbox is consistent.
+      const payload = {
+        _subject: "Flock Yeah — Stay in the loop",
+        interest: "Flock Yeah / coop cams",
+        source: "flock-yeah-hens",
+        message: message,
+        contact: contact,
+      };
+      if (looksLikeEmail(contact)) {
+        payload.email = contact;
+        payload._replyto = contact;
+      } else {
+        // Formspree often requires email — use farm inbox as shell, put phone in message.
+        payload.email = (FARM && FARM.email) || "jeffrey@lonetreeacres.com";
+        payload.phone = contact;
+        payload.name = "Flock visitor (phone/SMS)";
+      }
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify(payload);
+    } else {
+      headers["Content-Type"] = "application/json";
+      body = JSON.stringify({
+        contact: contact,
+        at: Date.now(),
+        source: "hens",
+      });
+    }
+
+    return fetch(url, { method: "POST", headers: headers, body: body }).then(
+      function (res) {
+        return res.json().catch(function () {
+          return {};
+        }).then(function (data) {
+          return { ok: res.ok, status: res.status, data: data };
+        });
+      }
+    );
+  }
+
   function renderNotify() {
     const form = el("notify-form");
     const status = el("notify-status");
@@ -216,7 +280,9 @@
       const saved = JSON.parse(localStorage.getItem(KEYS.notify) || "null");
       if (saved && saved.contact && status) {
         status.textContent =
-          "You're on the list (" + saved.contact + "). Nest Cam A weirdness inbound.";
+          "You're on the list (" +
+          saved.contact +
+          "). Coop cam / Clucky alerts when we post them.";
       }
     } catch (_) {}
     form.addEventListener("submit", function (e) {
@@ -227,30 +293,52 @@
       const row = { contact: contact, at: Date.now(), source: "hens" };
       localStorage.setItem(KEYS.notify, JSON.stringify(row));
       const cfg = global.EngageConfig || {};
-      if (cfg.notifyWebhook) {
-        fetch(cfg.notifyWebhook, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(row),
-        }).catch(function () {});
-      }
+      const mail = (FARM && FARM.email) || "jeffrey@lonetreeacres.com";
       const subject = encodeURIComponent("Flock Yeah notify signup");
       const body = encodeURIComponent(
-        "Please add me to Nest Cam A / daily Clucky line alerts.\n\nContact: " +
-          contact +
-          "\n"
+        "Please add me to coop cam / Clucky alerts.\n\nContact: " + contact + "\n"
       );
-      // Soft handoff to Jeff without requiring a backend
-      const mail = (FARM && FARM.email) || "jeffrey@lonetreeacres.com";
-      if (status) {
-        status.textContent =
-          "Saved. Optional: email Jeff so it’s on the farm list.";
-      }
       const mailBtn = el("notify-mail-jeff");
       if (mailBtn) {
         mailBtn.href = "mailto:" + mail + "?subject=" + subject + "&body=" + body;
-        mailBtn.hidden = false;
       }
+
+      if (status) status.textContent = "Sending to the farm list…";
+
+      postNotifyWebhook(cfg, contact)
+        .then(function (result) {
+          if (result && result.skipped) {
+            if (status) {
+              status.textContent =
+                "Saved on this device. Optional: email Jeff so it’s on the farm list.";
+            }
+            if (mailBtn) mailBtn.hidden = false;
+            return;
+          }
+          if (result && result.ok) {
+            if (status) {
+              status.textContent =
+                "You're on the farm list (" +
+                contact +
+                "). We'll use the same inbox as Lone Tree Acres inquiries.";
+            }
+            if (mailBtn) mailBtn.hidden = true;
+          } else {
+            if (status) {
+              status.textContent =
+                "Saved here, but the farm form didn’t accept it. Try Email Jeff.";
+            }
+            if (mailBtn) mailBtn.hidden = false;
+          }
+        })
+        .catch(function () {
+          if (status) {
+            status.textContent =
+              "Saved here, but network failed. Try Email Jeff as backup.";
+          }
+          if (mailBtn) mailBtn.hidden = false;
+        });
+
       if (input) input.value = "";
     });
   }
