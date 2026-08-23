@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Flock Yeah · Live Hen Cams · Lone Tree Acres</title>
-  <meta name="description" content="Flock Yeah chicken cams at Lone Tree Acres. Chat with Clucky and the hens, watch the egg counter, send gifts, and sponsor the coop.">
-  <link rel="stylesheet" href="css/hens.css">
+  <meta name="description" content="Flock Yeah coop area cams at Lone Tree Acres. Watch Nest/Run/Gate, chat with Clucky and the hens, support the flock, shop merch.">
+  <link rel="stylesheet" href="css/hens.css?v=cams3">
 </head>
-<body>
+<body class="has-merch-bg">
   <header class="site-header">
     <div class="brand">
       <div class="brand-mark">Flock <span>Yeah</span></div>
@@ -18,19 +18,30 @@
       <a href="whos-who.html">Who's Who</a>
       <a href="herd.html">Herd</a>
       <a href="shop.html">Shop</a>
-      <a href="ops.html">Ops</a>
-      <a href="https://lonetreeacres.com" target="_blank" rel="noopener noreferrer">Lone Tree Acres</a>
+      <a href="https://solforge.lonetreeacres.com" target="_blank" rel="noopener noreferrer">SolForge</a>
+      <a href="https://www.lonetreeacres.com" target="_blank" rel="noopener noreferrer">Lone Tree Acres</a>
     </nav>
   </header>
 
-  <main class="wrap">
+  <div class="proof-strip" role="status">
+    <span class="proof-live">Live</span>
+    coop area cams · Lone Tree Acres · Longmont, CO · Birds, not plates · Zero ALPR
+  </div>
+
+  <main class="wrap" id="cams">
     <section class="hero-strip">
-      <div class="live-pill">Multi-cam live</div>
-      <h1>The ladies are on air.</h1>
-      <p>
-        Clucky hosts flock/zone commentary — birds, not plates. Chat with the hens,
-        queue Farm desk actions for Jeff, send gifts, sponsor the coop.
+      <div class="live-pill">Area cams · Clucky on air</div>
+      <h1>The coop is on air.</h1>
+      <p class="hero-lead">
+        <strong>Coop</strong> + <strong>Chicken Run</strong> live ·
+        <strong>Cam 3</strong> asks if you want more chickens (donate today).
+        Not private per-hen booths. Full flock of 31 — chat spoofs any bird by name. Clucky hosts, PG and brief.
       </p>
+      <div class="hero-cta" role="group" aria-label="Primary actions">
+        <a class="btn btn-primary" href="#gifts">Support the flock</a>
+        <a class="btn" href="#chat">Ask Clucky</a>
+        <a class="btn" href="#sponsor">Sponsor today</a>
+      </div>
       <p class="ticker" id="live-ticker">Waiting for coop gossip…</p>
     </section>
 
@@ -38,40 +49,63 @@
       <div class="panel">
         <div class="stage" id="cam-stage">
           <img class="stage-photo" id="stage-photo" src="assets/hens/henrietta.svg" alt="">
+          <img class="stage-live-img" id="stage-live-img" alt="Live area camera" hidden>
+          <video class="stage-live-video" id="stage-live-video" playsinline muted autoplay controls hidden></video>
+          <div class="stage-cta" id="stage-cta" hidden></div>
           <div class="stage-mark" id="stage-mark" aria-hidden="true">FY</div>
           <div class="stage-inner">
-            <h2 id="stage-hen-name">Henrietta</h2>
-            <p id="stage-cam-label">Nest Cam A</p>
-            <p id="stage-hen-bio">Flock matriarch.</p>
+            <h2 id="stage-hen-name">Coop Cam</h2>
+            <p id="stage-cam-label">Coop · area camera</p>
+            <p id="stage-hen-bio">Inside the coop — main live stage.</p>
+            <p class="cam-stream-status" id="cam-stream-status"></p>
           </div>
         </div>
-        <div class="commentary" id="cam-commentary" aria-live="polite">
-          <strong>Cam commentary</strong> Loading flock/zone events…
+
+        <div class="clucky-pin" id="clucky-pin" hidden>
+          <div class="clucky-pin-body">
+            <strong>Clucky just said</strong>
+            <p id="clucky-pin-text">…</p>
+          </div>
+          <div class="clucky-pin-actions">
+            <button type="button" class="btn btn-primary" id="btn-share-line">Share</button>
+            <button type="button" class="btn" id="btn-gift-from-line">Send a treat</button>
+            <a class="btn" id="btn-wear-the-bit" href="shop.html">Wear the bit</a>
+          </div>
         </div>
-        <div class="cam-grid" id="cam-grid" aria-label="Hen camera grid"></div>
+
+        <div class="commentary" id="cam-commentary" aria-live="polite">
+          <strong>Area cam notes</strong> Waiting for the flock…
+        </div>
+        <div class="gift-bridge" id="gift-bridge" hidden></div>
+        <p class="muted" id="cam-lan-banner" hidden style="margin-top:0.65rem"></p>
+        <p class="cam-grid-caption muted">Coop · Chicken Run · Donate (cam 3)</p>
+        <div class="cam-grid" id="cam-grid" aria-label="Area cameras and donate channel"></div>
+        <div id="flock-strip" class="flock-strip" aria-label="Hen roster for chat"></div>
         <div class="btn-row" style="margin-top:1rem">
-          <button type="button" class="btn" id="btn-solforge">Cut this hen in steel (SolForge)</button>
-          <a class="btn" href="whos-who.html">Jail lineup</a>
+          <button type="button" class="btn" id="btn-solforge">Cut a hen in steel</button>
+          <a class="btn" href="whos-who.html">Who's who</a>
         </div>
       </div>
 
       <aside class="side-stack">
-        <div class="panel">
-          <h2>Egg counter</h2>
-          <div class="stat-row">
-            <div class="egg-count" id="egg-count">0</div>
-            <div class="btn-row">
-              <button type="button" class="btn" id="egg-minus" aria-label="Decrease eggs">−</button>
-              <button type="button" class="btn btn-primary" id="egg-plus" aria-label="Increase eggs">+</button>
-            </div>
-          </div>
-          <p class="muted">Ops / Clucky can bump the tally when a nest pays rent.</p>
+        <div class="panel" id="hen-of-week-panel">
+          <div id="hen-of-week"></div>
         </div>
 
         <div class="panel">
+          <h2>Egg tally</h2>
+          <div class="stat-row">
+            <div class="egg-count" id="egg-count">—</div>
+          </div>
+          <p class="muted" id="egg-note">Farm estimate when posted — not a public counter you edit.</p>
+        </div>
+
+        <div class="panel" id="chat">
           <h2>Chat</h2>
+          <p class="muted" style="margin:0 0 0.5rem">Talk to Clucky or any hen (character chat — cams stay on areas).</p>
           <div class="chat-tabs" id="chat-tabs"></div>
-          <p class="muted" id="chat-target-label">Clucky · AI Coop Host</p>
+          <p class="muted" id="chat-target-label">Clucky</p>
+          <div class="chat-chips" id="chat-chips" aria-label="Suggested questions"></div>
           <div class="chat-log" id="chat-log" aria-live="polite"></div>
           <form class="chat-form" id="chat-form">
             <input id="chat-input" type="text" placeholder="Ask Clucky or a hen…" autocomplete="off" required>
@@ -79,54 +113,104 @@
           </form>
         </div>
 
-        <div class="panel">
-          <h2>Gifts</h2>
+        <div class="panel" id="gifts">
+          <h2>Support the flock</h2>
+          <p class="muted" style="margin:0 0 0.5rem">Tips fund coop care — not an instant snack machine.</p>
           <div class="gift-tray" id="gift-tray"></div>
           <ul class="gift-log" id="gift-log"></ul>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="sponsor">
           <h2>Sponsor</h2>
           <div class="sponsor-slot" id="sponsor-slot"></div>
           <form class="sponsor-form" id="sponsor-form">
-            <input id="sponsor-name" type="text" placeholder="Sponsor name" required>
+            <input id="sponsor-name" type="text" placeholder="Your name" required>
             <input id="sponsor-note" type="text" placeholder="Optional note">
-            <button class="btn btn-primary" type="submit">Lock in</button>
+            <button class="btn btn-primary" type="submit">Sponsor today · $25</button>
           </form>
+          <p class="muted">Your name on the board for 24 hours.</p>
         </div>
 
-        <div class="panel">
-          <h2>Farm desk</h2>
+        <details class="panel">
+          <summary><h2>Stay in the loop</h2></summary>
+          <form class="notify-form" id="notify-form" style="margin-top:0.65rem">
+            <input id="notify-contact" type="text" placeholder="Email or mobile" required autocomplete="email">
+            <button class="btn btn-primary" type="submit">Notify me</button>
+          </form>
+          <p class="muted" id="notify-status">Goes to the same farm Formspree inbox as lonetreeacres.com inquiries.</p>
+          <a class="btn" id="notify-mail-jeff" hidden href="#">Email Jeff (backup)</a>
+        </details>
+
+        <details class="panel farm-desk-panel">
+          <summary><h2>Farm desk</h2></summary>
+          <p class="muted">Ops notes (not required for visitors).</p>
           <ul class="farm-desk-list" id="farm-desk-list"></ul>
           <form class="desk-form" id="desk-form" style="margin-top:0.65rem">
-            <input id="desk-input" type="text" placeholder="Add a desk note…" required>
+            <input id="desk-input" type="text" placeholder="Add a note…" required>
             <button class="btn" type="submit">Post</button>
           </form>
-        </div>
+        </details>
       </aside>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="wrap">
-      <strong>Flock Yeah</strong> at Lone Tree Acres · Owner Jeff Lay ·
-      <a href="https://lonetreeacres.com">lonetreeacres.com</a> ·
-      AI host Clucky · “Keep flocks for the birds.” — Mom
+      <strong>Flock Yeah</strong> at
+      <a href="https://www.lonetreeacres.com">Lone Tree Acres</a> ·
+      <a href="https://solforge.lonetreeacres.com">SolForge Works</a> ·
+      Owner Jeff Lay · AI host Clucky · “Keep flocks for the birds.” — Mom
     </div>
   </footer>
 
-  <script src="js/flock-data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+  <script src="js/flock-roster.generated.js?v=names1"></script>
+  <script src="js/flock-data.js?v=names1"></script>
+  <script src="js/cam-config.js?v=run2b"></script>
   <script src="js/stripe-config.js"></script>
+  <script src="js/pay-config.js?v=shop-stock1"></script>
+  <script src="js/engage-config.js?v=formspree1"></script>
+  <script src="js/treat-hook.js"></script>
   <script src="js/solforge-bridge.js"></script>
-  <script src="js/hen-voice.js"></script>
-  <script src="js/hen-cam.js"></script>
+  <script src="js/hen-voice.js?v=clucky1"></script>
+  <script src="js/clucky-watch.js"></script>
+  <script src="js/engage.js?v=formspree1"></script>
+  <script>
+    // Load cam-config.local.js only on localhost / farm LAN (never on public CDN).
+    // Then boot hen-cam after optional local override.
+    (function () {
+      var h = location.hostname;
+      var isLocal =
+        h === "localhost" ||
+        h === "127.0.0.1" ||
+        h === "[::1]" ||
+        /^192\.168\./.test(h) ||
+        /^10\./.test(h);
+      function bootHenCam() {
+        var s = document.createElement("script");
+        s.src = "js/hen-cam.js?v=cams3";
+        document.body.appendChild(s);
+      }
+      if (!isLocal) {
+        bootHenCam();
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = "js/cam-config.local.js";
+      s.onload = bootHenCam;
+      s.onerror = bootHenCam;
+      document.head.appendChild(s);
+    })();
+  </script>
   <script>
     (function () {
       var hash = (location.hash || "").replace(/^#/, "");
-      if (!hash || !window.FlockData.getHen(hash)) return;
+      if (!hash || !window.FlockData || !window.FlockData.getHen(hash)) return;
       document.addEventListener("DOMContentLoaded", function () {
-        var tile = document.querySelector('[data-hen="' + hash + '"]');
-        if (tile) tile.click();
+        setTimeout(function () {
+          var tile = document.querySelector('[data-hen="' + hash + '"]');
+          if (tile) tile.click();
+        }, 200);
       });
     })();
   </script>

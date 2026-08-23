@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ops · Flock Yeah Farm Desk</title>
-  <meta name="description" content="Flock Yeah ops board — cam status, egg tally notes, SolForge handoff, and security pointers.">
-  <link rel="stylesheet" href="css/hens.css">
+  <title>Ops ritual · Flock Yeah</title>
+  <meta name="description" content="Weekly 15-minute Flock Yeah ops checklist.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/hens.css?v=ops-ritual1">
 </head>
-<body>
+<body class="has-merch-bg">
   <header class="site-header">
     <div class="brand">
       <div class="brand-mark">Flock <span>Yeah</span></div>
@@ -24,61 +25,111 @@
 
   <main class="wrap">
     <section class="hero-strip">
-      <div class="live-pill">Farm desk</div>
-      <h1>Ops board</h1>
-      <p>Static-site checklist for running Flock Yeah without leaking secrets. Owner: Jeff Lay.</p>
+      <div class="live-pill">~15 min / week</div>
+      <h1>Ops ritual</h1>
+      <p class="hero-lead">
+        Cam OK? PayPal skim? Restock draft? Sponsor note? Done.
+        No daily content treadmill — Clucky + Nest Cam <em>are</em> the show.
+      </p>
+      <p class="muted" id="ritual-week-label"></p>
     </section>
 
     <section class="ops-grid">
-      <article class="ops-card">
-        <h3>Cameras</h3>
-        <p>v1 uses photos + zone commentary (no face ID). Recommended: <strong>Reolink PoE</strong> (coop/nests), <strong>Reolink Argus</strong> solar (run). Drop HLS embeds into the stage later.</p>
-        <a class="btn" href="hens.html">Open cams</a>
+      <article class="ops-card" style="grid-column:1/-1">
+        <h3>Agent last run</h3>
+        <div id="agent-report"><p class="muted">Loading…</p></div>
+        <p class="muted">Agent does the checks. You only act on FAIL / package receive.</p>
       </article>
-      <article class="ops-card">
-        <h3>Egg counter</h3>
-        <p>Stored in <code>localStorage</code> key <code>fy_egg_count_v1</code>. Reset from browser storage if needed.</p>
-        <button type="button" class="btn btn-danger" id="reset-eggs">Reset eggs</button>
+
+      <article class="ops-card" style="grid-column:1/-1">
+        <h3>This week’s checklist</h3>
+        <ul class="ops-ritual-list" id="ritual-list"></ul>
+        <div class="btn-row" style="margin-top:0.75rem">
+          <button type="button" class="btn btn-primary" id="ritual-mark-all">Mark all done</button>
+          <button type="button" class="btn" id="ritual-reset">Reset week</button>
+        </div>
+        <p class="muted" id="ritual-status" style="margin-top:0.65rem"></p>
       </article>
+
       <article class="ops-card">
-        <h3>Stripe</h3>
-        <p>Publishable key + Payment Links only in <code>js/stripe-config.js</code>. Secrets stay on SolForge / server.</p>
-        <a class="btn" href="shop.html">Shop config</a>
+        <h3>1 · Cams</h3>
+        <p id="ops-cam-status">Checking…</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="hens.html" target="_blank" rel="noopener">Open cams</a>
+          <a class="btn" href="/cam/snap" target="_blank" rel="noopener">Snap test</a>
+        </div>
       </article>
+
+      <article class="ops-card">
+        <h3>2 · PayPal skim</h3>
+        <p>Skim PayPal/Venmo for gift tips &amp; <code>sponsor:Name</code> notes.</p>
+        <div class="btn-row">
+          <a class="btn" href="https://www.paypal.com/myaccount/transactions" target="_blank" rel="noopener">PayPal</a>
+        </div>
+      </article>
+
+      <article class="ops-card">
+        <h3>3 · Restock package</h3>
+        <p>Build EA draft if stock low. When goods arrive, receive package → bumps shop stock.</p>
+        <label class="muted">Package id</label>
+        <input id="pkg-id" type="text" placeholder="rp_2026…" style="width:100%;margin:0.35rem 0">
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="pkg-receive">Receive package (stock +)</button>
+        </div>
+        <p class="muted" id="pkg-status"></p>
+        <p class="muted">Needs Bearer in local ops token (see below). Or run fleet script.</p>
+      </article>
+
+      <article class="ops-card">
+        <h3>4 · Sponsor board</h3>
+        <p>After a payment with note <code>sponsor:Jane</code>, activate the board.</p>
+        <input id="sponsor-name-ops" type="text" placeholder="Name" style="width:100%;margin:0.25rem 0">
+        <input id="sponsor-note-ops" type="text" placeholder="Optional note" style="width:100%;margin:0.25rem 0">
+        <button type="button" class="btn btn-primary" id="sponsor-activate">Put on board 24h</button>
+        <p class="muted" id="sponsor-ops-status"></p>
+      </article>
+
       <article class="ops-card">
         <h3>SolForge</h3>
-        <p>Plasma SVGs live in <code>designs/plasma/</code>. Logos in <code>designs/print/logos/</code>. Bridge opens <code>solforge.lonetreeacres.com/start</code>.</p>
+        <p>Plasma / 3D jobs.</p>
         <button type="button" class="btn btn-primary" id="open-solforge">Open SolForge</button>
+        <a class="btn" href="shop.html">Shop</a>
       </article>
+
       <article class="ops-card">
-        <h3>Security</h3>
-        <p>Read <a href="SECURITY.md">SECURITY.md</a>. No API secrets in this repo. Chat is local personality until a bridge is wired.</p>
+        <h3>Friday reminder</h3>
+        <p>Optional: fleet runs <code>OPS-FRIDAY-REMINDER.sh</code> → Gmail draft “ops ritual due”.</p>
+        <p class="muted">Farm token (Bearer, stays in this browser only):</p>
+        <input id="ops-token" type="password" placeholder="CRON / FLOCK_FARM secret" autocomplete="off" style="width:100%">
       </article>
-      <article class="ops-card">
-        <h3>Handoff</h3>
-        <p>Next agent: start at <a href="CHAT-HANDOFF.md">CHAT-HANDOFF.md</a> for architecture and TODOs.</p>
+
+      <article class="ops-card" style="grid-column:1/-1">
+        <h3>Marketing (Phase A + B)</h3>
+        <p>
+          <strong>Wed 10:00</strong> weekly: agent syncs channels, emails dual-brand digest, posts
+          <em>Flock</em> blurb to Bluesky if enabled.
+        </p>
+        <ul class="ops-ritual-list">
+          <li>Phase A (always): email checklist — no social accounts required</li>
+          <li>Phase B (dream autopost): Bluesky account + <code>MARKETING_AUTO_BLUESKY=true</code> on webhost</li>
+          <li>Forums (BYC, Reddit, FB groups): still manual — open digest links when you feel like it</li>
+        </ul>
+        <div class="btn-row">
+          <a class="btn" href="/admin/marketing" target="_blank" rel="noopener">Admin marketing</a>
+          <a class="btn" href="/api/marketing/flock" target="_blank" rel="noopener">Flock research JSON</a>
+        </div>
       </article>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="wrap">Lone Tree Acres · 6693 Rabbit Mountain Rd · jeffrey@lonetreeacres.com</div>
+    <div class="wrap">Lone Tree Acres · ops · noindex</div>
   </footer>
 
-  <script src="js/flock-data.js"></script>
+  <script src="js/flock-roster.generated.js?v=flock31"></script>
+  <script src="js/flock-data.js?v=flock31"></script>
+  <script src="js/cam-config.js?v=area-cams1"></script>
   <script src="js/solforge-bridge.js"></script>
-  <script>
-    (function () {
-      var tag = document.getElementById("brand-tagline");
-      if (tag) tag.textContent = FlockData.FARM.tagline + " " + FlockData.FARM.attribution;
-      document.getElementById("reset-eggs").addEventListener("click", function () {
-        localStorage.removeItem(FlockData.STORAGE_KEYS.eggs);
-        alert("Egg counter cleared for this browser.");
-      });
-      document.getElementById("open-solforge").addEventListener("click", function () {
-        SolForgeBridge.openShop();
-      });
-    })();
-  </script>
+  <script src="js/ops-ritual.js?v=ops-ritual2"></script>
 </body>
 </html>

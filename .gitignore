@@ -8,3 +8,16 @@ node_modules/
 .vscode/
 .idea/
 *.local.html
+js/cam-config.local.js
+cam-secrets.json
+ai-secrets.json
+solforge-secrets.json
+stripe-config.local.js
+js/pay-config.local.js
+tmp-snap-test.jpg
+tmp-ollama-req.json
+logs/
+node_modules/
+tools/go2rtc/go2rtc.exe
+tools/go2rtc/go2rtc.yaml
+tools/go2rtc/*.zip

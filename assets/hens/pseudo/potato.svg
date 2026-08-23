@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Potato">
+  <defs>
+    <linearGradient id="bg-potato" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f4ef"/>
+      <stop offset="100%" stop-color="#e7e0d4"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bg-potato)" stroke="#1a1816" stroke-width="3"/>
+  <ellipse cx="60" cy="74" rx="30" ry="24" fill="#483889"/>
+  <circle cx="72" cy="48" r="20" fill="#483889"/>
+  <polygon points="88,48 106,53 88,60" fill="#9237bd"/>
+  <circle cx="77" cy="46" r="3.2" fill="#1a1816"/>
+  <path d="M62 34 Q70 22 78 32" fill="#ea580c" stroke="#1a1816" stroke-width="0.8"/>
+  
+  
+  <text x="60" y="112" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="#1a1816">Potato</text>
+</svg>

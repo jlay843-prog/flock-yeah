@@ -26,30 +26,112 @@
       <p id="success-detail">
         Your support keeps cameras warm, nests soft, and Clucky employed (sort of).
       </p>
+      <p class="muted" id="success-next">
+        Head back to cams — Clucky will announce it in chat.
+      </p>
       <div class="btn-row" style="justify-content:center;margin-top:1.25rem">
-        <a class="btn btn-primary" href="hens.html">Back to cams</a>
+        <a class="btn btn-primary" id="back-cams" href="hens.html">Back to cams · hear Clucky</a>
         <a class="btn" href="shop.html">More shop</a>
       </div>
     </section>
   </main>
 
-  <script src="js/flock-data.js"></script>
+  <script src="js/flock-roster.generated.js?v=flock31"></script>
+  <script src="js/flock-data.js?v=flock31"></script>
+  <script src="js/engage-config.js"></script>
+  <script src="js/treat-hook.js"></script>
   <script>
     (function () {
       var params = new URLSearchParams(location.search);
       var item = params.get("item");
       var demo = params.get("demo");
+      var kind = params.get("kind") || "order";
+      var method = params.get("method") || "";
+      var hen = params.get("hen") || "";
+      var nameParam = params.get("name") || "";
       var el = document.getElementById("success-detail");
       var found = item && FlockData.SHOP_ITEMS.find(function (i) { return i.id === item; });
+      var gift = item && FlockData.GIFTS.find(function (g) { return g.id === item; });
       var last = null;
       try { last = JSON.parse(sessionStorage.getItem("fy_last_order") || "null"); } catch (e) {}
-      if (found) {
+
+      var isDemo = demo === "1" || method === "demo" || !!(last && last.demo);
+      var displayName =
+        nameParam ||
+        (gift ? gift.emoji + " " + gift.name : "") ||
+        (found ? found.name : "") ||
+        (last && last.name) ||
+        "Your support";
+
+      // ERP queue only after checkout (not on gift click) — silent to visitor
+      if (gift && gift.dispense && window.TreatHook) {
+        try {
+          TreatHook.requestDispense({
+            giftId: gift.id,
+            henId: hen || (last && last.henId) || "",
+            demo: isDemo,
+            source: "checkout-success",
+          });
+        } catch (e) {}
+      }
+
+      if (gift || found || last || nameParam) {
+        var rail =
+          method === "paypal"
+            ? " via PayPal"
+            : method === "venmo"
+              ? " via Venmo"
+              : "";
         el.textContent =
-          (demo ? "Demo checkout for " : "Paid / queued: ") +
-          found.name +
-          ". Clucky will announce it on the Farm desk.";
-      } else if (last) {
-        el.textContent = "Last local order: " + last.name + ".";
+          (isDemo ? "Noted: " : "Thank you" + rail + ": ") +
+          displayName +
+          ". Clucky will announce it when you return to cams.";
+      }
+
+      var pending = {
+        kind: kind,
+        name: displayName,
+        henId: hen || (last && last.henId) || "",
+        giftId: gift ? gift.id : "",
+        demo: isDemo,
+        method: method || (isDemo ? "demo" : "paid"),
+      };
+      try {
+        sessionStorage.setItem("fy_pending_announce_v1", JSON.stringify(pending));
+      } catch (e) {}
+
+      // Sponsor board: public claim after checkout (shared across visitors via SolForge)
+      if (kind === "sponsor" || (last && last.kind === "sponsor") || item === "sponsor-day") {
+        var sName = nameParam || (last && last.name) || "";
+        sName = String(sName).replace(/^Sponsor:\s*/i, "").trim();
+        if (sName) {
+          var base =
+            (FlockData.FARM && FlockData.FARM.solforge) ||
+            "https://solforge.lonetreeacres.com";
+          fetch(String(base).replace(/\/$/, "") + "/api/flock/sponsor", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: sName,
+              note: "",
+              source: "checkout-success",
+              publicClaim: true,
+            }),
+          }).catch(function () {});
+        }
+      }
+
+      var back = document.getElementById("back-cams");
+      if (back) {
+        var u = new URL("hens.html", location.href);
+        u.searchParams.set("thanks", "1");
+        u.searchParams.set("kind", pending.kind);
+        u.searchParams.set("name", pending.name);
+        if (pending.henId) u.searchParams.set("hen", pending.henId);
+        if (pending.giftId) u.searchParams.set("gift", pending.giftId);
+        if (pending.demo) u.searchParams.set("demo", "1");
+        if (pending.method) u.searchParams.set("method", pending.method);
+        back.href = u.toString();
       }
     })();
   </script>

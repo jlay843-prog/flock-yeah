@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Mac">
+  <defs>
+    <linearGradient id="bg-mac" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7f4ef"/>
+      <stop offset="100%" stop-color="#e7e0d4"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#bg-mac)" stroke="#1a1816" stroke-width="3"/>
+  <ellipse cx="60" cy="74" rx="30" ry="24" fill="#1a1816"/>
+  <circle cx="72" cy="48" r="20" fill="#1a1816"/>
+  <polygon points="88,48 106,53 88,60" fill="#d97706"/>
+  <circle cx="77" cy="46" r="3.2" fill="#1a1816"/>
+  <path d="M62 34 Q70 22 78 32" fill="#c2410c" stroke="#1a1816" stroke-width="0.8"/>
+  <path d="M58 38 Q64 28 70 36" fill="#c2410c" opacity="0.9"/>
+  <path d="M48 78 Q40 95 55 88" fill="#d97706" opacity="0.85"/>
+  <text x="60" y="112" text-anchor="middle" font-family="Georgia,serif" font-size="9" fill="#1a1816">Mac</text>
+</svg>

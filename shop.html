@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shop · Flock Yeah · Merch, Eggs &amp; Plasma</title>
   <meta name="description" content="Flock Yeah shop — stickers, mugs, farm eggs, SolForge plasma hen cuts, and coop sponsorship.">
-  <link rel="stylesheet" href="css/hens.css">
+  <link rel="stylesheet" href="css/hens.css?v=shop-stock1">
 </head>
-<body>
+<body class="page-shop has-merch-bg">
   <header class="site-header">
     <div class="brand">
       <div class="brand-mark">Flock <span>Yeah</span></div>
@@ -18,7 +18,8 @@
       <a href="whos-who.html">Who's Who</a>
       <a href="herd.html">Herd</a>
       <a href="shop.html" aria-current="page">Shop</a>
-      <a href="ops.html">Ops</a>
+      <a href="https://solforge.lonetreeacres.com" target="_blank" rel="noopener noreferrer">SolForge</a>
+      <a href="https://www.lonetreeacres.com" target="_blank" rel="noopener noreferrer">Lone Tree Acres</a>
     </nav>
   </header>
 
@@ -27,26 +28,35 @@
       <div class="live-pill">Merch &amp; metal</div>
       <h1>Shop the flock</h1>
       <p>
-        Stickers, mugs, local eggs, and plasma-cut hen silhouettes via
-        <a href="https://solforge.lonetreeacres.com" target="_blank" rel="noopener noreferrer">SolForge</a>.
-        Stripe Payment Links plug into <code>js/stripe-config.js</code> when you're ready.
+        Spy chickens, cop chickens, Mom’s doctrine on a mug.
+        Birds, not plates — stickers, tees, and steel silhouettes from the farm.
       </p>
-      <p class="muted" id="shop-status">Checking payment config…</p>
+      <p class="muted">Merch and apparel: shipping calculated at checkout.</p>
+      <p class="muted" id="shop-status"></p>
     </section>
 
     <section class="shop-grid" id="shop-grid" aria-label="Shop catalog"></section>
+
+    <section class="hero-strip" style="padding-top:0.5rem">
+      <h2 style="font-family:var(--font-display);letter-spacing:-0.03em;margin:0">Design wall</h2>
+    </section>
+    <section class="design-wall" id="design-wall" aria-label="Merch design wall"></section>
   </main>
 
   <footer class="site-footer">
     <div class="wrap">
-      Payments: Stripe (client publishable key only) · Fabrication:
-      <a href="https://solforge.lonetreeacres.com" target="_blank" rel="noopener noreferrer">solforge.lonetreeacres.com</a>
+      PayPal · Venmo · Custom metal via
+      <a href="https://solforge.lonetreeacres.com" target="_blank" rel="noopener noreferrer">SolForge Works</a>
     </div>
   </footer>
 
-  <script src="js/flock-data.js"></script>
-  <script src="js/stripe-config.js"></script>
-  <script src="js/solforge-bridge.js"></script>
-  <script src="js/shop.js"></script>
+  <script src="js/flock-roster.generated.js?v=flock31"></script>
+  <script src="js/flock-data.js?v=path-a"></script>
+  <script src="js/stripe-config.js?v=solforge1"></script>
+  <script src="js/stripe-config.local.js"></script>
+  <script src="js/pay-config.js?v=shop-stock1"></script>
+  <script src="js/pay-config.local.js"></script>
+  <script src="js/solforge-bridge.js?v=solforge1"></script>
+  <script src="js/shop.js?v=path-a"></script>
 </body>
 </html>
