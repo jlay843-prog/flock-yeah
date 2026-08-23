@@ -207,13 +207,13 @@
     },
   ];
 
-  /** Target margin ~25% → price ≈ cost / 0.75 */
+  /** Path A: unpadded POD costs + lower product-only retail (shipping at checkout). */
   const SHOP_ITEMS = [
     {
       id: "sticker-pack",
       name: "Spy Chicken Sticker Pack",
-      priceCents: 900,
-      costCents: 675,
+      priceCents: 600,
+      costCents: 450,
       kind: "merch",
       designId: "flock-yeah-classic",
       image: "assets/merch/stickers-flock-pack.png",
@@ -222,8 +222,8 @@
     {
       id: "sticker-spy",
       name: "Spy Chicken Sticker (single)",
-      priceCents: 400,
-      costCents: 300,
+      priceCents: 300,
+      costCents: 150,
       kind: "merch",
       designId: "spy-chicken",
       image: "assets/merch/sticker-spy.png",
@@ -232,8 +232,8 @@
     {
       id: "sticker-cop",
       name: "Cop Chicken Sticker (single)",
-      priceCents: 400,
-      costCents: 300,
+      priceCents: 300,
+      costCents: 150,
       kind: "merch",
       designId: "cop-chicken",
       image: "assets/merch/sticker-cop.png",
@@ -242,8 +242,8 @@
     {
       id: "mug-spy",
       name: "Spy Chicken Mug",
-      priceCents: 2400,
-      costCents: 1800,
+      priceCents: 1600,
+      costCents: 1100,
       kind: "merch",
       designId: "spy-chicken",
       image: "assets/merch/mug-spy-chicken.png",
@@ -252,8 +252,8 @@
     {
       id: "mug-mom",
       name: "Mom Quote Mug",
-      priceCents: 2200,
-      costCents: 1650,
+      priceCents: 1600,
+      costCents: 1100,
       kind: "merch",
       designId: "keep-flocks-mom",
       image: "assets/merch/mug-mom.png",
@@ -262,8 +262,8 @@
     {
       id: "tee-flock",
       name: "Flock Yeah Tee",
-      priceCents: 3200,
-      costCents: 2400,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "flock-yeah-classic",
       image: "assets/merch/tee-flock-yeah.png",
@@ -272,8 +272,8 @@
     {
       id: "tee-cop",
       name: "Cop Chicken Tee",
-      priceCents: 3400,
-      costCents: 2550,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "cop-chicken",
       image: "assets/merch/tee-cop-chicken.png",
@@ -282,8 +282,8 @@
     {
       id: "tee-nah",
       name: "Flock Safety? Nah. Tee",
-      priceCents: 3400,
-      costCents: 2550,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "flock-safety-nah",
       image: "assets/merch/art-flock-safety-nah.png",
@@ -292,8 +292,8 @@
     {
       id: "tee-mom",
       name: "Keep Flocks Tee",
-      priceCents: 3200,
-      costCents: 2400,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "keep-flocks-mom",
       image: "assets/merch/tee-mom.png",
@@ -302,8 +302,8 @@
     {
       id: "tee-zero",
       name: "Zero ALPR Tee",
-      priceCents: 3200,
-      costCents: 2400,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "zero-alpr",
       image: "assets/merch/tee-zero.png",
@@ -312,8 +312,8 @@
     {
       id: "tee-birds",
       name: "Birds Not Plates Tee",
-      priceCents: 3200,
-      costCents: 2400,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "birds-not-plates",
       image: "assets/merch/tee-birds-not-plates.png",
@@ -322,8 +322,8 @@
     {
       id: "tee-feeder",
       name: "Feeder Surveillance Tee",
-      priceCents: 3200,
-      costCents: 2400,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "feeder-surveillance",
       image: "assets/merch/tee-feeder.png",
@@ -332,8 +332,8 @@
     {
       id: "tee-clucky",
       name: "Clucky Saw Your Car Tee",
-      priceCents: 3200,
-      costCents: 2400,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "clucky-saw-car",
       image: "assets/merch/tee-clucky-car.png",
@@ -342,8 +342,8 @@
     {
       id: "tee-watch",
       name: "Neighborhood Watch Tee",
-      priceCents: 3200,
-      costCents: 2400,
+      priceCents: 2400,
+      costCents: 1500,
       kind: "apparel",
       designId: "neighborhood-watch",
       image: "assets/merch/tee-neighborhood.png",
@@ -352,8 +352,8 @@
     {
       id: "hat-flock",
       name: "Flock Yeah Cap",
-      priceCents: 2800,
-      costCents: 2100,
+      priceCents: 2000,
+      costCents: 1600,
       kind: "apparel",
       designId: "flock-yeah-classic",
       image: "assets/merch/hat-flock-yeah.png",
