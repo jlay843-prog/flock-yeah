@@ -184,7 +184,9 @@
     el("lb-title").textContent = item.name;
     el("lb-saying").textContent = design ? "“" + design.saying + "”" : "";
     el("lb-blurb").textContent =
-      item.blurb + (formatMoney ? " · " + formatMoney(item.priceCents) : "");
+      item.blurb +
+      (formatMoney ? " · " + formatMoney(item.priceCents) : "") +
+      (item.kind === "merch" || item.kind === "apparel" ? " + shipping" : "");
 
     const thumbs = el("lb-thumbs");
     thumbs.innerHTML = (MERCH_DESIGNS || [])
@@ -266,6 +268,9 @@
         '<div class="shop-row">' +
         "<strong>" +
         (formatMoney ? formatMoney(item.priceCents) : "") +
+        (item.kind === "merch" || item.kind === "apparel"
+          ? '<span class="muted"> + shipping</span>'
+          : "") +
         "</strong>" +
         '<button type="button" class="btn btn-primary" data-buy="' +
         item.id +
