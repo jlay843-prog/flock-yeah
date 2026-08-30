@@ -63,6 +63,10 @@
       clearInterval(state._leadTimer);
       state._leadTimer = null;
     }
+    if (state._startTimeout) {
+      clearTimeout(state._startTimeout);
+      state._startTimeout = null;
+    }
     if (state.hls) {
       try {
         state.hls.destroy();
@@ -249,15 +253,27 @@
       setStreamStatus("Live · " + label);
     };
 
-    // Continuous MP4 — buffer-ahead (~4–5s behind live edge) absorbs camera keyframe hitches
+    // Continuous MP4 — stills first (never black), video takes over when a frame lands.
     if (
       (stream.mode === "mp4" || stream.mode === "hls" || stream.mode === "video") &&
       stream.mp4Url &&
       vid &&
       stage
     ) {
-      vid.hidden = false;
       stage.classList.add("has-live");
+      if (stream.snapshotUrl && img) {
+        img.hidden = false;
+        const snapTick = () => {
+          img.src =
+            stream.snapshotUrl +
+            (stream.snapshotUrl.indexOf("?") >= 0 ? "&" : "?") +
+            "_ts=" +
+            Date.now();
+        };
+        snapTick();
+        state.snapshotTimer = setInterval(snapTick, stream.refreshMs || 2000);
+      }
+      vid.hidden = true;
       vid.muted = true;
       vid.playsInline = true;
       vid.autoplay = true;
@@ -267,10 +283,8 @@
         vid.preload = "auto";
       } catch (_) {}
 
-      // Play ~4.5s behind the buffered tip so brief stalls don't freeze the picture
-      const TARGET_LEAD = 4.5;
-      const MAX_LEAD = 9;
-      const MIN_START = 3.5;
+      const TARGET_LEAD = 2.5;
+      const MAX_LEAD = 8;
       let stallTimer = null;
       let recoveries = 0;
       let leadTimer = null;
@@ -296,25 +310,40 @@
         return end - (vid.currentTime || 0);
       };
       const maintainLead = () => {
+        if (!started) return;
         const end = bufferedEnd();
-        if (end < MIN_START) return;
+        if (end < 0.4) return;
         const L = leadSecs();
         try {
-          if (L < 2.2) {
-            // Too close to live edge — step back into buffer (absorbs next hitch)
+          if (L < 1.2) {
             const t = Math.max(0, end - TARGET_LEAD);
             if (t + 0.25 < end) vid.currentTime = t;
           } else if (L > MAX_LEAD) {
-            // Too far behind — catch up to target lag
             vid.currentTime = Math.max(0, end - TARGET_LEAD);
           }
         } catch (_) {}
       };
+      const showVideo = () => {
+        vid.hidden = false;
+        if (img) img.hidden = true;
+        if (state.snapshotTimer) {
+          clearInterval(state.snapshotTimer);
+          state.snapshotTimer = null;
+        }
+        setStreamStatus("Live · " + label);
+      };
+      const keepStills = (why) => {
+        vid.hidden = true;
+        try {
+          vid.pause();
+        } catch (_) {}
+        if (img) img.hidden = false;
+        setStreamStatus(why || "Live stills · " + label);
+      };
       const softRecover = () => {
         if (recoveries >= 5) {
-          setStreamStatus("Live · recovering… stills");
           if (leadTimer) clearInterval(leadTimer);
-          fallBackToStills("");
+          keepStills("Live stills · " + label);
           return;
         }
         recoveries += 1;
@@ -325,7 +354,6 @@
 
       vid.onwaiting = () => {
         clearStall();
-        // Prefer buffer-ahead fix before hard recover
         maintainLead();
         stallTimer = setTimeout(softRecover, 900);
       };
@@ -337,50 +365,46 @@
       vid.onplaying = () => {
         clearStall();
         recoveries = Math.max(0, recoveries - 1);
-        setStreamStatus("Live · " + label);
+        started = true;
+        if (state._startTimeout) {
+          clearTimeout(state._startTimeout);
+          state._startTimeout = null;
+        }
+        showVideo();
       };
       vid.onprogress = () => {
-        if (!started && bufferedEnd() >= MIN_START) {
-          started = true;
-          try {
-            vid.currentTime = Math.max(0, bufferedEnd() - TARGET_LEAD);
-          } catch (_) {}
-          vid.play()
-            .then(() => setStreamStatus("Live · " + label))
-            .catch(() => setStreamStatus("Live · tap play · " + label));
-        }
+        if (!started && bufferedEnd() >= 0.3) tryPlay();
         maintainLead();
       };
 
       const tryPlay = () => {
-        if (bufferedEnd() < MIN_START) {
-          setStreamStatus("Live · buffering…");
-          return;
-        }
+        if (started) return;
         started = true;
-        try {
-          vid.currentTime = Math.max(0, bufferedEnd() - TARGET_LEAD);
-        } catch (_) {}
-        return vid.play().then(
-          () => setStreamStatus("Live · " + label),
-          () => setStreamStatus("Live · tap play · " + label)
-        );
+        if (state._startTimeout) {
+          clearTimeout(state._startTimeout);
+          state._startTimeout = null;
+        }
+        vid.play().then(showVideo, () => {
+          started = false;
+          keepStills("Live stills · tap play · " + label);
+        });
       };
 
       const mp4Src =
         stream.mp4Url +
         (stream.mp4Url.indexOf("?") >= 0 ? "&" : "?") +
-        "buf=5";
+        "buf=5&cam=" +
+        encodeURIComponent(areaId);
       vid.src = mp4Src;
-      vid.onloadeddata = () => {
-        setStreamStatus("Live · buffering…");
-        // Give MSE a moment to accumulate before sitting on live edge
-        setTimeout(tryPlay, 1200);
-      };
+      vid.onloadeddata = tryPlay;
+      vid.oncanplay = tryPlay;
       if (leadTimer) clearInterval(leadTimer);
       leadTimer = setInterval(maintainLead, 1000);
-      // Store for stopLive cleanup
       state._leadTimer = leadTimer;
+      state._startTimeout = setTimeout(() => {
+        if (!started) keepStills("Live stills · " + label);
+      }, 8000);
+      setStreamStatus("Live · connecting " + label + "…");
 
       vid.onerror = () => {
         clearStall();
@@ -412,10 +436,10 @@
               state.hls.recoverMediaError();
               return;
             }
-            fallBackToStills("");
+            keepStills("Live stills · " + label);
           });
         } else {
-          fallBackToStills("");
+          keepStills("Live stills · " + label);
         }
       };
       return;
