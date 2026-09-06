@@ -221,7 +221,9 @@
   }
 
   function isWeatherAsk(text) {
-    return /\b(weather|cold|hot|rain|snow|wind|storm)\b/.test(normalize(text));
+    return /\b(weather|cold|hot|rains?|raining|snows?|snowing|winds?|windy|storms?|stormy)\b/.test(
+      normalize(text)
+    );
   }
 
   /** Short GET — never block chat long. Empty string on any miss. */
