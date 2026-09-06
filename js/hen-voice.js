@@ -220,6 +220,76 @@
     }
   }
 
+  /** Per-speaker user/assistant turns for Gemma multi-turn (Desktop owns the model). */
+  const HISTORY_CAP = 10;
+  const HISTORY_STORE = "fy_clucky_thread_v1";
+  const HISTORY_MAX_CHARS = 400;
+
+  function hydrateThreads() {
+    try {
+      if (typeof sessionStorage === "undefined") return {};
+      const raw = JSON.parse(sessionStorage.getItem(HISTORY_STORE) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  const threads = hydrateThreads();
+
+  function persistThreads() {
+    try {
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem(HISTORY_STORE, JSON.stringify(threads));
+      }
+    } catch (_) {
+      /* private mode / quota — in-memory still works */
+    }
+  }
+
+  function speakerKey(speakerId) {
+    return speakerId || "clucky";
+  }
+
+  function clipTurn(text) {
+    return String(text || "").trim().slice(0, HISTORY_MAX_CHARS);
+  }
+
+  function isHistoryTurn(row) {
+    return (
+      row &&
+      (row.role === "user" || row.role === "assistant") &&
+      typeof row.content === "string" &&
+      row.content.trim()
+    );
+  }
+
+  function getHistory(speakerId) {
+    const rows = threads[speakerKey(speakerId)] || [];
+    return rows.filter(isHistoryTurn).slice(-HISTORY_CAP);
+  }
+
+  function rememberTurn(speakerId, role, content) {
+    const text = clipTurn(content);
+    if (!text || (role !== "user" && role !== "assistant")) return;
+    const key = speakerKey(speakerId);
+    const next = (threads[key] || []).concat([{ role: role, content: text }]);
+    threads[key] = next.filter(isHistoryTurn).slice(-HISTORY_CAP);
+    persistThreads();
+  }
+
+  /** Prior turns + current user line so Desktop can treat `messages` as the thread. */
+  function historyForPost(speakerId, userText) {
+    const prior = getHistory(speakerId);
+    const current = { role: "user", content: clipTurn(userText) };
+    if (!current.content) return prior.slice(-HISTORY_CAP);
+    const last = prior[prior.length - 1];
+    if (last && last.role === "user" && last.content === current.content) {
+      return prior.slice(-HISTORY_CAP);
+    }
+    return prior.concat(current).slice(-HISTORY_CAP);
+  }
+
   function isWeatherAsk(text) {
     return /\b(weather|cold|hot|rain|snow|wind|storm)\b/.test(normalize(text));
   }
@@ -264,6 +334,7 @@
         text: userText,
         nestLine: nestLineHint(),
         eggCount: egg,
+        messages: historyForPost(speakerId, userText),
       };
       if (weatherLine) payload.weatherLine = weatherLine;
       const res = await fetch("/api/clucky/chat", {
@@ -292,22 +363,28 @@
    * Prefer farm/local LLM, then optional bridge, then witty canned (instant).
    */
   async function replyAsync(speakerId, userText, bridge) {
+    let answer;
     try {
       const llm = await replyViaApi(speakerId, userText);
-      if (llm) return llm;
+      if (llm) answer = llm;
     } catch (_) {
       /* fall through */
     }
-    if (bridge && typeof bridge.chat === "function") {
+    if (!answer && bridge && typeof bridge.chat === "function") {
       try {
         const remote = await bridge.chat(speakerId, userText);
-        if (remote && remote.text) return remote;
+        if (remote && remote.text) answer = remote;
       } catch (_) {
         /* fall through */
       }
     }
-    return reply(speakerId, userText);
+    if (!answer) answer = reply(speakerId, userText);
+    if (clipTurn(userText) && answer && answer.text) {
+      rememberTurn(speakerId, "user", userText);
+      rememberTurn(speakerId, "assistant", answer.text);
+    }
+    return answer;
   }
 
-  global.HenVoice = { reply, replyAsync, CLUCKY, HENS };
+  global.HenVoice = { reply, replyAsync, getHistory, CLUCKY, HENS };
 })(typeof window !== "undefined" ? window : globalThis);
