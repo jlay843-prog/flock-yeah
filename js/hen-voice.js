@@ -146,8 +146,11 @@
     if (/\b(drama|fight|peck|bully|mean)\b/.test(t)) {
       return "Drama suspects: Pepper (mouth), Scratch (dirt crimes), Henrietta (HR). Pick a hen and interrogate.";
     }
-    if (/\b(weather|cold|hot|rain|snow|wind|storm)\b/.test(t)) {
-      return "If it's nasty out, they pile into the coop and rewrite the pecking order. Indoor politics.";
+    if (isWeatherAsk(t)) {
+      return pick([
+        "Farm weather feed isn't in my beak yet. Ask again when the station's up — I don't invent forecasts.",
+        "Station's quiet and I don't do fake weather. Ping me when the farm feed's back in my beak.",
+      ]);
     }
     if (/\b(jeff|owner|farmer|desk)\b/.test(t)) {
       return "Jeff runs the farm desk. I run the commentary. Split responsibilities, shared blame.";
@@ -217,6 +220,29 @@
     }
   }
 
+  function isWeatherAsk(text) {
+    return /\b(weather|cold|hot|rain|snow|wind|storm)\b/.test(normalize(text));
+  }
+
+  /** Short GET — never block chat long. Empty string on any miss. */
+  async function fetchWeatherLine() {
+    const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 1500) : null;
+    try {
+      const res = await fetch("/api/clucky/weather", {
+        cache: "no-store",
+        signal: ctrl ? ctrl.signal : undefined,
+      });
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data && data.line ? String(data.line) : "";
+    } catch (_) {
+      return "";
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
+  }
+
   /**
    * POST /api/clucky/chat — works on SolForge production (farm Ollama)
    * and local `npm run dev`. Hard timeout so UI stays snappy.
@@ -226,18 +252,24 @@
       global.HenCam && typeof global.HenCam.getEggCount === "function"
         ? global.HenCam.getEggCount()
         : undefined;
+    let weatherLine = "";
+    if (isWeatherAsk(userText)) {
+      weatherLine = await fetchWeatherLine();
+    }
     const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
     const timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 8000) : null;
     try {
+      const payload = {
+        speakerId: speakerId || "clucky",
+        text: userText,
+        nestLine: nestLineHint(),
+        eggCount: egg,
+      };
+      if (weatherLine) payload.weatherLine = weatherLine;
       const res = await fetch("/api/clucky/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          speakerId: speakerId || "clucky",
-          text: userText,
-          nestLine: nestLineHint(),
-          eggCount: egg,
-        }),
+        body: JSON.stringify(payload),
         signal: ctrl ? ctrl.signal : undefined,
         cache: "no-store",
       });
