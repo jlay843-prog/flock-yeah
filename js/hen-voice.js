@@ -2,6 +2,7 @@
  * Flock Yeah — Clucky + per-hen chat
  * Prefers /api/clucky/chat (SolForge production or npm run dev Ollama).
  * Instant witty canned replies when the LLM is slow or offline — never generic echo.
+ * Client sends capped per-speaker `messages` for multi-turn; Desktop owns Gemma.
  */
 (function (global) {
   "use strict";
