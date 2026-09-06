@@ -257,7 +257,7 @@
       weatherLine = await fetchWeatherLine();
     }
     const ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-    const timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 8000) : null;
+    const timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 35000) : null;
     try {
       const payload = {
         speakerId: speakerId || "clucky",
