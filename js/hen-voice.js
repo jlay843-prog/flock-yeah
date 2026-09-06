@@ -158,10 +158,12 @@
     if (/\b(alpr|plate|license|surveillance|spy)\b/.test(t)) {
       return "Birds, not plates. Zero ALPR. Maximum dirt baths. Mom was very clear.";
     }
-    if (/\b(joke|funny|pun|laugh)\b/.test(t)) {
+    if (isJokeAsk(t)) {
       return pick([
         "Why did the chicken cross the livestream? Content.",
         "I'd tell a longer joke, but Henrietta bills by the cluck.",
+        "What do you call a hen who does stand-up? A cluck-median. I'll see myself to the run.",
+        "Knock-knock. Who's there? Pepper. Pepper who? Pepper doesn't knock — she drops a dust-bath punchline.",
       ]);
     }
     if (/\b(thank|thanks|thx)\b/.test(t)) {
@@ -171,18 +173,12 @@
       return "Ask about eggs, the lineup, Nest Cam A, gifts, or which hen is causing drama. Short questions, sharp answers.";
     }
 
-    // Contextual bounce from keywords — never “You said: …”
-    const words = t.split(/\s+/).filter((w) => w.length > 3 && !/^(looks|like|the|this|that|with|from|have|what|when|where|about)$/.test(w));
-    const topic = words.slice(0, 4).join(" ");
-    if (topic) {
-      return pick([
-        "Noted on air: " + topic + ". Nest Cam A stays honest; I editorialize.",
-        "Interesting beat — " + topic + ". Want the hen roster take or the farm-desk version?",
-        "Copy that. " + topic + " is now part of tonight's coop plot.",
-        "I'll put “" + topic + "” on the run sheet between egg count and dust-bath reviews.",
-      ]);
-    }
-    return pick(FALLBACKS.clucky);
+    // Honest quiet — never fake an on-air “noted” when Gemma/API missed.
+    return pick([
+      "Clucky's quiet — the chat station isn't answering. Try again in a bit; I don't invent an on-air take.",
+      "Station's offline. I stay honest: no fake on-air notes when Gemma's out.",
+      "Farm chat missed that one. Ping me again — I don't editorialize from a dead line.",
+    ]);
   }
 
   function reply(speakerId, userText) {
@@ -222,6 +218,10 @@
 
   function isWeatherAsk(text) {
     return /\b(weather|cold|hot|rain|snow|wind|storm)\b/.test(normalize(text));
+  }
+
+  function isJokeAsk(text) {
+    return /\b(jokes?|funny|puns?|laughs?|laughing|humor|hilarious)\b/.test(normalize(text));
   }
 
   /** Short GET — never block chat long. Empty string on any miss. */
