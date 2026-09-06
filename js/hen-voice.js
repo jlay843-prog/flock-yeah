@@ -149,7 +149,7 @@
     if (isWeatherAsk(t)) {
       return pick([
         "Farm weather feed isn't in my beak yet. Ask again when the station's up — I don't invent forecasts.",
-        "Station's quiet and I don't do fake weather. Ping me when the farm feed's back in my beak.",
+        "No station line in my beak. I won't guess the sky — try again when the farm feed is up.",
       ]);
     }
     if (/\b(jeff|owner|farmer|desk)\b/.test(t)) {
