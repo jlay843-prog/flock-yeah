@@ -352,7 +352,27 @@
     return String(base).replace(/\/$/, "") + "/api/shop/stock";
   }
 
+  function shopClosed() {
+    return data().SHOP_IN_STOCK === false;
+  }
+
+  function seedClosedStock() {
+    const closed = {};
+    (data().SHOP_ITEMS || []).forEach((item) => {
+      closed[item.id] = {
+        inStock: false,
+        madeToOrder: false,
+        label: "Out of stock",
+      };
+    });
+    stockMap = closed;
+    if (global.PayConfig) global.PayConfig.stockMap = stockMap;
+    global.FlockShop = global.FlockShop || {};
+    global.FlockShop._stockMap = stockMap;
+  }
+
   function isOrderable(itemId) {
+    if (shopClosed()) return false;
     const row = stockMap[itemId];
     if (!row) {
       // Unknown / stock API down — allow made-to-order kinds only offline-safe
@@ -416,6 +436,11 @@
   }
 
   async function loadStock() {
+    if (shopClosed()) {
+      seedClosedStock();
+      applyStockToDom();
+      return;
+    }
     try {
       const res = await fetch(stockUrl(), { cache: "no-store" });
       if (!res.ok) return;
@@ -450,7 +475,7 @@
     if (!isOrderable(itemId)) {
       if (status) {
         status.textContent =
-          item.name + " is out of stock. We cannot take orders until restocked.";
+          "Ordering is based on demand only. We appreciate any requests via the contact form.";
       }
       return;
     }
@@ -526,6 +551,15 @@
     const { FARM } = data();
     if (tag && FARM) tag.textContent = FARM.tagline + " " + FARM.attribution;
     const status = el("shop-status");
+    if (shopClosed()) {
+      seedClosedStock();
+      applyStockToDom();
+      if (status) {
+        status.textContent =
+          "All shop items are out of stock. Ordering is based on demand only. We appreciate any requests via the contact form.";
+      }
+      return;
+    }
     if (status) status.textContent = "Loading stock…";
     loadStock();
   }
