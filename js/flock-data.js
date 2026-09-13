@@ -207,6 +207,13 @@
     },
   ];
 
+  /**
+   * Shop catalog master switch. false = every SHOP_ITEMS SKU is out of stock
+   * (wins over SolForge /api/shop/stock inStock + madeToOrder).
+   * Gifts / cam sponsor on hens.html are not SHOP_ITEMS buy buttons.
+   */
+  const SHOP_IN_STOCK = false;
+
   /** Path A: unpadded POD costs + lower product-only retail (shipping at checkout). */
   const SHOP_ITEMS = [
     {
@@ -527,6 +534,7 @@
     HORSES,
     GIFTS,
     MERCH_DESIGNS,
+    SHOP_IN_STOCK,
     SHOP_ITEMS,
     CAMERAS,
     FARM,
