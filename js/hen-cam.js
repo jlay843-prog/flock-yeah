@@ -1040,6 +1040,18 @@
     global.FlockEngage.saveChat(rows);
   }
 
+  function sourceBadge(source) {
+    if (!source) return "";
+    const label = String(source);
+    return (
+      '<span class="chat-source" data-source="' +
+      escapeHtml(label) +
+      '">' +
+      escapeHtml(label) +
+      "</span>"
+    );
+  }
+
   function pushChat(role, text, speakerId, opts) {
     const log = el("chat-log");
     if (!log) return;
@@ -1060,6 +1072,7 @@
         '" alt="" onerror="this.style.visibility=\'hidden\'">' +
         '<div class="chat-bubble"><strong>' +
         escapeHtml(role) +
+        sourceBadge(o.source) +
         "</strong><p>" +
         escapeHtml(text) +
         "</p></div>";
@@ -1072,6 +1085,7 @@
         text: text,
         speakerId: speakerId || (isYou ? "you" : "clucky"),
         at: Date.now(),
+        source: o.source || "",
       });
     }
   }
@@ -1087,7 +1101,7 @@
       };
     rows.slice(-24).forEach((r) => {
       if (!r || junk(r.text)) return;
-      pushChat(r.role, r.text, r.speakerId, { skipPersist: true });
+      pushChat(r.role, r.text, r.speakerId, { skipPersist: true, source: r.source });
     });
   }
 
@@ -1108,7 +1122,7 @@
     pushChat("you", msg);
     const bridge = global.SolForgeBridge;
     const answer = await global.HenVoice.replyAsync(state.chatTarget, msg, bridge);
-    pushChat(answer.speaker, answer.text, state.chatTarget);
+    pushChat(answer.speaker, answer.text, state.chatTarget, { source: answer.source });
 
     // Self-moderating farm-desk hint: physical action verbs → queue for Jeff
     if (/\b(feed|treat|open|close|clean|refill|check)\b/i.test(msg)) {

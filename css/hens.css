@@ -1023,10 +1023,31 @@ button.btn {
 }
 
 .chat-bubble strong {
-  display: block;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
   font-size: 0.75rem;
   color: var(--emerald);
   margin-bottom: 0.15rem;
+}
+
+.chat-source {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mist-dim);
+  background: rgba(26, 24, 22, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.08rem 0.4rem;
+}
+
+.chat-source[data-source="ollama"] {
+  color: var(--emerald-deep);
+  background: rgba(4, 120, 87, 0.1);
 }
 
 .chat-row.chat-you .chat-bubble strong {
