@@ -1451,7 +1451,14 @@ textarea:focus {
   border-color: rgba(120, 113, 108, 0.35);
 }
 
-.shop-card .btn-disabled,
+.shop-card .btn-disabled {
+  opacity: 0.85;
+  cursor: pointer;
+  background: #d6d3d1 !important;
+  color: #57534e !important;
+  border-color: #a8a29e !important;
+}
+
 .shop-card button[disabled] {
   opacity: 0.65;
   cursor: not-allowed;
@@ -1780,4 +1787,9 @@ textarea:focus {
 
 .landing h1 span {
   color: var(--emerald);
+}
+
+/* One accent word per main section */
+.accent-word {
+  color: var(--hen-accent);
 }

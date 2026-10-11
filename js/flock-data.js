@@ -66,7 +66,7 @@
       kind: "cta",
       ctaHeadline: "Want more chickens?",
       ctaBody: "Tips and sponsorships help feed, shelter, and grow the flock at Lone Tree Acres.",
-      ctaButton: "Donate today",
+      ctaButton: "Buy the hens a treat",
       ctaHref: "#sponsor",
     },
   ];

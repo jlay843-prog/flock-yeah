@@ -110,7 +110,7 @@
       (cam && cam.ctaBody) ||
       "Help grow the flock — donate today.";
     const btn =
-      (stream && stream.cta) || (cam && cam.ctaButton) || "Donate today";
+      (stream && stream.cta) || (cam && cam.ctaButton) || "Buy the hens a treat";
     const href =
       (stream && stream.href) || (cam && cam.ctaHref) || "#sponsor";
     const secHref = (stream && stream.secondaryHref) || "#gifts";

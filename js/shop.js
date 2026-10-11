@@ -220,10 +220,10 @@
     const buyBtn = el("lb-buy");
     buyBtn.dataset.itemId = itemId;
     const ok = isOrderable(itemId);
-    buyBtn.disabled = !ok;
-    buyBtn.textContent = ok ? "Get it" : "Out of stock";
+    buyBtn.disabled = false;
+    buyBtn.textContent = ok ? "Get it" : WANT_LABEL;
     buyBtn.onclick = () => {
-      if (!isOrderable(itemId)) return;
+      if (!isOrderable(itemId)) return askForIt();
       closeLightbox();
       buy(itemId);
     };
@@ -286,7 +286,9 @@
     grid.querySelectorAll("[data-buy]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        buy(btn.getAttribute("data-buy"));
+        const id = btn.getAttribute("data-buy");
+        if (!isOrderable(id)) return askForIt();
+        buy(id);
       });
     });
     grid.querySelectorAll("[data-open]").forEach((node) => {
@@ -399,6 +401,13 @@
     return row.label || (row.inStock ? "In stock" : "Out of stock");
   }
 
+  // Out-of-stock merch is demand-only: send to contact, never checkout.
+  const WANT_LABEL = "Tell us you want one";
+  const CONTACT_URL = "https://www.lonetreeacres.com/#contact";
+  function askForIt() {
+    window.open(CONTACT_URL, "_blank", "noopener");
+  }
+
   function applyStockToDom() {
     const cards = document.querySelectorAll(".shop-card[data-sku]");
     cards.forEach((card) => {
@@ -417,9 +426,9 @@
       badge.hidden = !label;
       const buyBtn = card.querySelector("[data-buy]");
       if (buyBtn) {
-        buyBtn.disabled = !orderable;
-        buyBtn.setAttribute("aria-disabled", orderable ? "false" : "true");
-        buyBtn.textContent = orderable ? "Get it" : "Out of stock";
+        buyBtn.disabled = false;
+        buyBtn.setAttribute("aria-disabled", "false");
+        buyBtn.textContent = orderable ? "Get it" : WANT_LABEL;
         buyBtn.classList.toggle("btn-primary", orderable);
         buyBtn.classList.toggle("btn-disabled", !orderable);
       }
@@ -430,8 +439,8 @@
     const lbBuy = el("lb-buy");
     if (lbBuy && lbBuy.dataset.itemId) {
       const ok = isOrderable(lbBuy.dataset.itemId);
-      lbBuy.disabled = !ok;
-      lbBuy.textContent = ok ? "Get it" : "Out of stock";
+      lbBuy.disabled = false;
+      lbBuy.textContent = ok ? "Get it" : WANT_LABEL;
     }
   }
 
